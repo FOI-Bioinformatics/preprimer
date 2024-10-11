@@ -22,6 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -e .  # install the preprimer package
+        pip install -r requirements.txt  # Ensure pytest is listed here
 
     - name: Run tests
       run: |
