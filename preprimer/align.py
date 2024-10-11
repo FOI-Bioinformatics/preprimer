@@ -1,5 +1,6 @@
 import os
-from preprimer.utils import FileHandler, PrimerWriter, Aligner
+from preprimer.utils import FileHandler, Aligner
+from . import writers
 
 def align(args):
     for output_format in args.output_format:
@@ -17,8 +18,8 @@ def align(args):
                 fw_seq = primer_pair[1]
                 rw_seq = primer_pair[2]
                 if output_format == 'exonerate':
-                    PrimerWriter.run_exonerate(f'{amplicon_name}_fw', output_folder, fw_seq, args.reference)
-                    PrimerWriter.run_exonerate(f'{amplicon_name}_rw', output_folder, rw_seq, args.reference)
+                    writers.run_exonerate(f'{amplicon_name}_fw', output_folder, fw_seq, args.reference)
+                    writers.run_exonerate(f'{amplicon_name}_rw', output_folder, rw_seq, args.reference)
         
         if output_format == 'me-pcr':
             file_name = os.path.join(output_folder, f'{args.prefix}.mepcr.aln')

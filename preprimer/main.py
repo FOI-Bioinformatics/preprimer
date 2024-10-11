@@ -8,13 +8,13 @@ def main():
 
     # Convert subparser
     convert_parser = subparsers.add_parser("convert", help="Convert between different formats")
+    convert_parser.add_argument("--input-format", choices=['varvamp', 'artic'], help="Input format", required=True)    
     convert_parser.add_argument("--primer-info", help="File with primer information")
     convert_parser.add_argument("--output-folder", help="Output folder")
     convert_parser.add_argument("--prefix", help="File prefix for output files")
-    convert_parser.add_argument("--input-format", choices=['varvamp', 'artic'], help="Input format", required=True)
     convert_parser.add_argument("--output-format", choices=['artic', 'sts', 'fasta'], nargs='+', help="Output format(s) for primers", required=True)
     convert_parser.add_argument("--reference", help="Fasta of new reference genome")
-    convert_parser.add_argument("--force", action="store_true", help="Force operation without prompting")
+    convert_parser.add_argument("--force", action="store_true", help="Force remove folders without prompting")
 
     # Align subparser
     align_parser = subparsers.add_parser("align", help="Align primers to a reference")

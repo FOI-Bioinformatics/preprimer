@@ -18,54 +18,57 @@ def parse_varvamp(primer_file, prefix):
 
     amplicon_info = {}
     primer_file_path = primer_file
-    with open(primer_file_path, 'r') as file:
-        # Skip the header line
-        next(file)
-        for line in file:
-            # Split the line by tabs
-            parts = line.strip().split('\t')
-            # Extract information from parts
-            amplicon_name = parts[0]
-            amplicon_length = int(parts[1])
-            primer_name = parts[2]
-            pool = int(parts[3])
-            start = int(parts[4])
-            stop = int(parts[5])
-            seq = parts[6]
-            size = int(parts[7])
-            gc_best = float(parts[8])
-            temp_best = float(parts[9])
-            mean_gc = float(parts[10])
-            mean_temp = float(parts[11])
-            score = float(parts[12])
-            amplicon_nr = str(int(amplicon_name.split("_")[1]))
-            # Add the information to the dictionary
-            if amplicon_name not in amplicon_info:
-                amplicon_info[amplicon_name] = []
-            if primer_name.startswith('FW'):
-                direction = 'forward'
-                artic_primer_name = f"{prefix}_{amplicon_nr}_LEFT_0"
-                strand = '+'
-            if primer_name.startswith('RW'):
-                direction = 'reverse'
-                artic_primer_name = f"{prefix}_{amplicon_nr}_RIGHT_0"
-                strand = '-'
-            amplicon_info[amplicon_name].append({
-                'amplicon_length': amplicon_length,
-                'primer_name': primer_name,
-                'artic_primer_name': artic_primer_name,
-                'strand': strand,
-                'direction': direction,
-                'pool': pool,
-                'start': start,
-                'stop': stop,
-                'seq': seq,
-                'size': size,
-                'gc_best': gc_best,
-                'temp_best': temp_best,
-                'mean_gc': mean_gc,
-                'mean_temp': mean_temp,
-                'score': score,
-                'reference_id': "ambigous_consensus"
-            })
+    try: 
+        with open(primer_file_path, 'r') as file:
+            # Skip the header line
+            next(file)
+            for line in file:
+                # Split the line by tabs
+                parts = line.strip().split('\t')
+                # Extract information from parts
+                amplicon_name = parts[0]
+                amplicon_length = int(parts[1])
+                primer_name = parts[2]
+                pool = int(parts[3])
+                start = int(parts[4])
+                stop = int(parts[5])
+                seq = parts[6]
+                size = int(parts[7])
+                gc_best = float(parts[8])
+                temp_best = float(parts[9])
+                mean_gc = float(parts[10])
+                mean_temp = float(parts[11])
+                score = float(parts[12])
+                amplicon_nr = str(int(amplicon_name.split("_")[1]))
+                # Add the information to the dictionary
+                if amplicon_name not in amplicon_info:
+                    amplicon_info[amplicon_name] = []
+                if primer_name.startswith('FW'):
+                    direction = 'forward'
+                    artic_primer_name = f"{prefix}_{amplicon_nr}_LEFT_0"
+                    strand = '+'
+                if primer_name.startswith('RW'):
+                    direction = 'reverse'
+                    artic_primer_name = f"{prefix}_{amplicon_nr}_RIGHT_0"
+                    strand = '-'
+                amplicon_info[amplicon_name].append({
+                    'amplicon_length': amplicon_length,
+                    'primer_name': primer_name,
+                    'artic_primer_name': artic_primer_name,
+                    'strand': strand,
+                    'direction': direction,
+                    'pool': pool,
+                    'start': start,
+                    'stop': stop,
+                    'seq': seq,
+                    'size': size,
+                    'gc_best': gc_best,
+                    'temp_best': temp_best,
+                    'mean_gc': mean_gc,
+                    'mean_temp': mean_temp,
+                    'score': score,
+                    'reference_id': "ambigous_consensus"
+                })
+    except:
+        print(f"File {primer_file} could not be parsed. Check your input")
     return amplicon_info
