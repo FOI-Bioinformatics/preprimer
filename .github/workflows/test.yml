@@ -36,7 +36,7 @@ jobs:
 
     - name: Create conda environment
       run: |
-        mamba create -n preprimer me-pcr exonerate
+        mamba create -n preprimer -c bioconda me-pcr exonerate
         conda activate preprimer
 
     - name: Run tests
