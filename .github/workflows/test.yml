@@ -33,7 +33,7 @@ jobs:
     - name: Install mamba
       run: |
         conda config --add channels bioconda
-        conda config --add channels condaforge
+        conda config --add channels conda-forge
         conda install mamba -n base -c conda-forge
 
     - name: Create conda environment
