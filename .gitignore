@@ -54,3 +54,6 @@ cover/
 
 #Old version of the script
 prep_tiled.py
+
+#test output
+test_output*
