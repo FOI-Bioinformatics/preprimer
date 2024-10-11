@@ -33,17 +33,13 @@ jobs:
     - name: Install mamba
       run: |
         conda config --add channels bioconda
+        conda config --add channels condaforge
         conda install mamba -n base -c conda-forge
 
     - name: Create conda environment
       run: |
-        mamba create -n preprimer
-        conda activate preprimer
-   
-    - name: Install dependencies with channels
-      run: |
-        mamba install -c bioconda -c conda-forge me-pcr exonerate  # Install me-PCR and exonerate
-
+        mamba create -n preprimer me-pcr exonerate
+        conda activate preprimer 
 
     - name: Run tests
       run: |
