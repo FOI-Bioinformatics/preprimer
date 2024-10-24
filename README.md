@@ -54,10 +54,12 @@ The artic minion command using the scheme could then look like this, with the na
 ```
 artic minion SINV guppy_minion_data/SINV --scheme-directory schemes/artic/ --read-file guppy_data/sample1.fastq --medaka --medaka-model r941_min_high_g360
 ```
-The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the aligner in PrePrimeR to find the correct location of the primer in the new reference.
-```
-# ADD OUTPUT HERE
-```
+The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the aligner in PrePrimeR to find the correct location of the primer in the new reference. This software will look for these characters during alignment and promt if they are found. 
+
+If `--force` no prompts will be displayed and
+- existing folders will be automatically removed with new
+- Amplicons where one or both primers fails to align will be excluded
+
 
 ### Align
 
