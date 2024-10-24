@@ -38,7 +38,7 @@ Output formats
 
 This is the default when `--reference` is NOT given as argument.
 ```bash
-preprimer convert --input-format varvamp --primer-info tests/test_data/ASFV_long/primers.tsv --output-folder test_output_convert --output-format artic --prefix ASFV
+preprimer convert --input-format varvamp --primer-info tests/test_data/ASFV_long/primers.tsv --output-folder schemes --output-format artic --prefix ASFV
 ```
 
 
@@ -47,7 +47,7 @@ preprimer convert --input-format varvamp --primer-info tests/test_data/ASFV_long
 If a reference fasta file is specified with `--reference` the primers will be aligned to this reference and the output will be in relation to the new reference. If a primer gets multiple hits in the new reference it will choose a pair located close to the position of the primer to the old reference. This solutin is chosen since we do not antissipate that the references differs so much. All alignments are saved in folder {output_folder}/alignment/new_reference.  
 
 ```
-preprimer convert --input-format varvamp --primer-info tests/test_data/ASFV_long/primers.tsv --output-folder test_output_convert --output-format artic fasta sts --prefix ASFV --reference tests/test_data/LR722600.1.fasta
+preprimer convert --input-format varvamp --primer-info tests/test_data/ASFV_long/primers.tsv --output-folder schemes --output-format artic fasta sts --prefix ASFV --reference tests/test_data/LR722600.1.fasta
 ```
 
 The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the aligner. Also an alignment will be made which is located in folder   This software will look for these characters during alignment and promt if they are found.   
@@ -66,7 +66,7 @@ artic minion ASFV guppy_minion_data/ASFV --scheme-directory schemes/artic/ --rea
 **Convert artic to sts and fasta**
 artic formats can only be converted into fasta and sts, not varvamp. An sts is needed for the Alignment in next section.
 ```
-preprimer convert --input-format artic --primer-info tests/test_data/artic/ASFV/V1/ASFV.scheme.bed --output-format sts fasta  --output-folder test_output --prefix ASFV
+preprimer convert --input-format artic --primer-info tests/test_data/artic/ASFV/V1/ASFV.scheme.bed --output-format sts fasta  --output-folder schemes --prefix ASFV
 ```
 
 
