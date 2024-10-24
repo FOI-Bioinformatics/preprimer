@@ -30,23 +30,14 @@ jobs:
         auto-update-conda: true
         python-version: '3.12'  # Replace with your Python version
 
-    - name: Install mamba
+    - name: Install mamba and environment dependencies
+      shell: bash -l {0}
       run: |
+        conda init bash
+        source ~/.bashrc
         conda config --add channels bioconda
         conda config --add channels conda-forge
         conda install mamba -n base -c conda-forge
-
-    # - name: Create conda environment
-    #   run: |
-    #     mamba create -n preprimer
-    #     conda activate preprimer
-   
-    - name: Install dependencies with channels
-      run: |
-        mamba create -n preprimer me-pcr exonerate  # Install me-PCR and exonerate
-        conda activate preprimer
-
-
-    - name: Run tests
-      run: |
-        python -m pytest tests/test_convert.py
+        mamba create -n preprimer me-pcr exonerate
+        source activate preprimer  # Activate the environment
+        python -m pytest tests/test_convert.py  # Run the tests within the environment
