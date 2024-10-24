@@ -1,14 +1,7 @@
 # PrePrimeR
 Prepare primers from different formats, i.e. schemes for tiled sequencing from varvamp to artic format. The script also aligns primers with mepcr or exonerate.
 
-Currently it supports 
-input primer formats: 
-- varvamp
-  
-Output formats
-- artic (outputs scheme and reference)
-- sts (used for insilico pcr with me-pcr)
-- fasta (all primer sequence in a multifasta)
+
 
 ## Installation
 ```
@@ -27,44 +20,69 @@ preprimer -h
 ```
 
 ### Convert
+
+Currently it supports 
+input primer formats: 
+- varvamp primers.tsv
+- artic *.scheme.bed
+
 varVAMP tiled primer schemes generated with https://github.com/jonas-fuchs/varVAMP 
 
-Example keeping the ambiguous consensus sequence from varvamp as reference. 
+Output formats
+- artic (outputs *.scheme.bed and reference.fasta)
+- sts (used for insilico pcr with me-pcr)
+- fasta (all primer sequences in a multifasta).  
+
+**Example keeping ambiguous consensus from varvamp as reference.**  
+
 This is the default when `--reference` is NOT given as argument.
 ```bash
 preprimer convert --input-format varvamp --primer-info varvamp/varvamp_outputfolder/primers.tsv --output-format artic  --prefix SINV
 ```
 
-Example using a **new sequence** as reference and **multiple outputs**. 
-Give the fasta as argument `--reference`.
-```bash
+
+**Example with new sequence as reference and multiple outputs (artic, fasta, sts)**.  
+
+Give the fasta as argument `--reference`. If a primer gets multiple hits in the new reference it choose a pair located close to where the primer was located in the old reference, assuming that they do not differ vastly. All alignments are saved in folder {output_folder}/alignment/new_reference.  
+
+
+```
 preprimer convert --input-format varvamp --primer-info varvamp/varvamp_outputfolder/primers.tsv --output-format artic fasta sts  --output-folder schemes --prefix SINV --reference NC_123456.fasta
 ```
 
-This text will be promted
-```console
-Do you want to remove the existing folder and create a new 'test_schemes/artic/SINV/V1'? (y/n): y
-Folder 'schemes/artic/asfv/V1' has been removed.  
-Output folder schemes/artic/asfv/V1 created successfully!
-Output folder schemes/fasta created successfully!
-Output folder schemes/sts created successfully!
 ```
-The artic minion command using the scheme could then look like this, with the name **prefix** of the scheme and the **directory** from the PrePrimeR output in the command.
 
-```
-artic minion SINV guppy_minion_data/SINV --scheme-directory schemes/artic/ --read-file guppy_data/sample1.fastq --medaka --medaka-model r941_min_high_g360
-```
-The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the aligner in PrePrimeR to find the correct location of the primer in the new reference. This software will look for these characters during alignment and promt if they are found. 
+The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the aligner. Also an alignment will be made which is located in folder   This software will look for these characters during alignment and promt if they are found.   
 
 If `--force` no prompts will be displayed and
 - existing folders will be automatically removed with new
 - Amplicons where one or both primers fails to align will be excluded
 
-
-### Align
+**Run artic**
+How to run artic minion command using the artic scheme converted from varvamp, with the name **prefix** of the scheme and the **directory** from the PrePrimeR output in the command.
 
 ```
-preprimer align --input-format varvamp --primer-info varvamp/varvamp_outputfolder/primers.tsv --output-format --output-folder schemes --prefix SINV --reference NC_123456.fasta
+artic minion ASFV guppy_minion_data/ASFV --scheme-directory schemes/artic/ --read-file guppy_data/sample1.fastq --medaka --medaka-model r941_min_high_g360
+```
+
+**Convert artic to sts and fasta**
+artic formats can only be converted into fasta and sts, not varvamp. An sts is needed for the Alignment in next section.
+```
+preprimer convert --input-format artic --primer-info tests/test_data/artic/ASFV/V1/ASFV.scheme.bed --output-format sts fasta  --output-folder test_output --prefix ASFV
+```
+
+
+### Align
+Input:
+- sts (can be genereated with convert command)
+  
+Output:
+- me-pcr
+- exonerate
+
+The output will be saved in {output_folder}/alignment/mepcr and {output_folder}/alignment/exonerate
+```
+preprimer align --sts-file test_data/ASFV.sts.tsv --output-format me-pcr exonerate --reference test_data/LR722600.1.fasta --prefix ASFV --output-folder test_output_alignment --force
 ```
 
 ## Contributing
