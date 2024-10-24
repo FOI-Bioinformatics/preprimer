@@ -31,7 +31,7 @@ def convert(args):
         amplicon_info = parse_artic(args.primer_info, args.prefix)
         #No new reference is specified. Use the existing artic reference
         if args.reference is None:
-            reference = os.path.join(artic_dir, old_file_prefix + "reference.fasta")
+            reference = os.path.join(primer_info_dir, old_file_prefix + "reference.fasta")
         else: 
             reference = args.reference
     #Update the dictionary with the new reference

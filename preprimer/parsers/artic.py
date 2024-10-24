@@ -19,15 +19,16 @@ def parse_artic(primer_file, prefix):
                 artic_primer_name = parts[3]
                 pool = int(parts[4])
                 strand = parts[5]
+                seq = parts[6]
                 
                 # Extract amplicon number from the primer name
-                amplicon_nr = primer_name.split('_')[2]
+                amplicon_nr = artic_primer_name.split('_')[2]
                 
                 # Determine direction and artic_primer_name
-                if primer_name.endswith('LEFT_1') or primer_name.endswith('LEFT_0'):
+                if artic_primer_name.endswith('LEFT_1') or artic_primer_name.endswith('LEFT_0'):
                     direction = 'forward'
                     amplicon_name = artic_primer_name.split("_LEFT")[0]
-                elif primer_name.endswith('RIGHT_1') or primer_name.endswith('RIGHT_0'):
+                elif artic_primer_name.endswith('RIGHT_1') or artic_primer_name.endswith('RIGHT_0'):
                     direction = 'reverse'
                     amplicon_name = artic_primer_name.split("_RIGHT")[0]
 
@@ -44,8 +45,29 @@ def parse_artic(primer_file, prefix):
                     'pool': pool,
                     'start': start,
                     'stop': stop,
-                    'reference_id': reference_id
+                    'seq': seq,
+                    'reference_id': reference_id,
+                    'amplicon_length': abs(stop-start)
                 })
     except:
         print(f"File {primer_file} could not be parsed. Check your input")
+        exit()
     return amplicon_info
+
+
+                    # 'amplicon_length': amplicon_length,
+                    # 'primer_name': primer_name,
+                    # 'artic_primer_name': artic_primer_name,
+                    # 'strand': strand,
+                    # 'direction': direction,
+                    # 'pool': pool,
+                    # 'start': start,
+                    # 'stop': stop,
+                    # 'seq': seq,
+                    # 'size': size,
+                    # 'gc_best': gc_best,
+                    # 'temp_best': temp_best,
+                    # 'mean_gc': mean_gc,
+                    # 'mean_temp': mean_temp,
+                    # 'score': score,
+                    # 'reference_id': "ambigous_consensus"
