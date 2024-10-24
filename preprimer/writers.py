@@ -78,4 +78,4 @@ def write_artic(file_path, amplicon_dict):
     with open(file_path, 'w') as output_file:
         for amplicon_name in amplicon_dict:
             for primer in amplicon_dict[amplicon_name]:
-                output_file.write(f"{primer['reference_id']}\t{primer['start']}\t{primer['stop']}\t{primer['artic_primer_name']}\t{primer['pool']}\t{primer['strand']}\n")
+                output_file.write(f"{primer['reference_id']}\t{primer['start']}\t{primer['stop']}\t{primer['artic_primer_name']}\t{primer['pool']}\t{primer['strand']}\t{primer['seq']}\n")

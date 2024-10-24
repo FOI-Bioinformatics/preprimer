@@ -40,4 +40,4 @@ jobs:
         conda install mamba -n base -c conda-forge
         mamba create -n preprimer me-pcr exonerate pytest
         source activate preprimer  # Activate the environment
-        python -m pytest tests/test_convert.py  # Run the tests within the environment
+        python -m pytest tests/test.py  # Run the tests within the environment
