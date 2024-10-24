@@ -45,11 +45,8 @@ preprimer convert --input-format varvamp --primer-info varvamp/varvamp_outputfol
 
 Give the fasta as argument `--reference`. If a primer gets multiple hits in the new reference it choose a pair located close to where the primer was located in the old reference, assuming that they do not differ vastly. All alignments are saved in folder {output_folder}/alignment/new_reference.  
 
-
 ```
 preprimer convert --input-format varvamp --primer-info varvamp/varvamp_outputfolder/primers.tsv --output-format artic fasta sts  --output-folder schemes --prefix SINV --reference NC_123456.fasta
-```
-
 ```
 
 The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the aligner. Also an alignment will be made which is located in folder   This software will look for these characters during alignment and promt if they are found.   
@@ -82,7 +79,7 @@ Output:
 
 The output will be saved in {output_folder}/alignment/mepcr and {output_folder}/alignment/exonerate
 ```
-preprimer align --sts-file test_data/ASFV.sts.tsv --output-format me-pcr exonerate --reference test_data/LR722600.1.fasta --prefix ASFV --output-folder test_output_alignment --force
+preprimer align --sts-file tests/test_data/ASFV.sts.tsv --output-format me-pcr exonerate --reference tests/test_data/LR722600.1.fasta --prefix ASFV --output-folder test_output_alignment --force
 ```
 
 ## Contributing
