@@ -24,6 +24,20 @@ jobs:
         pip install -e .  # install the preprimer package
         pip install -r requirements.txt  # Ensure pytest is listed here
 
-    - name: Run tests
+    - name: Set up conda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        python-version: '3.12'  # Replace with your Python version
+
+    - name: Install mamba and environment dependencies
+      shell: bash -l {0}
       run: |
-        python -m pytest tests/test_convert.py
+        conda init bash
+        source ~/.bashrc
+        conda config --add channels bioconda
+        conda config --add channels conda-forge
+        conda install mamba -n base -c conda-forge
+        mamba create -n preprimer me-pcr exonerate pytest
+        source activate preprimer  # Activate the environment
+        python -m pytest tests/test_convert.py  # Run the tests within the environment

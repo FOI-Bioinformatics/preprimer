@@ -6,10 +6,10 @@ def align(args):
     for output_format in args.output_format:
         if output_format == 'me-pcr':
             output_folder = os.path.join(args.output_folder, "alignment/mepcr")
-            FileHandler.check_folder_presence(output_folder, args.force)
+            FileHandler.check_folder_exists(output_folder, args.force)
         if output_format == 'exonerate':
             output_folder = os.path.join(args.output_folder, "alignment/exonerate")
-            FileHandler.check_folder_presence(output_folder, args.force)
+            FileHandler.check_folder_exists(output_folder, args.force)
         
         with open(args.sts_file, 'r') as file:
             for line in file:
@@ -18,8 +18,8 @@ def align(args):
                 fw_seq = primer_pair[1]
                 rw_seq = primer_pair[2]
                 if output_format == 'exonerate':
-                    writers.run_exonerate(f'{amplicon_name}_fw', output_folder, fw_seq, args.reference)
-                    writers.run_exonerate(f'{amplicon_name}_rw', output_folder, rw_seq, args.reference)
+                    Aligner.run_exonerate(f'{amplicon_name}_fw', output_folder, fw_seq, args.reference)
+                    Aligner.run_exonerate(f'{amplicon_name}_rw', output_folder, rw_seq, args.reference)
         
         if output_format == 'me-pcr':
             file_name = os.path.join(output_folder, f'{args.prefix}.mepcr.aln')
