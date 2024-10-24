@@ -20,6 +20,7 @@ preprimer -h
 ```
 
 ### Convert
+This part coverts the input format into one or multiple other formats
 
 Currently it supports 
 input primer formats: 
@@ -37,16 +38,16 @@ Output formats
 
 This is the default when `--reference` is NOT given as argument.
 ```bash
-preprimer convert --input-format varvamp --primer-info varvamp/varvamp_outputfolder/primers.tsv --output-format artic  --prefix SINV
+preprimer convert --input-format varvamp --primer-info tests/test_data/ASFV_long/primers.tsv --output-folder test_output_convert --output-format artic --prefix ASFV
 ```
 
 
 **Example with new sequence as reference and multiple outputs (artic, fasta, sts)**.  
 
-Give the fasta as argument `--reference`. If a primer gets multiple hits in the new reference it choose a pair located close to where the primer was located in the old reference, assuming that they do not differ vastly. All alignments are saved in folder {output_folder}/alignment/new_reference.  
+If a reference fasta file is specified with `--reference` the primers will be aligned to this reference and the output will be in relation to the new reference. If a primer gets multiple hits in the new reference it will choose a pair located close to the position of the primer to the old reference. This solutin is chosen since we do not antissipate that the references differs so much. All alignments are saved in folder {output_folder}/alignment/new_reference.  
 
 ```
-preprimer convert --input-format varvamp --primer-info varvamp/varvamp_outputfolder/primers.tsv --output-format artic fasta sts  --output-folder schemes --prefix SINV --reference NC_123456.fasta
+preprimer convert --input-format varvamp --primer-info tests/test_data/ASFV_long/primers.tsv --output-folder test_output_convert --output-format artic fasta sts --prefix ASFV --reference tests/test_data/LR722600.1.fasta
 ```
 
 The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the aligner. Also an alignment will be made which is located in folder   This software will look for these characters during alignment and promt if they are found.   
