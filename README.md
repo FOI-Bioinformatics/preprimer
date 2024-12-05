@@ -1,5 +1,5 @@
 # PrePrimeR
-Prepare primers from different formats, i.e. schemes for tiled sequencing from varvamp to artic format. The script also aligns primers with mepcr or exonerate.
+Prepare primers from different formats, i.e. schemes for tiled sequencing from varvamp to artic format. The script also aligns primers with exonerate and generates amplicons with mepcr.
 
 
 
