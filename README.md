@@ -50,7 +50,7 @@ If a reference fasta file is specified with `--reference` the primers will be al
 preprimer convert --input-format varvamp --primer-info tests/test_data/ASFV_long/primers.tsv --output-folder schemes --output-format artic fasta sts --prefix ASFV --reference tests/test_data/LR722600.1.fasta
 ```
 
-The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the aligner. Also an alignment will be made which is located in folder   This software will look for these characters during alignment and promt if they are found.   
+
 
 If `--force` no prompts will be displayed and
 - existing folders will be automatically removed with new
@@ -80,7 +80,7 @@ Output:
 - me-pcr
 - exonerate
 
-The output will be saved in {output_folder}/alignment/mepcr and {output_folder}/alignment/exonerate
+The output will be saved in {output_folder}/alignment/mepcr and {output_folder}/alignment/exonerate. The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the me-pcr aligner.  Then, first genereate
 ```
 preprimer align --sts-file tests/test_data/ASFV.sts.tsv --output-format me-pcr exonerate --reference tests/test_data/LR722600.1.fasta --prefix ASFV --output-folder output_alignment --force
 ```
