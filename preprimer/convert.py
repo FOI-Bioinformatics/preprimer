@@ -88,6 +88,6 @@ def convert(args):
             print(f"sts: {sts_filepath}")
             print("Primers will be named {prefix}_{amplicon_nr}_RIGHT_0 and {prefix}_{amplicon_nr}_LEFT_0\n")
             if FileHandler.check_folder_exists(os.path.dirname(sts_filepath), args.force):
-                writers.write_sts_2(sts_filepath, amplicon_info, reference,args.aligner)
+                writers.write_sts_2(sts_filepath, amplicon_info, reference,args.aligner, args.force)
             else: 
                 "No sts will be printed"
