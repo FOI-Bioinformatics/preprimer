@@ -22,7 +22,7 @@ def write_sts(file_path, amplicons, reference):
                 output_file.write(f"{amplicon_name}\t{seq_fw}\t{seq_rw}\t{amplicon_len}\n")
 
 # Write sts output format.
-def write_sts_2(file_path, amplicon_info, reference):
+def write_sts_2(file_path, amplicon_info, reference, aligner):
     #sts.file
     """
     amplicon_0      actgctgtaggcgtcaaagatt  cggaaataatacggtgggcgaga 2737
@@ -50,7 +50,10 @@ def write_sts_2(file_path, amplicon_info, reference):
                 amplicon_len = primer['amplicon_length']
 
                 if Aligner.contains_non_atgc(seq):
-                    aln_path = Aligner.run_exonerate(primer_name, os.path.dirname(file_path), seq, reference)                   
+                    if aligner == 'exonerate':
+                        aln_path = Aligner.run_exonerate(primer_name, os.path.dirname(file_path), seq, reference)                   
+                    elif aligner == 'blast':
+                        aln_path = Aligner.run_blast(primer_name, os.path.dirname(file_path), seq, reference, "0")
                     with open(aln_path, 'r') as file:
                         for line in file:
                             print(line, end='')
