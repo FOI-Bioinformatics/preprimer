@@ -1,5 +1,5 @@
 # PrePrimeR
-Prepare primers from different formats, i.e. schemes for tiled sequencing from varvamp to artic format. The script also aligns primers with exonerate and generates amplicons with mepcr.
+Prepare primers from different formats, i.e. schemes for tiled sequencing from varvamp to artic format. The script also aligns primers with blast or exonerate and generates (--output primers)amplicons with mepcr.
 
 
 
@@ -71,18 +71,18 @@ preprimer convert --input-format artic --primer-info tests/test_data/artic/ASFV/
 
 
 ### Align
-Use align to check both the alignment of the primers (exonerate) and the amplicons they produce (mepcr) to a fasta reference of your choice. 
+Use align to check both the alignment of the primers (blast or exonerate) and the amplicons they produce (mepcr) to a fasta reference of your choice. 
 
 Input:
 - sts (can be genereated with convert command)
   
 Output:
 - me-pcr
-- exonerate
+- primers (blast default)
 
-The output will be saved in {output_folder}/alignment/mepcr and {output_folder}/alignment/exonerate. The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the me-pcr aligner.  Then, first genereate
+The output will be saved in {output_folder}/alignment/mepcr and {output_folder}/alignment/primers. The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the me-pcr aligner.  Then, first genereate
 ```
-preprimer align --sts-file tests/test_data/ASFV.sts.tsv --output-format me-pcr exonerate --reference tests/test_data/LR722600.1.fasta --prefix ASFV --output-folder output_alignment --force
+preprimer align --sts-file tests/test_data/ASFV.sts.tsv --output-format me-pcr primers --reference tests/test_data/LR722600.1.fasta --prefix ASFV --output-folder output_alignment --force
 ```
 
 ## Contributing

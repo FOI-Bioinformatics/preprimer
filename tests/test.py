@@ -78,7 +78,7 @@ def test_preprimer_align():
     command = [
         "preprimer", "align",
         "--sts-file", "tests/test_data/ASFV.sts.tsv",
-        "--output-format", "me-pcr", "exonerate",
+        "--output-format", "me-pcr", "primers",
         "--reference", "tests/test_data/LR722600.1.fasta",
         "--prefix", "ASFV",
         "--output-folder", "test_output_alignment",
@@ -98,7 +98,7 @@ def test_preprimer_align():
     assert result.returncode == 0, f"Command failed: {result.stderr}"
 
     # Optionally, you can add checks to ensure output files are created and valid
-    output_folders = ["test_output_alignment/alignment/exonerate" , "test_output_alignment/alignment/mepcr"]
+    output_folders = ["test_output_alignment/alignment/primers" , "test_output_alignment/alignment/mepcr"]
     for output_folder in output_folders:
         assert os.path.exists(output_folder), f"Output folder {output_folder} not created"
     print("Test passed.")
