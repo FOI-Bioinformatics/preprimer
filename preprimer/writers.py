@@ -22,7 +22,7 @@ def write_sts(file_path, amplicons, reference):
                 output_file.write(f"{amplicon_name}\t{seq_fw}\t{seq_rw}\t{amplicon_len}\n")
 
 # Write sts output format.
-def write_sts_2(file_path, amplicon_info, reference, aligner):
+def write_sts_2(file_path, amplicon_info, reference, aligner, force):
     #sts.file
     """
     amplicon_0      actgctgtaggcgtcaaagatt  cggaaataatacggtgggcgaga 2737
@@ -63,11 +63,12 @@ def write_sts_2(file_path, amplicon_info, reference, aligner):
                         print(f'WARNING! before using the sts')
                         print(f'WARNING! Alignment in {aln_path}.')
                         response = input(f"Do you want to continue with ambigous bases in the primers? (y/n): ").strip().lower()
-                        if response == 'n':
-                            print("Aborted. Change the input primers and try again!")
-                            sys.exit(1)
-                        else: 
-                            pass
+                        if not force:
+                            if response == 'n':
+                                print("Aborted. Change the input primers and try again!")
+                                sys.exit(1)
+                            else: 
+                                pass
 
             output_file.write(f"{amplicon_name}\t{seq_fw}\t{seq_rw}\t{amplicon_len}\n")
 
