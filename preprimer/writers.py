@@ -62,13 +62,15 @@ def write_sts_2(file_path, amplicon_info, reference, aligner, force):
                         print(f'WARNING! Consider changing the primer of amplicon: {amplicon_name}, primer: {primer_name}, sequence: {seq} to atgc characters {Aligner.contains_non_atgc(seq)}')
                         print(f'WARNING! before using the sts')
                         print(f'WARNING! Alignment in {aln_path}.')
-                        response = input(f"Do you want to continue with ambigous bases in the primers? (y/n): ").strip().lower()
                         if not force:
+                            response = input(f"Do you want to continue with ambigous bases in the primers? (y/n): ").strip().lower()
                             if response == 'n':
                                 print("Aborted. Change the input primers and try again!")
                                 sys.exit(1)
                             else: 
                                 pass
+                        else: 
+                            pass
 
             output_file.write(f"{amplicon_name}\t{seq_fw}\t{seq_rw}\t{amplicon_len}\n")
 

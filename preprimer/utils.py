@@ -88,7 +88,7 @@ class AmpliconUpdater:
                 primer_seq = primer['seq']
                 parsed_alignment = ""
                 if aligner == 'exonerate':
-                    alignment_output = Aligner.run_exonerate(primer_name, output_dir, primer_seq, reference_fasta, "6")
+                    alignment_output = Aligner.run_exonerate(primer_name, output_dir, primer_seq, reference_fasta)
                     parsed_alignment = Aligner.parse_exonerate_output(alignment_output)
                 elif aligner == 'blast':
                     alignment_output = Aligner.run_blast(primer_name, output_dir, primer_seq, reference_fasta, "6")
