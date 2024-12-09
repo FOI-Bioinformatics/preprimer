@@ -39,13 +39,13 @@ def convert(args):
         print("\n#######################################")
         print("## UPDATING PRIMERS TO NEW REFERENCE ##")
         print("#######################################\n")
-        print("A new reference is given. Exonerate will be used to find new primer positions.\n")
+        print("A new reference is given. An aligner will be used to find new primer positions.\n")
         new_reference_alignment_dir = os.path.join(args.output_folder, "alignment/new_reference")
         print(f"Saving alignments to: {new_reference_alignment_dir}\n")
         #Returns true if a new folder is created
         if not FileHandler.check_folder_exists(new_reference_alignment_dir, args.force):
             exit()
-        updated_amplicon_info = AmpliconUpdater.translate_amplicon_info_to_new_reference(amplicon_info, reference, new_reference_alignment_dir, args.force)
+        updated_amplicon_info = AmpliconUpdater.translate_amplicon_info_to_new_reference(amplicon_info, reference, new_reference_alignment_dir, args.aligner, args.force)
         amplicon_info = updated_amplicon_info
 
     ## Output the dictionary in the specified formats
@@ -88,6 +88,6 @@ def convert(args):
             print(f"sts: {sts_filepath}")
             print("Primers will be named {prefix}_{amplicon_nr}_RIGHT_0 and {prefix}_{amplicon_nr}_LEFT_0\n")
             if FileHandler.check_folder_exists(os.path.dirname(sts_filepath), args.force):
-                writers.write_sts(sts_filepath, amplicon_info, reference)
+                writers.write_sts_2(sts_filepath, amplicon_info, reference,args.aligner)
             else: 
                 "No sts will be printed"
