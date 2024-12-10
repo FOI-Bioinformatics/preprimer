@@ -6,7 +6,7 @@ Prepare primers from different formats, i.e. schemes for tiled sequencing from v
 ## Installation
 ```
 #Create a new environment and install dependencies. Make sure to activate the environment.
-conda create -n PrePrimeR exonerate me-pcr
+conda create -n PrePrimeR exonerate me-pcr blast
 conda activate PrePrimeR
 
 git clone https://github.com/FOI-Bioinformatics/preprimer.git
