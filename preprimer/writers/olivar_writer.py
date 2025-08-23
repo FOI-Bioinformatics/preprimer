@@ -6,9 +6,9 @@ Writes primer data to Olivar-compatible comma-separated format.
 
 import csv
 from pathlib import Path
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Optional, Union
 
-from preprimer.core.interfaces import OutputWriter, AmpliconData
+from preprimer.core.interfaces import AmpliconData, OutputWriter
 
 
 class OlivarWriter(OutputWriter):
@@ -51,7 +51,9 @@ class OlivarWriter(OutputWriter):
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Get reference chromosome name from kwargs or use default
-        chrom_name = kwargs.get("chrom_name", kwargs.get("reference_name", "ref"))
+        chrom_name = kwargs.get(
+            "chrom_name", kwargs.get(
+                "reference_name", "ref"))
 
         # Prepare amplicon data for Olivar format
         amplicon_rows = []
@@ -65,13 +67,13 @@ class OlivarWriter(OutputWriter):
             if not forward_primers or not reverse_primers:
                 continue
 
-            # Use first primer of each type for Olivar format (one amplicon per row)
+            # Use first primer of each type for Olivar format (one amplicon per
+            # row)
             forward_primer = forward_primers[0]
             reverse_primer = reverse_primers[0]
 
             amplicon_id = (
-                f"{prefix}_{amplicon.amplicon_id}" if prefix else amplicon.amplicon_id
-            )
+                f"{prefix}_{amplicon.amplicon_id}" if prefix else amplicon.amplicon_id)
 
             # Calculate amplicon coordinates
             # Use primer coordinates to determine amplicon span
@@ -211,8 +213,7 @@ class OlivarWriter(OutputWriter):
             reverse_primer = reverse_primers[0]
 
             amplicon_id = (
-                f"{prefix}_{amplicon.amplicon_id}" if prefix else amplicon.amplicon_id
-            )
+                f"{prefix}_{amplicon.amplicon_id}" if prefix else amplicon.amplicon_id)
 
             # Calculate amplicon coordinates
             start_coord = min(forward_primer.start, reverse_primer.start)

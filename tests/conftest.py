@@ -5,20 +5,20 @@ This module provides shared test configuration, fixtures, and utilities
 for harmonized testing across all parser types.
 """
 
-import pytest
+import os
+import sys
 import tempfile
 from pathlib import Path
-import sys
-import os
+
+import pytest
+
+from preprimer.core.config import PrePrimerConfig
+from preprimer.core.registry import parser_registry, writer_registry
 
 # Add preprimer to path for testing
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 # Import and register all components
-import preprimer.parsers
-import preprimer.writers
-from preprimer.core.config import PrePrimerConfig
-from preprimer.core.registry import parser_registry, writer_registry
 
 
 @pytest.fixture(scope="session")
@@ -125,12 +125,14 @@ def parser_test_data(request, test_data_dir):
 
     # Skip if test file doesn't exist
     if not data["file"].exists():
-        pytest.skip(f"Test file not available for {request.param}: {data['file']}")
+        pytest.skip(
+            f"Test file not available for {request.param}: {data['file']}")
 
     # Calculate actual values for ARTIC
     if request.param == "artic":
         with open(data["file"]) as f:
-            lines = [line for line in f if line.strip() and not line.startswith("#")]
+            lines = [
+                line for line in f if line.strip() and not line.startswith("#")]
         data["expected_primers"] = len(lines)
         data["expected_amplicons"] = len(lines) // 2
 
@@ -140,10 +142,14 @@ def parser_test_data(request, test_data_dir):
 def pytest_configure(config):
     """Configure pytest with custom markers."""
     config.addinivalue_line(
-        "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
-    )
-    config.addinivalue_line("markers", "integration: marks tests as integration tests")
-    config.addinivalue_line("markers", "parser: marks tests for specific parsers")
+        "markers",
+        "slow: marks tests as slow (deselect with '-m \"not slow\"')")
+    config.addinivalue_line(
+        "markers",
+        "integration: marks tests as integration tests")
+    config.addinivalue_line(
+        "markers",
+        "parser: marks tests for specific parsers")
 
 
 def pytest_collection_modifyitems(config, items):

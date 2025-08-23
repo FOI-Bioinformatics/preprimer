@@ -2,14 +2,14 @@
 Core conversion logic for preprimer.
 """
 
-from pathlib import Path
-from typing import List, Union, Optional, Dict, Any
 import logging
+from pathlib import Path
+from typing import Dict, List, Optional, Union
 
-from .interfaces import AmpliconData
 from .config import PrePrimerConfig
+from .exceptions import OutputError, ParserError, ValidationError
+from .interfaces import AmpliconData
 from .registry import parser_registry, writer_registry
-from .exceptions import ParserError, OutputError, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +76,8 @@ class PrimerConverter:
         if reference_file is None:
             reference_file = parser.get_reference_file(input_file)
             if reference_file:
-                logger.info(f"Found associated reference file: {reference_file}")
+                logger.info(
+                    f"Found associated reference file: {reference_file}")
 
         # Use output formats from config if not specified
         if output_formats is None:
@@ -123,7 +124,8 @@ class PrimerConverter:
         # Create format-specific output path
         if output_format == "artic":
             # ARTIC needs special directory structure
-            output_path = output_dir / "artic" / prefix / "V1" / f"{prefix}.scheme.bed"
+            output_path = output_dir / "artic" / \
+                prefix / "V1" / f"{prefix}.scheme.bed"
         else:
             extension = writer.file_extension
             output_path = output_dir / output_format / f"{prefix}{extension}"
@@ -155,7 +157,8 @@ class PrimerConverter:
 
         for amplicon in amplicons:
             if not amplicon.primers:
-                issues.append(f"Amplicon {amplicon.amplicon_id} has no primers")
+                issues.append(
+                    f"Amplicon {amplicon.amplicon_id} has no primers")
                 continue
 
             # Check for forward and reverse primers
@@ -163,15 +166,18 @@ class PrimerConverter:
             reverse_count = len(amplicon.reverse_primers)
 
             if forward_count == 0:
-                issues.append(f"Amplicon {amplicon.amplicon_id} has no forward primers")
+                issues.append(
+                    f"Amplicon {amplicon.amplicon_id} has no forward primers")
             if reverse_count == 0:
-                issues.append(f"Amplicon {amplicon.amplicon_id} has no reverse primers")
+                issues.append(
+                    f"Amplicon {amplicon.amplicon_id} has no reverse primers")
 
             # Validate primer sequences if enabled
             if self.config.validate_sequences:
                 for primer in amplicon.primers:
                     if not primer.sequence:
-                        issues.append(f"Primer {primer.name} has empty sequence")
+                        issues.append(
+                            f"Primer {primer.name} has empty sequence")
                         continue
 
                     # Check sequence length
@@ -195,9 +201,8 @@ class PrimerConverter:
         if issues:
             if len(issues) > 10:
                 # Show first 10 issues and count
-                issue_summary = (
-                    "\n".join(issues[:10]) + f"\n... and {len(issues) - 10} more issues"
-                )
+                issue_summary = ("\n".join(
+                    issues[:10]) + f"\n... and {len(issues) - 10} more issues")
             else:
                 issue_summary = "\n".join(issues)
 

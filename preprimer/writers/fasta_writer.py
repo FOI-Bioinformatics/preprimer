@@ -2,12 +2,12 @@
 FASTA format writer.
 """
 
-from pathlib import Path
-from typing import List, Union, Optional
 import logging
+from pathlib import Path
+from typing import List, Optional, Union
 
-from ..core.interfaces import OutputWriter, AmpliconData
 from ..core.exceptions import OutputError
+from ..core.interfaces import AmpliconData, OutputWriter
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,8 @@ class FASTAWriter(OutputWriter):
                         f.write(sequence)
                         total_primers += 1
 
-            logger.info(f"Successfully wrote {total_primers} primers to FASTA format")
+            logger.info(
+                f"Successfully wrote {total_primers} primers to FASTA format")
 
         except Exception as e:
             raise OutputError(f"Failed to write FASTA format: {e}")

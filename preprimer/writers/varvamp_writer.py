@@ -6,9 +6,9 @@ Writes primer data to VarVAMP-compatible tab-separated format.
 
 import csv
 from pathlib import Path
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Union
 
-from preprimer.core.interfaces import OutputWriter, AmpliconData
+from preprimer.core.interfaces import AmpliconData, OutputWriter
 
 
 class VarVAMPWriter(OutputWriter):
@@ -66,8 +66,10 @@ class VarVAMPWriter(OutputWriter):
                     "stop": primer.stop,
                     "length": len(primer.sequence),
                     "gc_content": self._calculate_gc_content(primer.sequence),
-                    "tm": getattr(primer, "tm", 60.0),  # Default Tm if not available
-                    "penalty": getattr(primer, "score", 0.0),  # Use score as penalty
+                    # Default Tm if not available
+                    "tm": getattr(primer, "tm", 60.0),
+                    # Use score as penalty
+                    "penalty": getattr(primer, "score", 0.0),
                     "pool": primer.pool or 1,
                 }
                 primer_rows.append(row)
@@ -87,7 +89,8 @@ class VarVAMPWriter(OutputWriter):
                     "penalty",
                     "pool",
                 ]
-                writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
+                writer = csv.DictWriter(
+                    f, fieldnames=fieldnames, delimiter="\t")
                 writer.writeheader()
                 writer.writerows(primer_rows)
 

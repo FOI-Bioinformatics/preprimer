@@ -2,21 +2,21 @@
 Core preprimer modules with abstract base classes and interfaces.
 """
 
-from .interfaces import (
-    PrimerParser,
-    PrimerData,
-    AmpliconData,
-    OutputWriter,
-    AlignmentProvider,
-)
+from .config import DefaultConfig, PrePrimerConfig
 from .exceptions import (
-    PrePrimerError,
-    ParserError,
-    ValidationError,
     AlignmentError,
     OutputError,
+    ParserError,
+    PrePrimerError,
+    ValidationError,
 )
-from .config import PrePrimerConfig, DefaultConfig
+from .interfaces import (
+    AlignmentProvider,
+    AmpliconData,
+    OutputWriter,
+    PrimerData,
+    PrimerParser,
+)
 
 __all__ = [
     "PrimerParser",

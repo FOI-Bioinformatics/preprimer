@@ -2,12 +2,11 @@
 Parser implementations for different primer formats.
 """
 
-from .varvamp_parser import VarVAMPParser
-from .artic_parser import ARTICParser
-from .olivar_parser import OlivarParser
-
 # Auto-register all parsers
 from ..core.registry import parser_registry
+from .artic_parser import ARTICParser
+from .olivar_parser import OlivarParser
+from .varvamp_parser import VarVAMPParser
 
 
 def register_all_parsers():
@@ -20,4 +19,8 @@ def register_all_parsers():
 # Auto-register on import
 register_all_parsers()
 
-__all__ = ["VarVAMPParser", "ARTICParser", "OlivarParser", "register_all_parsers"]
+__all__ = [
+    "VarVAMPParser",
+    "ARTICParser",
+    "OlivarParser",
+    "register_all_parsers"]

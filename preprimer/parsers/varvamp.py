@@ -9,9 +9,10 @@ def parse_varvamp(primer_file, prefix):
     # amplicon_1	2914	RW_135	0	7063	7084	cgaacagaatgcccacaacaca	22	50.0	60.0	50.0	60.0	0.6
     # amplicon_2	2571	FW_191	0	8692	8712	aattggtaggggcggtygtga	21	52.4	60.0	54.8	60.9	0.7
     # amplicon_2	2571	RW_292	0	11241	11262	tggactgcgcaaatccaacatc	22	50.0	60.1	50.0	60.1	0.7
-    # amplicon_3	2884	FW_311	0	12448	12468	atgccaccgggaaactgtaca	21	52.4	60.0	52.4	60.0	0.5
+    # amplicon_3      2884    FW_311  0       12448   12468
+    # atgccaccgggaaactgtaca   21      52.4    60.0    52.4    60.0    0.5
 
-    ## Check input
+    # Check input
 
     amplicon_info = {}
     primer_file_path = primer_file
@@ -68,6 +69,6 @@ def parse_varvamp(primer_file, prefix):
                         "reference_id": "ambigous_consensus",
                     }
                 )
-    except:
+    except BaseException:
         print(f"File {primer_file} could not be parsed. Check your input")
     return amplicon_info

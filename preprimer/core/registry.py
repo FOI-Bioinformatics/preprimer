@@ -2,12 +2,12 @@
 Parser and writer registry system for preprimer.
 """
 
+import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Type, Union
-import logging
 
-from .interfaces import PrimerParser, OutputWriter, AlignmentProvider
-from .exceptions import ParserError, OutputError
+from .exceptions import OutputError, ParserError
+from .interfaces import AlignmentProvider, OutputWriter, PrimerParser
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,8 @@ class ParserRegistry:
         """Get parser instance for a format."""
         format_name = format_name.lower()
         if format_name not in self._parsers:
-            raise ParserError(f"No parser registered for format: {format_name}")
+            raise ParserError(
+                f"No parser registered for format: {format_name}")
 
         return self._parsers[format_name]()
 
@@ -90,7 +91,8 @@ class WriterRegistry:
         """Get writer instance for a format."""
         format_name = format_name.lower()
         if format_name not in self._writers:
-            raise OutputError(f"No writer registered for format: {format_name}")
+            raise OutputError(
+                f"No writer registered for format: {format_name}")
 
         return self._writers[format_name]()
 

@@ -21,12 +21,11 @@ def parse_artic(primer_file, prefix):
                 seq = parts[6]
 
                 # Extract amplicon number from the primer name
-                amplicon_nr = artic_primer_name.split("_")[2]
+                artic_primer_name.split("_")[2]
 
                 # Determine direction and artic_primer_name
-                if artic_primer_name.endswith("LEFT_1") or artic_primer_name.endswith(
-                    "LEFT_0"
-                ):
+                if artic_primer_name.endswith(
+                        "LEFT_1") or artic_primer_name.endswith("LEFT_0"):
                     direction = "forward"
                     amplicon_name = artic_primer_name.split("_LEFT")[0]
                 elif artic_primer_name.endswith(
@@ -53,7 +52,7 @@ def parse_artic(primer_file, prefix):
                         "amplicon_length": abs(stop - start),
                     }
                 )
-    except:
+    except BaseException:
         print(f"File {primer_file} could not be parsed. Check your input")
         exit()
     return amplicon_info

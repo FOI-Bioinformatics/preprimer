@@ -2,12 +2,12 @@
 ARTIC primer format parser.
 """
 
-from pathlib import Path
-from typing import List, Union, Optional
 import logging
+from pathlib import Path
+from typing import List, Optional, Union
 
-from ..core.interfaces import PrimerParser, PrimerData, AmpliconData
 from ..core.exceptions import ParserError
+from ..core.interfaces import AmpliconData, PrimerData, PrimerParser
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +109,8 @@ class ARTICParser(PrimerParser):
                         )
 
                     # Extract amplicon number
-                    amplicon_num = name_parts[-3]  # Second to last before SIDE_ALT
+                    # Second to last before SIDE_ALT
+                    amplicon_num = name_parts[-3]
                     amplicon_id = f"amplicon_{amplicon_num}"
 
                     # Determine direction
@@ -118,7 +119,8 @@ class ARTICParser(PrimerParser):
                     elif "RIGHT" in primer_name:
                         direction = "reverse"
                     else:
-                        raise ParserError(f"Unknown primer side in: {primer_name}")
+                        raise ParserError(
+                            f"Unknown primer side in: {primer_name}")
 
                     # Create PrimerData object
                     primer = PrimerData(
@@ -161,7 +163,8 @@ class ARTICParser(PrimerParser):
 
         return amplicon_list
 
-    def get_reference_file(self, file_path: Union[str, Path]) -> Optional[Path]:
+    def get_reference_file(
+            self, file_path: Union[str, Path]) -> Optional[Path]:
         """Get associated reference file."""
         file_path = Path(file_path)
 

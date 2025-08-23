@@ -5,14 +5,14 @@ This module provides comprehensive, standardized testing for VarVAMP, ARTIC,
 and Olivar parsers using pytest fixtures and parametrized tests.
 """
 
-import pytest
-import tempfile
 from pathlib import Path
 
-from preprimer.core.interfaces import PrimerData, AmpliconData
-from preprimer.core.converter import PrimerConverter
-from preprimer.core.registry import parser_registry, writer_registry
+import pytest
+
 from preprimer import convert_primers
+from preprimer.core.converter import PrimerConverter
+from preprimer.core.interfaces import AmpliconData, PrimerData
+from preprimer.core.registry import parser_registry, writer_registry
 
 
 class TestParserValidation:
@@ -212,20 +212,15 @@ class TestCrossParserCompatibility:
 
     def test_consistent_conversion_workflow(self, temp_output_dir):
         """Test that conversion workflow is consistent across all parsers."""
-        test_files = [
-            (
-                "varvamp",
-                Path(__file__).parent / "test_data" / "ASFV_long" / "primers.tsv",
-            ),
-            ("artic", Path(__file__).parent / "test_data" / "ASFV.scheme.bed"),
-            (
-                "olivar",
-                Path(__file__).parent
-                / "test_data"
-                / "olivar_examples"
-                / "olivar-design.csv",
-            ),
-        ]
+        test_files = [("varvamp", Path(__file__).parent /
+                       "test_data" /
+                       "ASFV_long" /
+                       "primers.tsv", ), ("artic", Path(__file__).parent /
+                                          "test_data" /
+                                          "ASFV.scheme.bed"), ("olivar", Path(__file__).parent /
+                                                               "test_data" /
+                                                               "olivar_examples" /
+                                                               "olivar-design.csv", ), ]
 
         successful_conversions = 0
 
@@ -263,10 +258,14 @@ class TestCrossParserCompatibility:
             assert parser.validate_file(non_existent) is False
 
     @pytest.mark.integration
-    def test_end_to_end_workflow(self, parser_test_data, temp_output_dir, test_config):
+    def test_end_to_end_workflow(
+            self,
+            parser_test_data,
+            temp_output_dir,
+            test_config):
         """Test complete end-to-end workflow."""
         file_path = parser_test_data["file"]
-        format_name = parser_test_data["format"]
+        parser_test_data["format"]
         prefix = parser_test_data["prefix"]
 
         # Create converter with test config

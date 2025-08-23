@@ -1,9 +1,5 @@
 import os
-import shutil
-import re
-import tempfile
-import subprocess
-from pathlib import Path
+
 from preprimer.utils import Aligner
 
 
@@ -20,7 +16,8 @@ def write_sts(file_path, amplicons, reference):
                 if primer["direction"] == "reverse":
                     seq_rw = primer["seq"]
                 amplicon_len = primer["amplicon_length"]
-            output_file.write(f"{amplicon_name}\t{seq_fw}\t{seq_rw}\t{amplicon_len}\n")
+            output_file.write(
+                f"{amplicon_name}\t{seq_fw}\t{seq_rw}\t{amplicon_len}\n")
 
 
 # Write sts output format.
@@ -40,7 +37,6 @@ def write_sts_2(file_path, amplicon_info, reference, aligner, force):
             amplicon_name = key
             seq_fw = ""
             seq_rw = ""
-            len = ""
             for primer in amplicon_info[amplicon_name]:
                 primer_name = primer["primer_name"]
                 amplicon_len = primer["amplicon_length"]
@@ -54,12 +50,10 @@ def write_sts_2(file_path, amplicon_info, reference, aligner, force):
                 if Aligner.contains_non_atgc(seq):
                     if aligner == "exonerate":
                         aln_path = Aligner.run_exonerate(
-                            primer_name, os.path.dirname(file_path), seq, reference
-                        )
+                            primer_name, os.path.dirname(file_path), seq, reference)
                     elif aligner == "blast":
                         aln_path = Aligner.run_blast(
-                            primer_name, os.path.dirname(file_path), seq, reference, "0"
-                        )
+                            primer_name, os.path.dirname(file_path), seq, reference, "0")
                     with open(aln_path, "r") as file:
                         for line in file:
                             print(line, end="")
@@ -74,12 +68,7 @@ def write_sts_2(file_path, amplicon_info, reference, aligner, force):
                         print(f"WARNING! Alignment in {aln_path}.")
                         if not force:
                             response = (
-                                input(
-                                    f"Do you want to continue with ambigous bases in the primers? (y/n): "
-                                )
-                                .strip()
-                                .lower()
-                            )
+                                input(f"Do you want to continue with ambigous bases in the primers? (y/n): ") .strip() .lower())
                             if response == "n":
                                 print(
                                     "Aborted. Change the input primers and try again!"
@@ -90,14 +79,16 @@ def write_sts_2(file_path, amplicon_info, reference, aligner, force):
                         else:
                             pass
 
-            output_file.write(f"{amplicon_name}\t{seq_fw}\t{seq_rw}\t{amplicon_len}\n")
+            output_file.write(
+                f"{amplicon_name}\t{seq_fw}\t{seq_rw}\t{amplicon_len}\n")
 
 
 def write_fasta(file_path, amplicon_dict):
     with open(file_path, "w") as output_file:
         for key in amplicon_dict:
             for primer in amplicon_dict[key]:
-                output_file.write(f">{primer['artic_primer_name']}\n{primer['seq']}\n")
+                output_file.write(
+                    f">{primer['artic_primer_name']}\n{primer['seq']}\n")
 
 
 def write_artic(file_path, amplicon_dict):

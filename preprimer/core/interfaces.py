@@ -5,7 +5,8 @@ Abstract base classes and data structures for preprimer.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Union, Any
+from typing import Any, Dict, List, Optional, Union
+
 import pandas as pd
 
 
@@ -86,27 +87,24 @@ class PrimerParser(ABC):
     @abstractmethod
     def format_name(self) -> str:
         """Return the format name this parser handles."""
-        pass
 
     @property
     @abstractmethod
     def file_extensions(self) -> List[str]:
         """Return supported file extensions."""
-        pass
 
     @abstractmethod
     def validate_file(self, file_path: Union[str, Path]) -> bool:
         """Validate that the file can be parsed by this parser."""
-        pass
 
     @abstractmethod
     def parse(
         self, file_path: Union[str, Path], prefix: str = ""
     ) -> List[AmpliconData]:
         """Parse primer file and return list of AmpliconData objects."""
-        pass
 
-    def get_reference_file(self, file_path: Union[str, Path]) -> Optional[Path]:
+    def get_reference_file(
+            self, file_path: Union[str, Path]) -> Optional[Path]:
         """Get associated reference file if it exists."""
         return None
 
@@ -118,13 +116,11 @@ class OutputWriter(ABC):
     @abstractmethod
     def format_name(self) -> str:
         """Return the output format name."""
-        pass
 
     @property
     @abstractmethod
     def file_extension(self) -> str:
         """Return the file extension for this format."""
-        pass
 
     @abstractmethod
     def write(
@@ -135,7 +131,6 @@ class OutputWriter(ABC):
         **kwargs,
     ) -> None:
         """Write amplicon data to the specified output format."""
-        pass
 
     def validate_output_path(self, output_path: Union[str, Path]) -> Path:
         """Validate and prepare output path."""
@@ -151,12 +146,10 @@ class AlignmentProvider(ABC):
     @abstractmethod
     def tool_name(self) -> str:
         """Return the alignment tool name."""
-        pass
 
     @abstractmethod
     def is_available(self) -> bool:
         """Check if the alignment tool is available."""
-        pass
 
     @abstractmethod
     def align_primers(
@@ -166,7 +159,6 @@ class AlignmentProvider(ABC):
         output_dir: Union[str, Path],
     ) -> List[PrimerData]:
         """Align primers to reference and return updated primer data."""
-        pass
 
     @abstractmethod
     def create_amplicons(
@@ -176,4 +168,3 @@ class AlignmentProvider(ABC):
         output_path: Union[str, Path],
     ) -> pd.DataFrame:
         """Create in-silico PCR amplicons."""
-        pass

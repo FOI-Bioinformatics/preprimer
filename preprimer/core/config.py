@@ -5,7 +5,7 @@ Configuration management for preprimer.
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Any, Optional, List, Union
+from typing import Any, Dict, List, Union
 
 from .exceptions import ConfigError
 

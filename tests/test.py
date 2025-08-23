@@ -1,5 +1,5 @@
-import subprocess
 import os
+import subprocess
 
 
 def test_preprimer_convert():
@@ -34,7 +34,8 @@ def test_preprimer_convert():
     # Check if the command executed successfully
     assert result.returncode == 0, f"Command failed: {result.stderr}"
 
-    # Optionally, you can add checks to ensure output files are created and valid
+    # Optionally, you can add checks to ensure output files are created and
+    # valid
     artic_output_files = [
         os.path.join("test_output/artic/ASFV/V1", "ASFV.scheme.bed"),
         os.path.join("test_output/artic/ASFV/V1", "ASFV.reference.fasta"),
@@ -43,7 +44,8 @@ def test_preprimer_convert():
     sts_output_file = os.path.join("test_output/sts/", "ASFV.sts.tsv")
     output_files = artic_output_files + [fasta_output_file, sts_output_file]
     for output_file in output_files:
-        assert os.path.exists(output_file), f"Output file {output_file} not created"
+        assert os.path.exists(
+            output_file), f"Output file {output_file} not created"
     print("Test passed.")
 
 
@@ -81,7 +83,8 @@ def test_preprimer_convert_change_reference():
     # Check if the command executed successfully
     assert result.returncode == 0, f"Command failed: {result.stderr}"
 
-    # Optionally, you can add checks to ensure output files are created and valid
+    # Optionally, you can add checks to ensure output files are created and
+    # valid
     artic_output_files = [
         os.path.join("test_output/artic/ASFV/V1", "ASFV.scheme.bed"),
         os.path.join("test_output/artic/ASFV/V1", "ASFV.reference.fasta"),
@@ -90,7 +93,8 @@ def test_preprimer_convert_change_reference():
     sts_output_file = os.path.join("test_output/sts/", "ASFV.sts.tsv")
     output_files = artic_output_files + [fasta_output_file, sts_output_file]
     for output_file in output_files:
-        assert os.path.exists(output_file), f"Output file {output_file} not created"
+        assert os.path.exists(
+            output_file), f"Output file {output_file} not created"
     print("Test passed.")
 
 
@@ -125,7 +129,8 @@ def test_preprimer_align():
     # Check if the command executed successfully
     assert result.returncode == 0, f"Command failed: {result.stderr}"
 
-    # Optionally, you can add checks to ensure output files are created and valid
+    # Optionally, you can add checks to ensure output files are created and
+    # valid
     output_folders = [
         "test_output_alignment/alignment/primers",
         "test_output_alignment/alignment/mepcr",

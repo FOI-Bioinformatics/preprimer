@@ -5,6 +5,7 @@ Redirects to the new CLI interface.
 
 import sys
 import warnings
+
 from .cli import main as cli_main
 
 

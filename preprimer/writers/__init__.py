@@ -2,14 +2,13 @@
 Output format writers for different primer schemes.
 """
 
-from .artic_writer import ARTICWriter
-from .fasta_writer import FASTAWriter
-from .sts_writer import STSWriter
-from .varvamp_writer import VarVAMPWriter
-from .olivar_writer import OlivarWriter
-
 # Auto-register all writers
 from ..core.registry import writer_registry
+from .artic_writer import ARTICWriter
+from .fasta_writer import FASTAWriter
+from .olivar_writer import OlivarWriter
+from .sts_writer import STSWriter
+from .varvamp_writer import VarVAMPWriter
 
 
 def register_all_writers():

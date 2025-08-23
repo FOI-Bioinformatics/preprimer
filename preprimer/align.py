@@ -1,6 +1,6 @@
 import os
-from preprimer.utils import FileHandler, Aligner
-from . import writers
+
+from preprimer.utils import Aligner, FileHandler
 
 
 def align(args):
@@ -9,7 +9,8 @@ def align(args):
             output_folder = os.path.join(args.output_folder, "alignment/mepcr")
             FileHandler.check_folder_exists(output_folder, args.force)
         if output_format == "primers":
-            output_folder = os.path.join(args.output_folder, "alignment/primers")
+            output_folder = os.path.join(
+                args.output_folder, "alignment/primers")
             FileHandler.check_folder_exists(output_folder, args.force)
             print("\nRunning alignment of primers:")
             with open(args.sts_file, "r") as file:
@@ -20,11 +21,9 @@ def align(args):
                     rw_seq = primer_pair[2]
                     if args.aligner == "exonerate":
                         Aligner.run_exonerate(
-                            f"{amplicon_name}_fw", output_folder, fw_seq, args.reference
-                        )
+                            f"{amplicon_name}_fw", output_folder, fw_seq, args.reference)
                         Aligner.run_exonerate(
-                            f"{amplicon_name}_rw", output_folder, rw_seq, args.reference
-                        )
+                            f"{amplicon_name}_rw", output_folder, rw_seq, args.reference)
                     elif args.aligner == "blast":
                         Aligner.run_blast(
                             f"{amplicon_name}_fw",

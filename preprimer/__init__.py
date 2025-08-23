@@ -7,11 +7,12 @@ used in tiled amplicon sequencing.
 
 __version__ = "0.2.0"
 
-# Import core components
-from .core.interfaces import PrimerParser, OutputWriter, PrimerData, AmpliconData
-from .core.config import PrePrimerConfig, DefaultConfig
+from .core.config import DefaultConfig, PrePrimerConfig
 from .core.converter import PrimerConverter
-from .core.exceptions import PrePrimerError, ParserError, ValidationError, OutputError
+from .core.exceptions import OutputError, ParserError, PrePrimerError, ValidationError
+
+# Import core components
+from .core.interfaces import AmpliconData, OutputWriter, PrimerData, PrimerParser
 
 # Import registries for advanced users
 from .core.registry import parser_registry, writer_registry
