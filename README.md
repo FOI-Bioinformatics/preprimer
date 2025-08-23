@@ -1,92 +1,232 @@
-# PrePrimeR
-Prepare primers from different formats, i.e. schemes for tiled sequencing from varvamp to artic format. The script also aligns primers with blast or exonerate and generates (--output primers)amplicons with mepcr.
+# PrePrimer
 
+**Modern, extensible primer scheme converter for tiled amplicon sequencing.**
 
+PrePrimer converts between different primer scheme formats used in viral genome sequencing workflows. It supports VarVAMP, ARTIC, and Olivar formats with an extensible plugin-based architecture.
+
+## ✨ **Version 0.2.0 - Complete Refactor**
+
+- 🏗️ **Modern Architecture**: Plugin-based parser and writer system
+- 🔧 **Extensible Design**: Easy to add new formats and tools  
+- 🎯 **Multi-format Support**: VarVAMP, ARTIC, Olivar, and more
+- 🛡️ **Robust Validation**: Comprehensive error handling and validation
+- 🚀 **Enhanced CLI**: Intuitive commands with auto-detection
+- 🧪 **Well-tested**: Comprehensive test suite with modern Python patterns
+
+## 🎯 **Supported Formats**
+
+### **Input Formats**
+- **VarVAMP** (`.tsv`, `.txt`) - Tiled primer schemes from varVAMP
+- **ARTIC** (`.bed`, `.scheme.bed`) - ARTIC primer scheme BED format
+- **Olivar** (`.csv`) - Olivar primer design output
+
+### **Output Formats**  
+- **ARTIC** (`.scheme.bed`) - Ready for `artic minion` workflows
+- **FASTA** (`.fasta`) - All primers in multi-FASTA format
+- **STS** (`.sts.tsv`) - For me-pcr in-silico validation
+- **VarVAMP** (`.tsv`) - VarVAMP-compatible primer schemes  
+- **Olivar** (`.csv`) - Olivar primer design format
+
+**🔄 Complete bidirectional conversion between all formats!**
 
 ## Installation
-```
-#Create a new environment and install dependencies. Make sure to activate the environment.
-conda create -n PrePrimeR exonerate me-pcr blast
-conda activate PrePrimeR
 
+PrePrimer requires Python 3.8 or later.
+
+```bash
+# Clone the repository
 git clone https://github.com/FOI-Bioinformatics/preprimer.git
 cd preprimer
-pip install .
+
+# Install the package
+pip install -e .
+
+# For development
+pip install -e ".[dev]"
 ```
 
-## Usage
-```shell
-preprimer -h
-```
+## Quick Start
 
-### Convert
-This part coverts the input format into one or multiple other formats
-
-Currently it supports 
-input primer formats: 
-- varvamp primers.tsv
-- artic *.scheme.bed
-
-varVAMP tiled primer schemes generated with https://github.com/jonas-fuchs/varVAMP 
-
-Output formats
-- artic (outputs *.scheme.bed and reference.fasta)
-- sts (used for insilico pcr with me-pcr)
-- fasta (all primer sequences in a multifasta).  
-
-**Example keeping ambiguous consensus from varvamp as reference.**  
-
-This is the default when `--reference` is NOT given as argument.
 ```bash
-preprimer convert --input-format varvamp --primer-info tests/test_data/ASFV_long/primers.tsv --output-folder schemes --output-format artic --prefix ASFV
+# List supported formats
+preprimer list
+
+# Get info about a file
+preprimer info your_primers.tsv
+
+# Convert VarVAMP to ARTIC format
+preprimer convert --input primers.tsv --output-dir schemes/ --output-formats artic
+
+# Convert to multiple formats (including bidirectional)
+preprimer convert --input primers.tsv --output-dir schemes/ \
+                 --output-formats artic fasta sts varvamp olivar --prefix MyVirus
 ```
 
+## 📚 **Documentation**
 
-**Example with new sequence as reference and multiple outputs (artic, fasta, sts)**.  
+**Complete documentation is available in the [`docs/`](docs/) directory:**
 
-If a reference fasta file is specified with `--reference` the primers will be aligned to this reference and the output will be in relation to the new reference. If a primer gets multiple hits in the new reference it will choose a pair located close to the position of the primer to the old reference. This solutin is chosen since we do not antissipate that the references differs so much. All alignments are saved in folder {output_folder}/alignment/new_reference.  
+### **🚀 Getting Started**
+- **[Quick Start Guide](docs/user-guide/quick-start.md)** - Get up and running in 5 minutes
+- **[Installation Guide](docs/user-guide/installation.md)** - Detailed installation instructions
+- **[Basic Usage](docs/user-guide/basic-usage.md)** - Essential commands and workflows
+
+### **📖 User Guides**
+- **[CLI Reference](docs/user-guide/cli-reference.md)** - Complete command-line documentation
+- **[Configuration Guide](docs/user-guide/configuration.md)** - Customize PrePrimer behavior
+- **[Supported Formats](docs/user-guide/supported-formats.md)** - All input and output formats
+- **[User Guide Index](docs/user-guide/README.md)** - Complete user documentation
+
+### **🐍 For Developers**
+- **[Python API Guide](docs/api/python-api.md)** - Programmatic usage
+- **[Architecture Overview](docs/developer/architecture.md)** - System design
+- **[Adding Parsers](docs/developer/adding-parsers.md)** - Extending PrePrimer
+- **[Contributing Guide](docs/developer/contributing.md)** - Development guidelines
+
+### **🎯 Examples & Tutorials**
+- **[Use Cases](docs/tutorials/use-cases.md)** - Real-world workflows
+- **[Format Conversion](docs/tutorials/format-conversion.md)** - Converting between formats
+- **[Integration Examples](docs/tutorials/integration.md)** - Using with other tools
+
+**Quick Reference:**
+```bash
+# Get help
+preprimer --help
+
+# List supported formats
+preprimer list
+
+# Get file information
+preprimer info your_primers.tsv
+
+# Convert formats
+preprimer convert --input primers.tsv --output-dir schemes/ --output-formats artic
+
+# Multiple formats with custom prefix
+preprimer convert --input primers.tsv --output-dir output/ \
+                 --output-formats artic fasta sts --prefix MyVirus
+```
+
+## 🧬 **Use Cases**
+
+### **Viral Genome Sequencing Workflows**
+
+**1. VarVAMP → ARTIC Pipeline:**
+```bash
+# Design primers with VarVAMP
+# Then convert to ARTIC format
+preprimer convert --input varvamp_output.tsv --output-dir schemes/ --output-formats artic --prefix MPXV
+
+# Use with ARTIC workflow
+artic minion MPXV nanopore_data/ --scheme-directory schemes/artic/
+```
+
+**2. Cross-platform Compatibility:**
+```bash  
+# Convert Olivar design to all formats (full bidirectional support)
+preprimer convert --input olivar-design.csv \
+                 --output-dir multi_format/ \
+                 --output-formats artic fasta sts varvamp olivar \
+                 --prefix MultiVirus
+
+# Or convert ARTIC to VarVAMP and Olivar
+preprimer convert --input existing.scheme.bed \
+                 --output-dir converted/ \
+                 --output-formats varvamp olivar \
+                 --prefix ARTIC_Converted
+```
+
+**3. Primer Validation:**
+```bash
+# Validate primer design files
+preprimer info suspicious_primers.tsv
+preprimer convert --input primers.tsv --output-dir /tmp --validate-only
+```
+
+## 🏗️ **Architecture**
+
+PrePrimer 0.2.0 features a completely refactored, extensible architecture:
 
 ```
-preprimer convert --input-format varvamp --primer-info tests/test_data/ASFV_long/primers.tsv --output-folder schemes --output-format artic fasta sts --prefix ASFV --reference tests/test_data/LR722600.1.fasta
+preprimer/
+├── core/                    # Core abstractions and interfaces
+│   ├── interfaces.py        # Abstract base classes
+│   ├── config.py           # Configuration management  
+│   ├── converter.py        # Main conversion logic
+│   ├── registry.py         # Plugin registration system
+│   └── exceptions.py       # Custom exceptions
+├── parsers/                 # Input format parsers
+│   ├── varvamp_parser.py   # VarVAMP format
+│   ├── artic_parser.py     # ARTIC BED format
+│   └── olivar_parser.py    # Olivar CSV format
+├── writers/                 # Output format writers  
+│   ├── artic_writer.py     # ARTIC BED output
+│   ├── fasta_writer.py     # FASTA output
+│   └── sts_writer.py       # STS output for me-pcr
+└── cli.py                  # Modern command-line interface
 ```
 
+### **Key Features**
 
+- **🔌 Plugin Architecture**: Easy to add new parsers and writers
+- **🛡️ Robust Validation**: Comprehensive error handling and data validation  
+- **⚙️ Flexible Configuration**: JSON-based configuration system
+- **🔍 Auto-detection**: Automatic format detection based on content
+- **📊 Data Structures**: Standardized primer and amplicon data models
+- **🧪 Extensible**: Clean interfaces for adding new functionality
 
-If `--force` no prompts will be displayed and
-- existing folders will be automatically removed with new
-- Amplicons where one or both primers fails to align will be excluded
+## 🤝 **Contributing**
 
-**Run artic**
-How to run artic minion command using the artic scheme converted from varvamp, with the name **prefix** of the scheme and the **directory** from the PrePrimeR output in the command.
+We welcome contributions! PrePrimer is designed to be easily extensible.
 
+### **Adding New Formats**
+
+1. **Create a Parser** (for input formats):
+   ```python
+   class MyParser(PrimerParser):
+       # Implement required methods
+   ```
+
+2. **Create a Writer** (for output formats):  
+   ```python
+   class MyWriter(OutputWriter):
+       # Implement required methods
+   ```
+
+3. **Register Your Components**:
+   ```python
+   from preprimer.core.registry import parser_registry, writer_registry
+   parser_registry.register(MyParser)
+   writer_registry.register(MyWriter)
+   ```
+
+### **Development Setup**
+```bash
+git clone https://github.com/FOI-Bioinformatics/preprimer.git
+cd preprimer
+
+# Install with development dependencies
+pip install -e ".[dev]"
+
+# Run tests
+python -m pytest
+
+# Run specific tests
+python -m pytest tests/test_refactored_system.py -v
 ```
-artic minion ASFV guppy_minion_data/ASFV --scheme-directory schemes/artic/ --read-file guppy_data/sample1.fastq --medaka --medaka-model r941_min_high_g360
-```
 
-**Convert artic to sts and fasta**
-artic formats can only be converted into fasta and sts, not varvamp. An sts is needed for the Alignment in next section.
-```
-preprimer convert --input-format artic --primer-info tests/test_data/artic/ASFV/V1/ASFV.scheme.bed --output-format sts fasta  --output-folder schemes --prefix ASFV
-```
+## 📄 **License**
 
+PrePrimer is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### Align
-Use align to check both the alignment of the primers (blast or exonerate) and the amplicons they produce (mepcr) to a fasta reference of your choice. 
+## 🙏 **Acknowledgments**
 
-Input:
-- sts (can be genereated with convert command)
-  
-Output:
-- me-pcr
-- primers (blast default)
+- Original PrePrimer codebase
+- [VarVAMP](https://github.com/jonas-fuchs/varVAMP) primer design tool
+- [ARTIC](https://github.com/artic-network/artic-tools) tiled amplicon sequencing  
+- [Olivar](https://github.com/treangenlab/Olivar) variant-aware primer design
+- Contributors and users of the bioinformatics community
 
-The output will be saved in {output_folder}/alignment/mepcr and {output_folder}/alignment/primers. The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the me-pcr aligner.  Then, first genereate
-```
-preprimer align --sts-file tests/test_data/ASFV.sts.tsv --output-format me-pcr primers --reference tests/test_data/LR722600.1.fasta --prefix ASFV --output-folder output_alignment --force
-```
+---
 
-## Contributing
-We welcome contributions to PrePrimeR! If you have suggestions or contributions, please open an issue or pull request.
-
-## License
-PrePrimeR is licensed under the MIT License.
+**PrePrimer 0.2.0 - Modern primer scheme conversion made easy! 🧬✨**
