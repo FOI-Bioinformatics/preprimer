@@ -103,21 +103,19 @@ class AmpliconUpdater:
                     alignment_output = Aligner.run_exonerate(
                         primer_name, output_dir, primer_seq, reference_fasta
                     )
-                    parsed_alignment = Aligner.parse_exonerate_output(
-                        alignment_output)
+                    parsed_alignment = Aligner.parse_exonerate_output(alignment_output)
                 elif aligner == "blast":
                     alignment_output = Aligner.run_blast(
-                        primer_name, output_dir, primer_seq, reference_fasta, "6")
-                    parsed_alignment = Aligner.parse_blast_output(
-                        alignment_output)
+                        primer_name, output_dir, primer_seq, reference_fasta, "6"
+                    )
+                    parsed_alignment = Aligner.parse_blast_output(alignment_output)
                 # If parsing exonerate output fails i.e. no alignments found
                 if not parsed_alignment:
                     print(
                         f"\nNo alignment found for primer {primer_name} in amplicon {amplicon_name} to {reference_fasta}."
                     )
                     if not force:
-                        user_input = input(
-                            f"Do you want to continue anyway?  (y/n): ")
+                        user_input = input(f"Do you want to continue anyway?  (y/n): ")
                         if user_input.lower() == "n":
                             print(f"Program will exit. Try a different reference")
                             exit()
@@ -165,11 +163,7 @@ class AmpliconUpdater:
 # ___________________________________________________________
 class Aligner:
     @staticmethod
-    def run_me_pcr(
-            primer_sts_file,
-            reference_genome,
-            use_temp_file,
-            regular_filepath):
+    def run_me_pcr(primer_sts_file, reference_genome, use_temp_file, regular_filepath):
         if use_temp_file:
             # Create a temporary file in the specified folder
             with tempfile.NamedTemporaryFile(mode="w", delete=False) as output_file:
@@ -276,8 +270,7 @@ class Aligner:
             seq_file_path = seq_file.name
 
         # Ensure the reference genome is formatted as a BLAST database
-        blast_db_prefix = os.path.splitext(
-            os.path.basename(reference_genome))[0]
+        blast_db_prefix = os.path.splitext(os.path.basename(reference_genome))[0]
         blastdb_output = output_path + "/db/" + f"{blast_db_prefix}"
         if not os.path.exists(blastdb_output + ".nhr"):
             if not os.path.exists(reference_genome):

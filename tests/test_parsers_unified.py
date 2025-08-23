@@ -118,12 +118,10 @@ class ParserTestBase:
                 assert output_files[format_name].exists()
 
             # Validate ARTIC output
-            self._validate_artic_output(
-                output_files["artic"], expected_primers)
+            self._validate_artic_output(output_files["artic"], expected_primers)
 
             # Validate FASTA output
-            self._validate_fasta_output(
-                output_files["fasta"], expected_primers)
+            self._validate_fasta_output(output_files["fasta"], expected_primers)
 
             # Validate STS output
             self._validate_sts_output(output_files["sts"], expected_amplicons)
@@ -213,8 +211,7 @@ class TestVarVAMPParser(ParserTestBase):
     @pytest.fixture
     def test_file(self):
         """VarVAMP test file fixture."""
-        return Path(__file__).parent / "test_data" / \
-            "ASFV_long" / "primers.tsv"
+        return Path(__file__).parent / "test_data" / "ASFV_long" / "primers.tsv"
 
     @pytest.fixture
     def reference_file(self):
@@ -246,8 +243,7 @@ class TestVarVAMPParser(ParserTestBase):
         )
 
         # VarVAMP-specific tests
-        assert sum(len(a.primers)
-                   for a in amplicons) == 160  # 80 amplicons × 2 primers
+        assert sum(len(a.primers) for a in amplicons) == 160  # 80 amplicons × 2 primers
 
         # Check first amplicon
         first_amplicon = amplicons[0]
@@ -263,10 +259,8 @@ class TestVarVAMPParser(ParserTestBase):
     def test_varvamp_conversion_workflow(self, test_file):
         """Test VarVAMP complete conversion workflow."""
         self.assert_conversion_consistency(
-            test_file,
-            expected_amplicons=80,
-            expected_primers=160,
-            prefix="ASFV")
+            test_file, expected_amplicons=80, expected_primers=160, prefix="ASFV"
+        )
 
     def test_varvamp_reference_file_detection(self, test_file, reference_file):
         """Test VarVAMP reference file detection."""
@@ -303,8 +297,7 @@ class TestARTICParser(ParserTestBase):
 
         # Count lines in file to determine expected amplicons
         with open(test_file) as f:
-            lines = [
-                line for line in f if line.strip() and not line.startswith("#")]
+            lines = [line for line in f if line.strip() and not line.startswith("#")]
 
         expected_primers = len(lines)
         expected_amplicons = expected_primers // 2  # Assuming pairs
@@ -326,8 +319,7 @@ class TestARTICParser(ParserTestBase):
         """Test ARTIC complete conversion workflow."""
         # Count expected amplicons and primers
         with open(test_file) as f:
-            lines = [
-                line for line in f if line.strip() and not line.startswith("#")]
+            lines = [line for line in f if line.strip() and not line.startswith("#")]
 
         expected_primers = len(lines)
         expected_amplicons = expected_primers // 2
@@ -387,8 +379,7 @@ class TestOlivarParser(ParserTestBase):
         )
 
         # Olivar-specific tests
-        assert sum(len(a.primers)
-                   for a in amplicons) == 10  # 5 amplicons × 2 primers
+        assert sum(len(a.primers) for a in amplicons) == 10  # 5 amplicons × 2 primers
 
         # Check primer naming
         for amplicon in amplicons:
@@ -410,10 +401,8 @@ class TestOlivarParser(ParserTestBase):
             pytest.skip("Olivar test data not available")
 
         self.assert_conversion_consistency(
-            test_file,
-            expected_amplicons=5,
-            expected_primers=10,
-            prefix="COVID19")
+            test_file, expected_amplicons=5, expected_primers=10, prefix="COVID19"
+        )
 
 
 class TestCrossParserCompatibility:
@@ -513,8 +502,7 @@ def run_all_tests():
     if varvamp_file.exists():
         print("✅ Testing VarVAMP parser...")
         parser = VarVAMPParser()
-        amplicons = test_base.assert_parser_consistency(
-            parser, varvamp_file, 80)
+        amplicons = test_base.assert_parser_consistency(parser, varvamp_file, 80)
         test_base.assert_conversion_consistency(varvamp_file, 80, 160, "ASFV")
         print(
             f"   Parsed {len(amplicons)} amplicons with {sum(len(a.primers) for a in amplicons)} primers"
@@ -555,10 +543,7 @@ def run_all_tests():
     print("✅ Testing cross-parser compatibility...")
 
     # Format detection
-    all_files = {
-        "varvamp": varvamp_file,
-        "artic": artic_file,
-        "olivar": olivar_file}
+    all_files = {"varvamp": varvamp_file, "artic": artic_file, "olivar": olivar_file}
 
     for format_name, file_path in all_files.items():
         if file_path.exists():

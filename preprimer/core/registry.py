@@ -34,8 +34,7 @@ class ParserRegistry:
         """Get parser instance for a format."""
         format_name = format_name.lower()
         if format_name not in self._parsers:
-            raise ParserError(
-                f"No parser registered for format: {format_name}")
+            raise ParserError(f"No parser registered for format: {format_name}")
 
         return self._parsers[format_name]()
 
@@ -91,8 +90,7 @@ class WriterRegistry:
         """Get writer instance for a format."""
         format_name = format_name.lower()
         if format_name not in self._writers:
-            raise OutputError(
-                f"No writer registered for format: {format_name}")
+            raise OutputError(f"No writer registered for format: {format_name}")
 
         return self._writers[format_name]()
 

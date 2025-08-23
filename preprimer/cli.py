@@ -47,23 +47,16 @@ Examples:
         """,
     )
 
-    parser.add_argument(
-        "--version",
-        action="version",
-        version="PrePrimer 0.2.0")
+    parser.add_argument("--version", action="version", version="PrePrimer 0.2.0")
     parser.add_argument(
         "--log-level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
         default="INFO",
         help="Set logging level",
     )
-    parser.add_argument(
-        "--config",
-        type=Path,
-        help="Configuration file (JSON)")
+    parser.add_argument("--config", type=Path, help="Configuration file (JSON)")
 
-    subparsers = parser.add_subparsers(
-        dest="command", help="Available commands")
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Convert command
     convert_parser = subparsers.add_parser(
@@ -73,11 +66,8 @@ Examples:
     )
 
     convert_parser.add_argument(
-        "--input",
-        "--primer-info",
-        type=Path,
-        required=True,
-        help="Input primer file")
+        "--input", "--primer-info", type=Path, required=True, help="Input primer file"
+    )
 
     convert_parser.add_argument(
         "--output-dir",
@@ -128,14 +118,10 @@ Examples:
     list_parser.add_argument(
         "--writers", action="store_true", help="List output formats"
     )
-    list_parser.add_argument(
-        "--all",
-        action="store_true",
-        help="List all formats")
+    list_parser.add_argument("--all", action="store_true", help="List all formats")
 
     # Info command
-    info_parser = subparsers.add_parser(
-        "info", help="Show information about a file")
+    info_parser = subparsers.add_parser("info", help="Show information about a file")
     info_parser.add_argument("file", type=Path, help="File to analyze")
 
     return parser
@@ -218,11 +204,7 @@ def cmd_list(args: argparse.Namespace) -> int:
 
     if not (args.parsers or args.writers or args.all):
         # Default: show both
-        return cmd_list(
-            argparse.Namespace(
-                parsers=True,
-                writers=True,
-                all=False))
+        return cmd_list(argparse.Namespace(parsers=True, writers=True, all=False))
 
     return 0
 
@@ -258,8 +240,7 @@ def cmd_info(args: argparse.Namespace) -> int:
                 for i, amplicon in enumerate(amplicons[:5]):  # Show first 5
                     fwd_count = len(amplicon.forward_primers)
                     rev_count = len(amplicon.reverse_primers)
-                    print(
-                        f"  {amplicon.amplicon_id}: {fwd_count}F + {rev_count}R")
+                    print(f"  {amplicon.amplicon_id}: {fwd_count}F + {rev_count}R")
 
                 if len(amplicons) > 5:
                     print(f"  ... and {len(amplicons) - 5} more amplicons")

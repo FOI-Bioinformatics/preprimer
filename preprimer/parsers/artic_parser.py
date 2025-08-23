@@ -119,8 +119,7 @@ class ARTICParser(PrimerParser):
                     elif "RIGHT" in primer_name:
                         direction = "reverse"
                     else:
-                        raise ParserError(
-                            f"Unknown primer side in: {primer_name}")
+                        raise ParserError(f"Unknown primer side in: {primer_name}")
 
                     # Create PrimerData object
                     primer = PrimerData(
@@ -163,8 +162,7 @@ class ARTICParser(PrimerParser):
 
         return amplicon_list
 
-    def get_reference_file(
-            self, file_path: Union[str, Path]) -> Optional[Path]:
+    def get_reference_file(self, file_path: Union[str, Path]) -> Optional[Path]:
         """Get associated reference file."""
         file_path = Path(file_path)
 

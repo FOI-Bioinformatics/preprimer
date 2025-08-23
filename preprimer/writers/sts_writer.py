@@ -61,8 +61,7 @@ class STSWriter(OutputWriter):
 
                     # Create STS name (amplicon identifier)
                     sts_name = f"{amplicon.amplicon_id}"
-                    if hasattr(amplicon,
-                               "reference_id") and amplicon.reference_id:
+                    if hasattr(amplicon, "reference_id") and amplicon.reference_id:
                         sts_name = f"{amplicon.reference_id}_{amplicon.amplicon_id}"
 
                     # Write STS line: NAME FORWARD REVERSE
@@ -77,8 +76,7 @@ class STSWriter(OutputWriter):
                             f"Amplicon {amplicon.amplicon_id} has multiple primers per direction, using first of each"
                         )
 
-            logger.info(
-                f"Successfully wrote {amplicon_count} amplicons to STS format")
+            logger.info(f"Successfully wrote {amplicon_count} amplicons to STS format")
 
             # If reference was provided, log it for user info
             if reference_path:

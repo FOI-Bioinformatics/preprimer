@@ -57,10 +57,8 @@ class TestOlivarParserWithRealData:
         """Test that Olivar CSV file is properly validated."""
         parser = OlivarParser()
 
-        assert olivar_csv_file.exists(
-        ), f"Test file not found: {olivar_csv_file}"
-        assert parser.validate_file(
-            olivar_csv_file), "Olivar CSV file should be valid"
+        assert olivar_csv_file.exists(), f"Test file not found: {olivar_csv_file}"
+        assert parser.validate_file(olivar_csv_file), "Olivar CSV file should be valid"
 
     def test_olivar_csv_parsing(self, olivar_csv_file):
         """Test parsing of Olivar CSV file."""
@@ -68,8 +66,7 @@ class TestOlivarParserWithRealData:
         amplicons = parser.parse(olivar_csv_file, "EPI_ISL_402124")
 
         # Verify basic parsing results
-        assert len(
-            amplicons) == 5, f"Expected 5 amplicons, got {len(amplicons)}"
+        assert len(amplicons) == 5, f"Expected 5 amplicons, got {len(amplicons)}"
 
         # Check first amplicon
         amp1 = amplicons[0]
@@ -210,8 +207,7 @@ class TestOlivarParserWithRealData:
             assert first_amplicon[1] == "cggctgcatgcttagtgc"
             assert first_amplicon[2] == "gacctcctccacggagtct"
 
-    def test_olivar_multi_format_conversion(
-            self, olivar_csv_file, reference_file):
+    def test_olivar_multi_format_conversion(self, olivar_csv_file, reference_file):
         """Test conversion to multiple formats simultaneously."""
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -230,8 +226,7 @@ class TestOlivarParserWithRealData:
             assert "sts" in output_files
 
             for format_name, file_path in output_files.items():
-                assert file_path.exists(
-                ), f"Output file for {format_name} should exist"
+                assert file_path.exists(), f"Output file for {format_name} should exist"
 
 
 def test_olivar_file_detection():
@@ -239,10 +234,8 @@ def test_olivar_file_detection():
     from preprimer.core.registry import parser_registry
 
     olivar_file = (
-        Path(__file__).parent /
-        "test_data" /
-        "olivar_examples" /
-        "olivar-design.csv")
+        Path(__file__).parent / "test_data" / "olivar_examples" / "olivar-design.csv"
+    )
 
     if olivar_file.exists():
         detected_format = parser_registry.detect_format(olivar_file)

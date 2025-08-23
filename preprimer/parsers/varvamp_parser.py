@@ -74,8 +74,7 @@ class VarVAMPParser(PrimerParser):
         file_path = Path(file_path)
 
         if not self.validate_file(file_path):
-            raise ParserError(
-                f"File {file_path} is not a valid VarVAMP format")
+            raise ParserError(f"File {file_path} is not a valid VarVAMP format")
 
         logger.info(f"Parsing VarVAMP file: {file_path}")
 
@@ -161,8 +160,7 @@ class VarVAMPParser(PrimerParser):
 
         return amplicon_list
 
-    def get_reference_file(
-            self, file_path: Union[str, Path]) -> Optional[Path]:
+    def get_reference_file(self, file_path: Union[str, Path]) -> Optional[Path]:
         """Get associated reference file (ambiguous_consensus.fasta)."""
         file_path = Path(file_path)
         ref_file = file_path.parent / "ambiguous_consensus.fasta"

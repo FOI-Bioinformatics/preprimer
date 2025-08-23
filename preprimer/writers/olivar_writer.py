@@ -51,9 +51,7 @@ class OlivarWriter(OutputWriter):
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Get reference chromosome name from kwargs or use default
-        chrom_name = kwargs.get(
-            "chrom_name", kwargs.get(
-                "reference_name", "ref"))
+        chrom_name = kwargs.get("chrom_name", kwargs.get("reference_name", "ref"))
 
         # Prepare amplicon data for Olivar format
         amplicon_rows = []
@@ -73,7 +71,8 @@ class OlivarWriter(OutputWriter):
             reverse_primer = reverse_primers[0]
 
             amplicon_id = (
-                f"{prefix}_{amplicon.amplicon_id}" if prefix else amplicon.amplicon_id)
+                f"{prefix}_{amplicon.amplicon_id}" if prefix else amplicon.amplicon_id
+            )
 
             # Calculate amplicon coordinates
             # Use primer coordinates to determine amplicon span
@@ -213,7 +212,8 @@ class OlivarWriter(OutputWriter):
             reverse_primer = reverse_primers[0]
 
             amplicon_id = (
-                f"{prefix}_{amplicon.amplicon_id}" if prefix else amplicon.amplicon_id)
+                f"{prefix}_{amplicon.amplicon_id}" if prefix else amplicon.amplicon_id
+            )
 
             # Calculate amplicon coordinates
             start_coord = min(forward_primer.start, reverse_primer.start)

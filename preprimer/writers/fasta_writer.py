@@ -69,8 +69,7 @@ class FASTAWriter(OutputWriter):
                         f.write(sequence)
                         total_primers += 1
 
-            logger.info(
-                f"Successfully wrote {total_primers} primers to FASTA format")
+            logger.info(f"Successfully wrote {total_primers} primers to FASTA format")
 
         except Exception as e:
             raise OutputError(f"Failed to write FASTA format: {e}")

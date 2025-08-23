@@ -103,8 +103,7 @@ class OlivarParser(PrimerParser):
                         # Olivar CSV has a unique format where each row
                         # contains both forward and reverse primers
                         amplicon_id = row.get("amplicon_id", "")
-                        reference_id = row.get(
-                            "reference", prefix or "olivar_target")
+                        reference_id = row.get("reference", prefix or "olivar_target")
                         pool = int(row.get("pool", 1))
 
                         # Get primer sequences and positions
@@ -131,9 +130,8 @@ class OlivarParser(PrimerParser):
                             amplicon_id=amplicon_id,
                             reference_id=reference_id,
                             metadata={
-                                "original_data": {
-                                    k: v for k,
-                                    v in row.items() if v}},
+                                "original_data": {k: v for k, v in row.items() if v}
+                            },
                         )
 
                         # Create reverse primer
@@ -148,9 +146,8 @@ class OlivarParser(PrimerParser):
                             amplicon_id=amplicon_id,
                             reference_id=reference_id,
                             metadata={
-                                "original_data": {
-                                    k: v for k,
-                                    v in row.items() if v}},
+                                "original_data": {k: v for k, v in row.items() if v}
+                            },
                         )
 
                         # Group primers by amplicon
@@ -161,12 +158,10 @@ class OlivarParser(PrimerParser):
                                 reference_id=reference_id,
                             )
 
-                        amplicons[amplicon_id].primers.extend(
-                            [fwd_primer, rev_primer])
+                        amplicons[amplicon_id].primers.extend([fwd_primer, rev_primer])
 
                     except (ValueError, KeyError) as e:
-                        logger.warning(
-                            f"Skipping malformed row in Olivar file: {e}")
+                        logger.warning(f"Skipping malformed row in Olivar file: {e}")
                         continue
 
         except Exception as e:
@@ -186,17 +181,12 @@ class OlivarParser(PrimerParser):
 
         return amplicon_list
 
-    def get_reference_file(
-            self, file_path: Union[str, Path]) -> Optional[Path]:
+    def get_reference_file(self, file_path: Union[str, Path]) -> Optional[Path]:
         """Get associated reference file."""
         file_path = Path(file_path)
 
         # Olivar typically generates reference files with _ref suffix
-        base_name = file_path.stem.replace(
-            "-design",
-            "").replace(
-            "olivar-",
-            "")
+        base_name = file_path.stem.replace("-design", "").replace("olivar-", "")
 
         # Try common Olivar reference file patterns
         possible_refs = [
@@ -236,11 +226,7 @@ class OlivarParser(PrimerParser):
 
         return mapping
 
-    def _safe_get(
-            self,
-            row: dict,
-            possible_keys: List[str],
-            default: str = "") -> str:
+    def _safe_get(self, row: dict, possible_keys: List[str], default: str = "") -> str:
         """Safely get value from row using possible key names."""
         for key in possible_keys:
             if key in row and row[key]:

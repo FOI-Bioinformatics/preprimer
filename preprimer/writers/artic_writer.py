@@ -67,8 +67,7 @@ class ARTICWriter(OutputWriter):
                     logger.info(f"Copying reference to: {reference_file}")
                     shutil.copy2(reference_path, reference_file)
                 else:
-                    logger.warning(
-                        f"Reference file not found: {reference_path}")
+                    logger.warning(f"Reference file not found: {reference_path}")
 
             # Write summary info
             total_primers = sum(len(a.primers) for a in amplicons)

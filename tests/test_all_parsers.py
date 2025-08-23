@@ -212,15 +212,20 @@ class TestCrossParserCompatibility:
 
     def test_consistent_conversion_workflow(self, temp_output_dir):
         """Test that conversion workflow is consistent across all parsers."""
-        test_files = [("varvamp", Path(__file__).parent /
-                       "test_data" /
-                       "ASFV_long" /
-                       "primers.tsv", ), ("artic", Path(__file__).parent /
-                                          "test_data" /
-                                          "ASFV.scheme.bed"), ("olivar", Path(__file__).parent /
-                                                               "test_data" /
-                                                               "olivar_examples" /
-                                                               "olivar-design.csv", ), ]
+        test_files = [
+            (
+                "varvamp",
+                Path(__file__).parent / "test_data" / "ASFV_long" / "primers.tsv",
+            ),
+            ("artic", Path(__file__).parent / "test_data" / "ASFV.scheme.bed"),
+            (
+                "olivar",
+                Path(__file__).parent
+                / "test_data"
+                / "olivar_examples"
+                / "olivar-design.csv",
+            ),
+        ]
 
         successful_conversions = 0
 
@@ -258,11 +263,7 @@ class TestCrossParserCompatibility:
             assert parser.validate_file(non_existent) is False
 
     @pytest.mark.integration
-    def test_end_to_end_workflow(
-            self,
-            parser_test_data,
-            temp_output_dir,
-            test_config):
+    def test_end_to_end_workflow(self, parser_test_data, temp_output_dir, test_config):
         """Test complete end-to-end workflow."""
         file_path = parser_test_data["file"]
         parser_test_data["format"]

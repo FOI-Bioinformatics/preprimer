@@ -103,8 +103,7 @@ class PrimerParser(ABC):
     ) -> List[AmpliconData]:
         """Parse primer file and return list of AmpliconData objects."""
 
-    def get_reference_file(
-            self, file_path: Union[str, Path]) -> Optional[Path]:
+    def get_reference_file(self, file_path: Union[str, Path]) -> Optional[Path]:
         """Get associated reference file if it exists."""
         return None
 

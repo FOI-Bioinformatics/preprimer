@@ -24,8 +24,9 @@ def parse_artic(primer_file, prefix):
                 artic_primer_name.split("_")[2]
 
                 # Determine direction and artic_primer_name
-                if artic_primer_name.endswith(
-                        "LEFT_1") or artic_primer_name.endswith("LEFT_0"):
+                if artic_primer_name.endswith("LEFT_1") or artic_primer_name.endswith(
+                    "LEFT_0"
+                ):
                     direction = "forward"
                     amplicon_name = artic_primer_name.split("_LEFT")[0]
                 elif artic_primer_name.endswith(

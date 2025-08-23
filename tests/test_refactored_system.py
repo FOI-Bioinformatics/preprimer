@@ -39,22 +39,8 @@ class TestDataStructures:
 
     def test_amplicon_data_creation(self):
         """Test AmpliconData creation and properties."""
-        primer1 = PrimerData(
-            "p1",
-            "ATCG",
-            100,
-            104,
-            "+",
-            "forward",
-            amplicon_id="amp1")
-        primer2 = PrimerData(
-            "p2",
-            "CGAT",
-            200,
-            204,
-            "-",
-            "reverse",
-            amplicon_id="amp1")
+        primer1 = PrimerData("p1", "ATCG", 100, 104, "+", "forward", amplicon_id="amp1")
+        primer2 = PrimerData("p2", "CGAT", 200, 204, "-", "reverse", amplicon_id="amp1")
 
         amplicon = AmpliconData("amp1", [primer1, primer2])
 
@@ -153,8 +139,7 @@ amplicon_0\t2737\tRW_60\t0\t2719\t2741\tcggaaataatacggtgggcgaga\t23\t52.2\t60.8\
 amplicon_1\t2914\tFW_87\t1\t4171\t4192\ttcctcatgcgaattcactccca\t22\t50.0\t59.8\t50.0\t59.8\t0.9
 amplicon_1\t2914\tRW_135\t1\t7063\t7084\tcgaacagaatgcccacaacaca\t22\t50.0\t60.0\t50.0\t60.0\t0.6"""
 
-        temp_file = tempfile.NamedTemporaryFile(
-            mode="w", suffix=".tsv", delete=False)
+        temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False)
         temp_file.write(content)
         temp_file.close()
 
@@ -203,8 +188,7 @@ class TestConverter:
 amplicon_0\t300\tFW_0\t1\t1\t20\tATCGATCGATCGATCGATCG\t20\t50.0\t60.0\t50.0\t60.0\t1.0
 amplicon_0\t300\tRW_0\t1\t280\t300\tCGATCGATCGATCGATCGAT\t20\t50.0\t60.0\t50.0\t60.0\t1.0"""
 
-        temp_file = tempfile.NamedTemporaryFile(
-            mode="w", suffix=".tsv", delete=False)
+        temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False)
         temp_file.write(content)
         temp_file.close()
 

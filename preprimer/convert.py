@@ -36,8 +36,7 @@ def convert(args):
         print("## PARSING ARTIC ")
         print("#######################################\n")
         # artic_dir = os.path.dirname(args.primer_info)
-        old_file_prefix, ext = os.path.splitext(
-            os.path.basename(args.primer_info))
+        old_file_prefix, ext = os.path.splitext(os.path.basename(args.primer_info))
         amplicon_info = parse_artic(args.primer_info, args.prefix)
         # No new reference is specified. Use the existing artic reference
         if args.reference is None:
@@ -59,8 +58,7 @@ def convert(args):
         )
         print(f"Saving alignments to: {new_reference_alignment_dir}\n")
         # Returns true if a new folder is created
-        if not FileHandler.check_folder_exists(
-                new_reference_alignment_dir, args.force):
+        if not FileHandler.check_folder_exists(new_reference_alignment_dir, args.force):
             exit()
         updated_amplicon_info = (
             AmpliconUpdater.translate_amplicon_info_to_new_reference(
@@ -80,7 +78,8 @@ def convert(args):
             print("## PRINTING ARTIC ")
             print("#######################################\n")
             artic_scheme_filepath = os.path.join(
-                args.output_folder, f"artic/{args.prefix}/V1/{args.prefix}.scheme.bed")
+                args.output_folder, f"artic/{args.prefix}/V1/{args.prefix}.scheme.bed"
+            )
             artic_reference_filepath = os.path.join(
                 args.output_folder,
                 f"artic/{args.prefix}/V1/{args.prefix}.reference.fasta",
@@ -138,10 +137,7 @@ def convert(args):
                 os.path.dirname(sts_filepath), args.force
             ):
                 writers.write_sts_2(
-                    sts_filepath,
-                    amplicon_info,
-                    reference,
-                    args.aligner,
-                    args.force)
+                    sts_filepath, amplicon_info, reference, args.aligner, args.force
+                )
             else:
                 "No sts will be printed"

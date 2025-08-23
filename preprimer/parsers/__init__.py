@@ -19,8 +19,4 @@ def register_all_parsers():
 # Auto-register on import
 register_all_parsers()
 
-__all__ = [
-    "VarVAMPParser",
-    "ARTICParser",
-    "OlivarParser",
-    "register_all_parsers"]
+__all__ = ["VarVAMPParser", "ARTICParser", "OlivarParser", "register_all_parsers"]

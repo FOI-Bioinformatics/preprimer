@@ -89,8 +89,7 @@ class VarVAMPWriter(OutputWriter):
                     "penalty",
                     "pool",
                 ]
-                writer = csv.DictWriter(
-                    f, fieldnames=fieldnames, delimiter="\t")
+                writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
                 writer.writeheader()
                 writer.writerows(primer_rows)
 
