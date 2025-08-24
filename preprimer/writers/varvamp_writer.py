@@ -166,7 +166,10 @@ class VarVAMPWriter(OutputWriter):
             "extension": self.file_extension,
             "description": self.description,
             "use_case": "VarVAMP primer design tool input",
-            "columns": "amplicon_name, primer_name, sequence, start, stop, length, gc_content, tm, penalty, pool",
+            "columns": (
+                "amplicon_name, primer_name, sequence, start, stop, "
+                "length, gc_content, tm, penalty, pool"
+            ),
             "separator": "tab",
             "coordinate_system": "1-based",
         }

@@ -71,7 +71,10 @@ class OlivarWriter(OutputWriter):
             reverse_primer = reverse_primers[0]
 
             amplicon_id = (
-                f"{prefix}_{amplicon.amplicon_id}" if prefix else amplicon.amplicon_id
+                f"{prefix}_{
+                    amplicon.amplicon_id}"
+                if prefix
+                else amplicon.amplicon_id
             )
 
             # Calculate amplicon coordinates
@@ -158,7 +161,10 @@ class OlivarWriter(OutputWriter):
             "extension": self.file_extension,
             "description": self.description,
             "use_case": "Olivar variant-aware primer design tool input",
-            "columns": "amplicon_id, chrom, pool, start, end, fP (forward primer), rP (reverse primer)",
+            "columns": (
+                "amplicon_id, chrom, pool, start, end, "
+                "fP (forward primer), rP (reverse primer)"
+            ),
             "separator": "comma",
             "coordinate_system": "variable (depends on input)",
             "layout": "One amplicon per row (forward/reverse primers in same row)",
@@ -212,7 +218,10 @@ class OlivarWriter(OutputWriter):
             reverse_primer = reverse_primers[0]
 
             amplicon_id = (
-                f"{prefix}_{amplicon.amplicon_id}" if prefix else amplicon.amplicon_id
+                f"{prefix}_{
+                    amplicon.amplicon_id}"
+                if prefix
+                else amplicon.amplicon_id
             )
 
             # Calculate amplicon coordinates

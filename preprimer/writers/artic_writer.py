@@ -28,16 +28,17 @@ class ARTICWriter(OutputWriter):
         self,
         amplicons: List[AmpliconData],
         output_path: Union[str, Path],
-        reference_path: Optional[Union[str, Path]] = None,
+        prefix: str = "",
         **kwargs,
-    ) -> None:
+    ) -> Optional[Path]:
         """Write amplicon data in ARTIC format."""
 
         output_path = self.validate_output_path(output_path)
 
         # ARTIC format requires a specific directory structure
         # output_path should be like: schemes/artic/PREFIX/V1/PREFIX.scheme.bed
-        prefix = kwargs.get("prefix", "primers")
+        prefix = prefix or kwargs.get("prefix", "primers")
+        reference_path = kwargs.get("reference_path")
 
         # Create ARTIC directory structure
         artic_dir = output_path.parent
@@ -57,7 +58,13 @@ class ARTICWriter(OutputWriter):
                         # Use ARTIC naming convention
                         artic_name = primer.artic_name
 
-                        bed_line = f"{primer.reference_id}\t{primer.start}\t{primer.stop}\t{artic_name}\t{primer.pool or 1}\t{primer.strand}\t{primer.sequence}\n"
+                        bed_line = f"{
+                            primer.reference_id}\t{
+                            primer.start}\t{
+                            primer.stop}\t{artic_name}\t{
+                            primer.pool or 1}\t{
+                            primer.strand}\t{
+                            primer.sequence}\n"
                         f.write(bed_line)
 
             # Copy reference file if provided
@@ -72,8 +79,11 @@ class ARTICWriter(OutputWriter):
             # Write summary info
             total_primers = sum(len(a.primers) for a in amplicons)
             logger.info(
-                f"Successfully wrote ARTIC scheme with {len(amplicons)} amplicons and {total_primers} primers"
+                f"Successfully wrote ARTIC scheme with {len(amplicons)} "
+                f"amplicons and {total_primers} primers"
             )
+
+            return scheme_file
 
         except Exception as e:
             raise OutputError(f"Failed to write ARTIC format: {e}")

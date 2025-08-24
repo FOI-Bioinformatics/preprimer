@@ -27,12 +27,13 @@ class STSWriter(OutputWriter):
         self,
         amplicons: List[AmpliconData],
         output_path: Union[str, Path],
-        reference_path: Optional[Union[str, Path]] = None,
+        prefix: str = "",
         **kwargs,
-    ) -> None:
+    ) -> Optional[Path]:
         """Write amplicon data in STS format for me-pcr."""
 
         output_path = self.validate_output_path(output_path)
+        reference_path = kwargs.get("reference_path")
 
         logger.info(f"Writing STS format to: {output_path}")
 
@@ -50,7 +51,8 @@ class STSWriter(OutputWriter):
 
                     if not forward_primers or not reverse_primers:
                         logger.warning(
-                            f"Skipping amplicon {amplicon.amplicon_id}: missing forward or reverse primer"
+                            f"Skipping amplicon {amplicon.amplicon_id}: "
+                            "missing forward or reverse primer"
                         )
                         continue
 
@@ -65,7 +67,10 @@ class STSWriter(OutputWriter):
                         sts_name = f"{amplicon.reference_id}_{amplicon.amplicon_id}"
 
                     # Write STS line: NAME FORWARD REVERSE
-                    sts_line = f"{sts_name}\t{forward_primer.sequence}\t{reverse_primer.sequence}\n"
+                    sts_line = (
+                        f"{sts_name}\t{forward_primer.sequence}\t"
+                        f"{reverse_primer.sequence}\n"
+                    )
                     f.write(sts_line)
 
                     amplicon_count += 1
@@ -73,7 +78,8 @@ class STSWriter(OutputWriter):
                     # If there are multiple primers per direction, log warning
                     if len(forward_primers) > 1 or len(reverse_primers) > 1:
                         logger.info(
-                            f"Amplicon {amplicon.amplicon_id} has multiple primers per direction, using first of each"
+                            f"Amplicon {amplicon.amplicon_id} has multiple primers "
+                            "per direction, using first of each"
                         )
 
             logger.info(f"Successfully wrote {amplicon_count} amplicons to STS format")
@@ -81,11 +87,14 @@ class STSWriter(OutputWriter):
             # If reference was provided, log it for user info
             if reference_path:
                 logger.info(
-                    f"STS file ready for use with me-pcr against reference: {reference_path}"
+                    f"STS file ready for use with me-pcr against reference: "
+                    f"{reference_path}"
                 )
                 logger.info(
                     f"Example command: me-pcr -f {reference_path} -s {output_path}"
                 )
+
+            return output_path
 
         except Exception as e:
             raise OutputError(f"Failed to write STS format: {e}")

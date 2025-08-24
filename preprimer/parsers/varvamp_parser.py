@@ -98,13 +98,6 @@ class VarVAMPParser(PrimerParser):
                 for row in reader:
                     amplicon_name = row["amplicon_name"]
 
-                    # Extract amplicon number for naming
-                    amplicon_num = (
-                        amplicon_name.split("_")[-1]
-                        if "_" in amplicon_name
-                        else amplicon_name
-                    )
-
                     # Determine primer direction and naming
                     primer_name = row["primer_name"]
                     if primer_name.startswith("FW"):
@@ -155,7 +148,8 @@ class VarVAMPParser(PrimerParser):
 
         amplicon_list = list(amplicons.values())
         logger.info(
-            f"Parsed {len(amplicon_list)} amplicons with {sum(len(a.primers) for a in amplicon_list)} primers"
+            f"Parsed {len(amplicon_list)} amplicons with "
+            f"{sum(len(a.primers) for a in amplicon_list)} primers"
         )
 
         return amplicon_list

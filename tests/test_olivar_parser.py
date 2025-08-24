@@ -66,7 +66,10 @@ class TestOlivarParserWithRealData:
         amplicons = parser.parse(olivar_csv_file, "EPI_ISL_402124")
 
         # Verify basic parsing results
-        assert len(amplicons) == 5, f"Expected 5 amplicons, got {len(amplicons)}"
+        assert (
+            len(amplicons) == 5
+        ), f"Expected 5 amplicons, got {
+            len(amplicons)}"
 
         # Check first amplicon
         amp1 = amplicons[0]
@@ -99,7 +102,7 @@ class TestOlivarParserWithRealData:
             for primer in amplicon.primers:
                 assert (
                     primer.pool == expected_pools[i]
-                ), f"Amplicon {i+1} should be in pool {expected_pools[i]}"
+                ), f"Amplicon {i + 1} should be in pool {expected_pools[i]}"
 
     def test_olivar_primer_naming(self, olivar_csv_file):
         """Test primer naming conventions."""

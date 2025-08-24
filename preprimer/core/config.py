@@ -90,7 +90,8 @@ class PrePrimerConfig:
         valid_aligners = ["blast", "exonerate"]
         if self.aligner not in valid_aligners:
             issues.append(
-                f"Invalid aligner '{self.aligner}'. Must be one of: {valid_aligners}"
+                f"Invalid aligner '{
+                    self.aligner}'. Must be one of: {valid_aligners}"
             )
 
         # Validate primer length constraints
@@ -105,7 +106,8 @@ class PrePrimerConfig:
         valid_schemes = ["artic", "custom"]
         if self.primer_naming_scheme not in valid_schemes:
             issues.append(
-                f"Invalid naming scheme '{self.primer_naming_scheme}'. Must be one of: {valid_schemes}"
+                f"Invalid naming scheme '{
+                    self.primer_naming_scheme}'. Must be one of: {valid_schemes}"
             )
 
         return issues

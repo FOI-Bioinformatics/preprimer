@@ -205,7 +205,7 @@ class TestCrossParserCompatibility:
             assert parser in registered_parsers
 
         # Check writers
-        expected_writers = ["artic", "fasta", "sts"]
+        expected_writers = ["artic", "fasta", "sts", "varvamp", "olivar"]
         registered_writers = writer_registry.list_formats()
         for writer in expected_writers:
             assert writer in registered_writers

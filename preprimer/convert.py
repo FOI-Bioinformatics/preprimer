@@ -18,7 +18,8 @@ def convert(args):
         print("## PARSING VARVAMP ")
         print("#######################################\n")
         print(
-            f"Reading varvamp primer information from {args.primer_info} into a dictionary\n"
+            f"Reading varvamp primer information from {
+                args.primer_info} into a dictionary\n"
         )
         if args.reference is None:
             reference = (

@@ -27,9 +27,9 @@ class FASTAWriter(OutputWriter):
         self,
         amplicons: List[AmpliconData],
         output_path: Union[str, Path],
-        reference_path: Optional[Union[str, Path]] = None,
+        prefix: str = "",
         **kwargs,
-    ) -> None:
+    ) -> Optional[Path]:
         """Write amplicon data in FASTA format."""
 
         output_path = self.validate_output_path(output_path)
@@ -70,6 +70,8 @@ class FASTAWriter(OutputWriter):
                         total_primers += 1
 
             logger.info(f"Successfully wrote {total_primers} primers to FASTA format")
+
+            return output_path
 
         except Exception as e:
             raise OutputError(f"Failed to write FASTA format: {e}")

@@ -92,10 +92,11 @@ class PrimerConverter:
                     output_format,
                     output_dir,
                     prefix,
-                    reference_file,
+                    Path(reference_file) if reference_file else None,
                     **kwargs,
                 )
-                output_files[output_format] = output_file
+                if output_file:
+                    output_files[output_format] = output_file
                 logger.info(
                     f"Successfully created {output_format} format: {output_file}"
                 )
@@ -115,7 +116,7 @@ class PrimerConverter:
         prefix: str,
         reference_file: Optional[Path],
         **kwargs,
-    ) -> Path:
+    ) -> Optional[Path]:
         """Write amplicons in specified output format."""
 
         writer = writer_registry.get_writer(output_format)
@@ -136,15 +137,15 @@ class PrimerConverter:
                 )
 
         # Write the format
-        writer.write(
+        result_path = writer.write(
             amplicons=amplicons,
             output_path=output_path,
-            reference_path=reference_file,
             prefix=prefix,
+            reference_path=reference_file,
             **kwargs,
         )
 
-        return output_path
+        return result_path or output_path
 
     def _validate_amplicons(self, amplicons: List[AmpliconData]) -> None:
         """Validate parsed amplicon data."""
@@ -155,7 +156,10 @@ class PrimerConverter:
 
         for amplicon in amplicons:
             if not amplicon.primers:
-                issues.append(f"Amplicon {amplicon.amplicon_id} has no primers")
+                issues.append(
+                    f"Amplicon {
+                        amplicon.amplicon_id} has no primers"
+                )
                 continue
 
             # Check for forward and reverse primers
@@ -163,15 +167,24 @@ class PrimerConverter:
             reverse_count = len(amplicon.reverse_primers)
 
             if forward_count == 0:
-                issues.append(f"Amplicon {amplicon.amplicon_id} has no forward primers")
+                issues.append(
+                    f"Amplicon {
+                        amplicon.amplicon_id} has no forward primers"
+                )
             if reverse_count == 0:
-                issues.append(f"Amplicon {amplicon.amplicon_id} has no reverse primers")
+                issues.append(
+                    f"Amplicon {
+                        amplicon.amplicon_id} has no reverse primers"
+                )
 
             # Validate primer sequences if enabled
             if self.config.validate_sequences:
                 for primer in amplicon.primers:
                     if not primer.sequence:
-                        issues.append(f"Primer {primer.name} has empty sequence")
+                        issues.append(
+                            f"Primer {
+                                primer.name} has empty sequence"
+                        )
                         continue
 
                     # Check sequence length
@@ -189,7 +202,8 @@ class PrimerConverter:
                     invalid_chars = set(primer.sequence) - valid_chars
                     if invalid_chars:
                         issues.append(
-                            f"Primer {primer.name} contains invalid characters: {invalid_chars}"
+                            f"Primer {
+                                primer.name} contains invalid characters: {invalid_chars}"
                         )
 
         if issues:

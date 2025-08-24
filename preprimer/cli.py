@@ -240,7 +240,10 @@ def cmd_info(args: argparse.Namespace) -> int:
                 for i, amplicon in enumerate(amplicons[:5]):  # Show first 5
                     fwd_count = len(amplicon.forward_primers)
                     rev_count = len(amplicon.reverse_primers)
-                    print(f"  {amplicon.amplicon_id}: {fwd_count}F + {rev_count}R")
+                    print(
+                        f"  {
+                            amplicon.amplicon_id}: {fwd_count}F + {rev_count}R"
+                    )
 
                 if len(amplicons) > 5:
                     print(f"  ... and {len(amplicons) - 5} more amplicons")

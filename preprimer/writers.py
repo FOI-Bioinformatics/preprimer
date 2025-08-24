@@ -63,7 +63,8 @@ def write_sts_2(file_path, amplicon_info, reference, aligner, force):
                         )
                         print(f"WARNING! Ambigous bases do not work in me-pcr.")
                         print(
-                            f"WARNING! Consider changing the primer of amplicon: {amplicon_name}, primer: {primer_name}, sequence: {seq} to atgc characters {Aligner.contains_non_atgc(seq)}"
+                            f"WARNING! Consider changing the primer of amplicon: {amplicon_name}, primer: {primer_name}, sequence: {seq} to atgc characters {
+                                Aligner.contains_non_atgc(seq)}"
                         )
                         print(f"WARNING! before using the sts")
                         print(f"WARNING! Alignment in {aln_path}.")
@@ -100,5 +101,12 @@ def write_artic(file_path, amplicon_dict):
         for amplicon_name in amplicon_dict:
             for primer in amplicon_dict[amplicon_name]:
                 output_file.write(
-                    f"{primer['reference_id']}\t{primer['start']}\t{primer['stop']}\t{primer['artic_primer_name']}\t{primer['pool']}\t{primer['strand']}\t{primer['seq']}\n"
+                    f"{
+                        primer['reference_id']}\t{
+                        primer['start']}\t{
+                        primer['stop']}\t{
+                        primer['artic_primer_name']}\t{
+                        primer['pool']}\t{
+                            primer['strand']}\t{
+                                primer['seq']}\n"
                 )

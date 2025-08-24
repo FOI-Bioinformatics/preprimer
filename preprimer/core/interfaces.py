@@ -126,9 +126,9 @@ class OutputWriter(ABC):
         self,
         amplicons: List[AmpliconData],
         output_path: Union[str, Path],
-        reference_path: Optional[Union[str, Path]] = None,
+        prefix: str = "",
         **kwargs,
-    ) -> None:
+    ) -> Optional[Path]:
         """Write amplicon data to the specified output format."""
 
     def validate_output_path(self, output_path: Union[str, Path]) -> Path:

@@ -19,6 +19,8 @@ from preprimer.core.registry import parser_registry, writer_registry
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 # Import and register all components
+import preprimer.parsers  # noqa: E402
+import preprimer.writers  # noqa: E402
 
 
 @pytest.fixture(scope="session")
@@ -86,7 +88,7 @@ def verify_test_environment():
         assert parser in registered_parsers, f"Parser '{parser}' not registered"
 
     # Check that writers are registered
-    expected_writers = ["artic", "fasta", "sts"]
+    expected_writers = ["artic", "fasta", "sts", "varvamp", "olivar"]
     registered_writers = writer_registry.list_formats()
 
     for writer in expected_writers:
@@ -125,7 +127,11 @@ def parser_test_data(request, test_data_dir):
 
     # Skip if test file doesn't exist
     if not data["file"].exists():
-        pytest.skip(f"Test file not available for {request.param}: {data['file']}")
+        pytest.skip(
+            f"Test file not available for {
+                request.param}: {
+                data['file']}"
+        )
 
     # Calculate actual values for ARTIC
     if request.param == "artic":
