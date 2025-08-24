@@ -1,4 +1,5 @@
 import os
+import sys
 
 from preprimer.utils import Aligner
 
@@ -59,19 +60,23 @@ def write_sts_2(file_path, amplicon_info, reference, aligner, force):
                         for line in file:
                             print(line, end="")
                         print(
-                            f"WARNING! You are creating an sts with a primer with non ATCG characters"
+                            "WARNING! You are creating an sts with a primer "
+                            "with non ATCG characters"
                         )
-                        print(f"WARNING! Ambigous bases do not work in me-pcr.")
+                        print("WARNING! Ambigous bases do not work in me-pcr.")
                         print(
-                            f"WARNING! Consider changing the primer of amplicon: {amplicon_name}, primer: {primer_name}, sequence: {seq} to atgc characters {
-                                Aligner.contains_non_atgc(seq)}"
+                            f"WARNING! Consider changing the primer of amplicon: "
+                            f"{amplicon_name}, primer: {primer_name}, "
+                            f"sequence: {seq} to atgc characters "
+                            f"{Aligner.contains_non_atgc(seq)}"
                         )
-                        print(f"WARNING! before using the sts")
+                        print("WARNING! before using the sts")
                         print(f"WARNING! Alignment in {aln_path}.")
                         if not force:
                             response = (
                                 input(
-                                    f"Do you want to continue with ambigous bases in the primers? (y/n): "
+                                    "Do you want to continue with ambigous bases "
+                                    "in the primers? (y/n): "
                                 )
                                 .strip()
                                 .lower()

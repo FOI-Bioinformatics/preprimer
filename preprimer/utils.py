@@ -18,7 +18,8 @@ class FileHandler:
         if not force:
             response = (
                 input(
-                    f"Do you want to remove the existing folder and create a new '{directory}'? (y/n): "
+                    f"Do you want to remove the existing folder and create "
+                    f"a new '{directory}'? (y/n): "
                 )
                 .strip()
                 .lower()
@@ -112,12 +113,13 @@ class AmpliconUpdater:
                 # If parsing exonerate output fails i.e. no alignments found
                 if not parsed_alignment:
                     print(
-                        f"\nNo alignment found for primer {primer_name} in amplicon {amplicon_name} to {reference_fasta}."
+                        f"\nNo alignment found for primer {primer_name} "
+                        f"in amplicon {amplicon_name} to {reference_fasta}."
                     )
                     if not force:
-                        user_input = input(f"Do you want to continue anyway?  (y/n): ")
+                        user_input = input("Do you want to continue anyway?  (y/n): ")
                         if user_input.lower() == "n":
-                            print(f"Program will exit. Try a different reference")
+                            print("Program will exit. Try a different reference")
                             exit()
                     else:
                         print("Option --force excludes by default.")

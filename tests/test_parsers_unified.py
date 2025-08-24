@@ -505,7 +505,8 @@ def run_all_tests():
         amplicons = test_base.assert_parser_consistency(parser, varvamp_file, 80)
         test_base.assert_conversion_consistency(varvamp_file, 80, 160, "ASFV")
         print(
-            f"   Parsed {len(amplicons)} amplicons with {sum(len(a.primers) for a in amplicons)} primers"
+            f"   Parsed {len(amplicons)} amplicons with "
+            f"{sum(len(a.primers) for a in amplicons)} primers"
         )
 
     # ARTIC tests
@@ -525,7 +526,8 @@ def run_all_tests():
             artic_file, expected_amplicons, expected_primers, "ASFV"
         )
         print(
-            f"   Parsed {len(amplicons)} amplicons with {sum(len(a.primers) for a in amplicons)} primers"
+            f"   Parsed {len(amplicons)} amplicons with "
+            f"{sum(len(a.primers) for a in amplicons)} primers"
         )
 
     # Olivar tests
@@ -536,7 +538,8 @@ def run_all_tests():
         amplicons = test_base.assert_parser_consistency(parser, olivar_file, 5)
         test_base.assert_conversion_consistency(olivar_file, 5, 10, "COVID19")
         print(
-            f"   Parsed {len(amplicons)} amplicons with {sum(len(a.primers) for a in amplicons)} primers"
+            f"   Parsed {len(amplicons)} amplicons with "
+            f"{sum(len(a.primers) for a in amplicons)} primers"
         )
 
     # Cross-compatibility tests

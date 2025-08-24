@@ -66,10 +66,7 @@ class TestOlivarParserWithRealData:
         amplicons = parser.parse(olivar_csv_file, "EPI_ISL_402124")
 
         # Verify basic parsing results
-        assert (
-            len(amplicons) == 5
-        ), f"Expected 5 amplicons, got {
-            len(amplicons)}"
+        assert len(amplicons) == 5, f"Expected 5 amplicons, got {len(amplicons)}"
 
         # Check first amplicon
         amp1 = amplicons[0]
@@ -269,7 +266,8 @@ if __name__ == "__main__":
     # Test parsing
     amplicons = parser.parse(olivar_file, "EPI_ISL_402124")
     print(
-        f"✅ Parsed {len(amplicons)} amplicons with {sum(len(a.primers) for a in amplicons)} primers"
+        f"✅ Parsed {len(amplicons)} amplicons with "
+        f"{sum(len(a.primers) for a in amplicons)} primers"
     )
 
     # Test conversion

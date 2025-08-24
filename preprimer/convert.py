@@ -18,8 +18,8 @@ def convert(args):
         print("## PARSING VARVAMP ")
         print("#######################################\n")
         print(
-            f"Reading varvamp primer information from {
-                args.primer_info} into a dictionary\n"
+            f"Reading varvamp primer information from {args.primer_info} "
+            "into a dictionary\n"
         )
         if args.reference is None:
             reference = (
@@ -52,7 +52,8 @@ def convert(args):
         print("## UPDATING PRIMERS TO NEW REFERENCE ##")
         print("#######################################\n")
         print(
-            "A new reference is given. An aligner will be used to find new primer positions.\n"
+            "A new reference is given. An aligner will be used to find "
+            "new primer positions.\n"
         )
         new_reference_alignment_dir = os.path.join(
             args.output_folder, "alignment/new_reference"
@@ -87,12 +88,14 @@ def convert(args):
             )
             artic_folder = os.path.dirname(artic_scheme_filepath)
             print(
-                f'Reference and primer bedfile for use with "artic minion" is prepared in the specified folder'
+                'Reference and primer bedfile for use with "artic minion" '
+                'is prepared in the specified folder'
             )
             print(f"reference: {artic_scheme_filepath}")
             print(f"scheme bed: {artic_reference_filepath}\n")
             print(
-                "Primers will be named {prefix}_{amplicon_nr}_RIGHT_0 and {prefix}_{amplicon_nr}_LEFT_0\n"
+                "Primers will be named {prefix}_{amplicon_nr}_RIGHT_0 and "
+                "{prefix}_{amplicon_nr}_LEFT_0\n"
             )
             if FileHandler.check_folder_exists(artic_folder, args.force):
                 writers.write_artic(artic_scheme_filepath, amplicon_info)
@@ -107,11 +110,13 @@ def convert(args):
                 args.output_folder, f"fasta/{args.prefix}.fasta"
             )
             print(
-                f"Fasta file with all primers are printed in the specified output folder:"
+                "Fasta file with all primers are printed in the specified "
+                "output folder:"
             )
             print(f"fasta: {primer_fasta_filepath}\n")
             print(
-                "Primers will be named {prefix}_{amplicon_nr}_RIGHT_0 and {prefix}_{amplicon_nr}_LEFT_0\n"
+                "Primers will be named {prefix}_{amplicon_nr}_RIGHT_0 and "
+                "{prefix}_{amplicon_nr}_LEFT_0\n"
             )
 
             if FileHandler.check_folder_exists(
@@ -128,11 +133,13 @@ def convert(args):
                 args.output_folder, f"sts/{args.prefix}.sts.tsv"
             )
             print(
-                f"sts-file used in me-pcr will be saved in the specified output folder:"
+                "sts-file used in me-pcr will be saved in the specified "
+                "output folder:"
             )
             print(f"sts: {sts_filepath}")
             print(
-                "Primers will be named {prefix}_{amplicon_nr}_RIGHT_0 and {prefix}_{amplicon_nr}_LEFT_0\n"
+                "Primers will be named {prefix}_{amplicon_nr}_RIGHT_0 and "
+                "{prefix}_{amplicon_nr}_LEFT_0\n"
             )
             if FileHandler.check_folder_exists(
                 os.path.dirname(sts_filepath), args.force

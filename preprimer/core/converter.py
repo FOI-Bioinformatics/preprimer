@@ -58,7 +58,8 @@ class PrimerConverter:
             if input_format is None:
                 available_formats = parser_registry.list_formats()
                 raise ParserError(
-                    f"Could not detect input format. Available formats: {available_formats}"
+                    f"Could not detect input format. Available formats: "
+                    f"{available_formats}"
                 )
 
         logger.info(f"Detected input format: {input_format}")
@@ -156,10 +157,7 @@ class PrimerConverter:
 
         for amplicon in amplicons:
             if not amplicon.primers:
-                issues.append(
-                    f"Amplicon {
-                        amplicon.amplicon_id} has no primers"
-                )
+                issues.append(f"Amplicon {amplicon.amplicon_id} has no primers")
                 continue
 
             # Check for forward and reverse primers
@@ -190,20 +188,24 @@ class PrimerConverter:
                     # Check sequence length
                     if len(primer.sequence) < self.config.min_primer_length:
                         issues.append(
-                            f"Primer {primer.name} is too short ({len(primer.sequence)} bp)"
+                            f"Primer {primer.name} is too short "
+                            f"({len(primer.sequence)} bp)"
                         )
                     if len(primer.sequence) > self.config.max_primer_length:
                         issues.append(
-                            f"Primer {primer.name} is too long ({len(primer.sequence)} bp)"
+                            f"Primer {primer.name} is too long "
+                            f"({len(primer.sequence)} bp)"
                         )
 
                     # Check for valid nucleotides (allow IUPAC codes)
-                    valid_chars = set("ATCGRYSWKMBDHVNatcgryswkmbdhvn")
+                    valid_chars = set(
+                        "ATCGRYSWKMBDHVNatcgryswkmbdhvn"
+                    )
                     invalid_chars = set(primer.sequence) - valid_chars
                     if invalid_chars:
                         issues.append(
-                            f"Primer {
-                                primer.name} contains invalid characters: {invalid_chars}"
+                            f"Primer {primer.name} contains invalid "
+                            f"characters: {invalid_chars}"
                         )
 
         if issues:

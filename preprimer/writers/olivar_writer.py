@@ -71,10 +71,7 @@ class OlivarWriter(OutputWriter):
             reverse_primer = reverse_primers[0]
 
             amplicon_id = (
-                f"{prefix}_{
-                    amplicon.amplicon_id}"
-                if prefix
-                else amplicon.amplicon_id
+                f"{prefix}_{amplicon.amplicon_id}" if prefix else amplicon.amplicon_id
             )
 
             # Calculate amplicon coordinates
@@ -218,10 +215,7 @@ class OlivarWriter(OutputWriter):
             reverse_primer = reverse_primers[0]
 
             amplicon_id = (
-                f"{prefix}_{
-                    amplicon.amplicon_id}"
-                if prefix
-                else amplicon.amplicon_id
+                f"{prefix}_{amplicon.amplicon_id}" if prefix else amplicon.amplicon_id
             )
 
             # Calculate amplicon coordinates

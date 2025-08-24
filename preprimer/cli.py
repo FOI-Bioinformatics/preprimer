@@ -62,7 +62,10 @@ Examples:
     convert_parser = subparsers.add_parser(
         "convert",
         help="Convert primer schemes between formats",
-        description="Convert primer schemes between different formats (VarVAMP, ARTIC, Olivar)",
+        description=(
+            "Convert primer schemes between different formats "
+            "(VarVAMP, ARTIC, Olivar)"
+        ),
     )
 
     convert_parser.add_argument(
@@ -155,7 +158,8 @@ def cmd_convert(args: argparse.Namespace, config: PrePrimerConfig) -> int:
             amplicons = parser.parse(args.input, args.prefix)
             converter._validate_amplicons(amplicons)
             logger.info(
-                f"✅ Validation successful: {len(amplicons)} amplicons, {sum(len(a.primers) for a in amplicons)} primers"
+                f"✅ Validation successful: {len(amplicons)} amplicons, "
+                f"{sum(len(a.primers) for a in amplicons)} primers"
             )
             return 0
 
@@ -236,14 +240,11 @@ def cmd_info(args: argparse.Namespace) -> int:
 
             # Show amplicon summary
             if amplicons:
-                print(f"\n📊 Amplicon details:")
+                print("\n📊 Amplicon details:")
                 for i, amplicon in enumerate(amplicons[:5]):  # Show first 5
                     fwd_count = len(amplicon.forward_primers)
                     rev_count = len(amplicon.reverse_primers)
-                    print(
-                        f"  {
-                            amplicon.amplicon_id}: {fwd_count}F + {rev_count}R"
-                    )
+                    print(f"  {amplicon.amplicon_id}: {fwd_count}F + {rev_count}R")
 
                 if len(amplicons) > 5:
                     print(f"  ... and {len(amplicons) - 5} more amplicons")

@@ -133,11 +133,18 @@ class TestVarVAMPParser:
 
     def create_test_varvamp_file(self):
         """Create a test VarVAMP file."""
-        content = """amplicon_name\tamplicon_length\tprimer_name\tpool\tstart\tstop\tseq\tsize\tgc_best\ttemp_best\tmean_gc\tmean_temp\tscore
-amplicon_0\t2737\tFW_0\t0\t5\t26\tactgctgtaggcgtcaaagatt\t22\t45.5\t58.3\t45.5\t58.3\t4.7
-amplicon_0\t2737\tRW_60\t0\t2719\t2741\tcggaaataatacggtgggcgaga\t23\t52.2\t60.8\t52.2\t60.8\t3.0
-amplicon_1\t2914\tFW_87\t1\t4171\t4192\ttcctcatgcgaattcactccca\t22\t50.0\t59.8\t50.0\t59.8\t0.9
-amplicon_1\t2914\tRW_135\t1\t7063\t7084\tcgaacagaatgcccacaacaca\t22\t50.0\t60.0\t50.0\t60.0\t0.6"""
+        content = (
+            "amplicon_name\tamplicon_length\tprimer_name\tpool\tstart\tstop\t"
+            "seq\tsize\tgc_best\ttemp_best\tmean_gc\tmean_temp\tscore\n"
+            "amplicon_0\t2737\tFW_0\t0\t5\t26\tactgctgtaggcgtcaaagatt\t22\t"
+            "45.5\t58.3\t45.5\t58.3\t4.7\n"
+            "amplicon_0\t2737\tRW_60\t0\t2719\t2741\tcggaaataatacggtgggcgaga\t23\t"
+            "52.2\t60.8\t52.2\t60.8\t3.0\n"
+            "amplicon_1\t2914\tFW_87\t1\t4171\t4192\ttcctcatgcgaattcactccca\t22\t"
+            "50.0\t59.8\t50.0\t59.8\t0.9\n"
+            "amplicon_1\t2914\tRW_135\t1\t7063\t7084\tcgaacagaatgcccacaacaca\t22\t"
+            "50.0\t60.0\t50.0\t60.0\t0.6"
+        )
 
         temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False)
         temp_file.write(content)
@@ -184,9 +191,14 @@ class TestConverter:
 
     def create_simple_varvamp_file(self):
         """Create a simple VarVAMP file for testing."""
-        content = """amplicon_name\tamplicon_length\tprimer_name\tpool\tstart\tstop\tseq\tsize\tgc_best\ttemp_best\tmean_gc\tmean_temp\tscore
-amplicon_0\t300\tFW_0\t1\t1\t20\tATCGATCGATCGATCGATCG\t20\t50.0\t60.0\t50.0\t60.0\t1.0
-amplicon_0\t300\tRW_0\t1\t280\t300\tCGATCGATCGATCGATCGAT\t20\t50.0\t60.0\t50.0\t60.0\t1.0"""
+        content = (
+            "amplicon_name\tamplicon_length\tprimer_name\tpool\tstart\tstop\t"
+            "seq\tsize\tgc_best\ttemp_best\tmean_gc\tmean_temp\tscore\n"
+            "amplicon_0\t300\tFW_0\t1\t1\t20\tATCGATCGATCGATCGATCG\t20\t"
+            "50.0\t60.0\t50.0\t60.0\t1.0\n"
+            "amplicon_0\t300\tRW_0\t1\t280\t300\tCGATCGATCGATCGATCGAT\t20\t"
+            "50.0\t60.0\t50.0\t60.0\t1.0"
+        )
 
         temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False)
         temp_file.write(content)

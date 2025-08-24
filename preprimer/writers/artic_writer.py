@@ -58,13 +58,12 @@ class ARTICWriter(OutputWriter):
                         # Use ARTIC naming convention
                         artic_name = primer.artic_name
 
-                        bed_line = f"{
-                            primer.reference_id}\t{
-                            primer.start}\t{
-                            primer.stop}\t{artic_name}\t{
-                            primer.pool or 1}\t{
-                            primer.strand}\t{
-                            primer.sequence}\n"
+                        bed_line = (
+                            f"{primer.reference_id}\t{primer.start}\t"
+                            f"{primer.stop}\t{artic_name}\t"
+                            f"{primer.pool or 1}\t{primer.strand}\t"
+                            f"{primer.sequence}\n"
+                        )
                         f.write(bed_line)
 
             # Copy reference file if provided

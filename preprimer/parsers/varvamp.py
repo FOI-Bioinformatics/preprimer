@@ -2,13 +2,20 @@
 def parse_varvamp(primer_file, prefix):
     # primers.tsv
 
-    # amlicon_name	amplicon_length	primer_name	pool	start	stop	seq	size	gc_best	temp_best	mean_gc	mean_temp	score
-    # amplicon_0	2737	FW_0	0	5	26	actgctgtaggcgtcaaagatt	22	45.5	58.3	45.5	58.3	4.7
-    # amplicon_0	2737	RW_60	0	2719	2741	cggaaataatacggtgggcgaga	23	52.2	60.8	52.2	60.8	3.0
-    # amplicon_1	2914	FW_87	0	4171	4192	tcctcatgcgaattcactccca	22	50.0	59.8	50.0	59.8	0.9
-    # amplicon_1	2914	RW_135	0	7063	7084	cgaacagaatgcccacaacaca	22	50.0	60.0	50.0	60.0	0.6
-    # amplicon_2	2571	FW_191	0	8692	8712	aattggtaggggcggtygtga	21	52.4	60.0	54.8	60.9	0.7
-    # amplicon_2	2571	RW_292	0	11241	11262	tggactgcgcaaatccaacatc	22	50.0	60.1	50.0	60.1	0.7
+    # amlicon_name	amplicon_length	primer_name	pool	start	stop	seq	size
+    # gc_best	temp_best	mean_gc	mean_temp	score
+    # amplicon_0	2737	FW_0	0	5	26	actgctgtaggcgtcaaagatt	22
+    # 45.5	58.3	45.5	58.3	4.7
+    # amplicon_0	2737	RW_60	0	2719	2741	cggaaataatacggtgggcgaga	23
+    # 52.2	60.8	52.2	60.8	3.0
+    # amplicon_1	2914	FW_87	0	4171	4192	tcctcatgcgaattcactccca	22
+    # 50.0	59.8	50.0	59.8	0.9
+    # amplicon_1	2914	RW_135	0	7063	7084	cgaacagaatgcccacaacaca	22
+    # 50.0	60.0	50.0	60.0	0.6
+    # amplicon_2	2571	FW_191	0	8692	8712	aattggtaggggcggtygtga	21
+    # 52.4	60.0	54.8	60.9	0.7
+    # amplicon_2	2571	RW_292	0	11241	11262	tggactgcgcaaatccaacatc	22
+    # 50.0	60.1	50.0	60.1	0.7
     # amplicon_3      2884    FW_311  0       12448   12468
     # atgccaccgggaaactgtaca   21      52.4    60.0    52.4    60.0    0.5
 

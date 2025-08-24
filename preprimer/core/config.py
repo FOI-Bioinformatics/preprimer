@@ -90,8 +90,8 @@ class PrePrimerConfig:
         valid_aligners = ["blast", "exonerate"]
         if self.aligner not in valid_aligners:
             issues.append(
-                f"Invalid aligner '{
-                    self.aligner}'. Must be one of: {valid_aligners}"
+                f"Invalid aligner '{self.aligner}'. "
+                f"Must be one of: {valid_aligners}"
             )
 
         # Validate primer length constraints

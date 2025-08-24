@@ -157,7 +157,8 @@ class ARTICParser(PrimerParser):
 
         amplicon_list = list(amplicons.values())
         logger.info(
-            f"Parsed {len(amplicon_list)} amplicons with {sum(len(a.primers) for a in amplicon_list)} primers"
+            f"Parsed {len(amplicon_list)} amplicons with "
+            f"{sum(len(a.primers) for a in amplicon_list)} primers"
         )
 
         return amplicon_list
