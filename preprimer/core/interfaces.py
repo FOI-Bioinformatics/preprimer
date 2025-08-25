@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-import pandas as pd
+# import pandas as pd  # Removed to avoid dependency
 
 
 @dataclass
@@ -165,5 +165,5 @@ class AlignmentProvider(ABC):
         primers_file: Union[str, Path],
         reference_path: Union[str, Path],
         output_path: Union[str, Path],
-    ) -> pd.DataFrame:
+    ) -> Any:
         """Create in-silico PCR amplicons."""

@@ -22,7 +22,6 @@ setup(
     
     install_requires=[
         "biopython>=1.80",
-        "pandas>=1.3.0",
     ],
     
     extras_require={
