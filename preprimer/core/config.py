@@ -106,8 +106,8 @@ class PrePrimerConfig:
         valid_schemes = ["artic", "custom"]
         if self.primer_naming_scheme not in valid_schemes:
             issues.append(
-                f"Invalid naming scheme '{
-                    self.primer_naming_scheme}'. Must be one of: {valid_schemes}"
+                f"Invalid naming scheme '{self.primer_naming_scheme}'. "
+                f"Must be one of: {valid_schemes}"
             )
 
         return issues

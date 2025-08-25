@@ -198,9 +198,7 @@ class PrimerConverter:
                         )
 
                     # Check for valid nucleotides (allow IUPAC codes)
-                    valid_chars = set(
-                        "ATCGRYSWKMBDHVNatcgryswkmbdhvn"
-                    )
+                    valid_chars = set("ATCGRYSWKMBDHVNatcgryswkmbdhvn")
                     invalid_chars = set(primer.sequence) - valid_chars
                     if invalid_chars:
                         issues.append(

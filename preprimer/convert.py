@@ -89,7 +89,7 @@ def convert(args):
             artic_folder = os.path.dirname(artic_scheme_filepath)
             print(
                 'Reference and primer bedfile for use with "artic minion" '
-                'is prepared in the specified folder'
+                "is prepared in the specified folder"
             )
             print(f"reference: {artic_scheme_filepath}")
             print(f"scheme bed: {artic_reference_filepath}\n")
