@@ -165,24 +165,15 @@ class PrimerConverter:
             reverse_count = len(amplicon.reverse_primers)
 
             if forward_count == 0:
-                issues.append(
-                    f"Amplicon {
-                        amplicon.amplicon_id} has no forward primers"
-                )
+                issues.append(f"Amplicon {amplicon.amplicon_id} has no forward primers")
             if reverse_count == 0:
-                issues.append(
-                    f"Amplicon {
-                        amplicon.amplicon_id} has no reverse primers"
-                )
+                issues.append(f"Amplicon {amplicon.amplicon_id} has no reverse primers")
 
             # Validate primer sequences if enabled
             if self.config.validate_sequences:
                 for primer in amplicon.primers:
                     if not primer.sequence:
-                        issues.append(
-                            f"Primer {
-                                primer.name} has empty sequence"
-                        )
+                        issues.append(f"Primer {primer.name} has empty sequence")
                         continue
 
                     # Check sequence length

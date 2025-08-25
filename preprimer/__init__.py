@@ -17,6 +17,10 @@ from .core.interfaces import AmpliconData, OutputWriter, PrimerData, PrimerParse
 # Import registries for advanced users
 from .core.registry import parser_registry, writer_registry
 
+# Import parsers and writers to trigger auto-registration
+import preprimer.parsers  # noqa: F401
+import preprimer.writers  # noqa: F401
+
 
 # Convenience function for simple usage
 def convert_primers(
