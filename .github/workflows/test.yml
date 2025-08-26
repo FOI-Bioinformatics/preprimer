@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
         python-version: ["3.10", 3.11, 3.12]
 
     steps:
@@ -67,7 +67,7 @@ jobs:
 
     - name: Run flake8
       run: |
-        flake8 preprimer/ tests/ --max-line-length=120 --extend-ignore=E203,W503
+        flake8 preprimer/ tests/ --max-line-length=88 --extend-ignore=E203,W503
 
     - name: Run mypy
       run: |

@@ -6,14 +6,15 @@ Complete installation instructions for PrePrimer on all supported platforms.
 
 ### **System Requirements**
 - **Python**: 3.8 or later
-- **Operating System**: Windows, macOS, or Linux
+- **Operating System**: Linux or macOS only
 - **Memory**: 512 MB RAM minimum (2 GB recommended for large files)
 - **Storage**: 100 MB free space
+
+> ⚠️ **Windows Support**: Windows is not currently supported due to Unicode character encoding limitations. Consider using WSL2 on Windows.
 
 ### **Python Dependencies**
 PrePrimer automatically installs these required packages:
 - `biopython>=1.80` - Biological sequence analysis
-- `pandas>=1.3.0` - Data manipulation and analysis
 
 ## 🚀 **Installation Methods**
 
@@ -106,9 +107,11 @@ cd preprimer
 pip3 install -e .
 ```
 
-### **Windows Installation**
+### **Windows Users**
 
-#### **Using Windows Subsystem for Linux (WSL) - Recommended**
+PrePrimer does not support native Windows due to Unicode character encoding limitations. Windows users can use **Windows Subsystem for Linux (WSL2)**:
+
+#### **Using WSL2 (Recommended for Windows)**
 ```bash
 # 1. Install WSL2 with Ubuntu
 wsl --install -d Ubuntu
@@ -118,17 +121,6 @@ sudo apt update && sudo apt install python3 python3-pip git
 git clone https://github.com/FOI-Bioinformatics/preprimer.git
 cd preprimer
 pip3 install -e .
-```
-
-#### **Native Windows**
-```powershell
-# 1. Install Python from python.org or Microsoft Store
-# 2. Install Git from git-scm.com
-# 3. In PowerShell or Command Prompt:
-
-git clone https://github.com/FOI-Bioinformatics/preprimer.git
-cd preprimer
-pip install -e .
 ```
 
 ## 🐍 **Virtual Environment Setup (Recommended)**
@@ -142,9 +134,6 @@ python3 -m venv preprimer-env
 
 # Activate (Linux/macOS)
 source preprimer-env/bin/activate
-
-# Activate (Windows)
-preprimer-env\Scripts\activate
 
 # Install PrePrimer
 git clone https://github.com/FOI-Bioinformatics/preprimer.git
@@ -255,7 +244,7 @@ python3 --version
 # Install git first
 # macOS: brew install git
 # Ubuntu: sudo apt install git
-# Windows: Download from git-scm.com
+# Windows: Use WSL2 with Ubuntu
 ```
 
 #### **Dependency Conflicts**
@@ -284,10 +273,10 @@ sudo yum groupinstall "Development Tools"
 sudo yum install python3-devel
 ```
 
-#### **Windows: Microsoft Visual C++**
-```powershell
-# Install Microsoft C++ Build Tools if needed
-# Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+#### **Windows Users: Use WSL2**
+```bash
+# PrePrimer does not support native Windows
+# Install and use WSL2 with Ubuntu as described above
 ```
 
 ## 🔄 **Updating PrePrimer**

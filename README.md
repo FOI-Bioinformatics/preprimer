@@ -31,7 +31,9 @@ PrePrimer converts between different primer scheme formats used in viral genome 
 
 ## Installation
 
-PrePrimer requires Python 3.8 or later.
+PrePrimer requires Python 3.8 or later and is supported on **Linux** and **macOS** only.
+
+> ⚠️ **Note**: Windows is not currently supported due to Unicode character encoding limitations.
 
 ```bash
 # Clone the repository
