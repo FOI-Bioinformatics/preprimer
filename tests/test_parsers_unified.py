@@ -11,21 +11,19 @@ import sys
 import tempfile
 from pathlib import Path
 
-import pytest
-
-from preprimer import convert_primers
-from preprimer.core.config import PrePrimerConfig
-from preprimer.core.converter import PrimerConverter
-from preprimer.core.interfaces import AmpliconData, PrimerData
-from preprimer.core.registry import parser_registry, writer_registry
-from preprimer.parsers.artic_parser import ARTICParser
-from preprimer.parsers.olivar_parser import OlivarParser
-from preprimer.parsers.varvamp_parser import VarVAMPParser
-
-# Add preprimer to path
+# Add preprimer to path for testing
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-# Import preprimer components
+import pytest  # noqa: E402
+
+from preprimer import convert_primers  # noqa: E402
+from preprimer.core.config import PrePrimerConfig  # noqa: E402
+from preprimer.core.converter import PrimerConverter  # noqa: E402
+from preprimer.core.interfaces import AmpliconData, PrimerData  # noqa: E402
+from preprimer.core.registry import parser_registry, writer_registry  # noqa: E402
+from preprimer.parsers.artic_parser import ARTICParser  # noqa: E402
+from preprimer.parsers.olivar_parser import OlivarParser  # noqa: E402
+from preprimer.parsers.varvamp_parser import VarVAMPParser  # noqa: E402
 
 # Ensure all parsers and writers are registered
 

@@ -2,19 +2,24 @@
 Tests for the refactored preprimer system.
 """
 
+import os
+import sys
 import tempfile
 from pathlib import Path
 
-from preprimer.core.config import PrePrimerConfig
-from preprimer.core.converter import PrimerConverter
-from preprimer.core.interfaces import AmpliconData, PrimerData
-from preprimer.core.registry import parser_registry, writer_registry
-from preprimer.parsers.artic_parser import ARTICParser
-from preprimer.parsers.olivar_parser import OlivarParser
-from preprimer.parsers.varvamp_parser import VarVAMPParser
-from preprimer.writers.artic_writer import ARTICWriter
-from preprimer.writers.fasta_writer import FASTAWriter
-from preprimer.writers.sts_writer import STSWriter
+# Add preprimer to path for testing
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+from preprimer.core.config import PrePrimerConfig  # noqa: E402
+from preprimer.core.converter import PrimerConverter  # noqa: E402
+from preprimer.core.interfaces import AmpliconData, PrimerData  # noqa: E402
+from preprimer.core.registry import parser_registry, writer_registry  # noqa: E402
+from preprimer.parsers.artic_parser import ARTICParser  # noqa: E402
+from preprimer.parsers.olivar_parser import OlivarParser  # noqa: E402
+from preprimer.parsers.varvamp_parser import VarVAMPParser  # noqa: E402
+from preprimer.writers.artic_writer import ARTICWriter  # noqa: E402
+from preprimer.writers.fasta_writer import FASTAWriter  # noqa: E402
+from preprimer.writers.sts_writer import STSWriter  # noqa: E402
 
 
 class TestDataStructures:
