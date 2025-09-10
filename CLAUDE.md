@@ -1,28 +1,29 @@
 # CLAUDE.md - PrePrimer Technical Guide
 
-This file provides comprehensive technical guidance to Claude Code (claude.ai/code) when working with the PrePrimer codebase.
+Technical guidance for Claude Code when working with the PrePrimer codebase.
 
-## Current State Analysis (v0.2.0)
+## Current State (v0.2.0)
 
 **Codebase Metrics:**
-- 12,363 total lines of Python code across 47 files
-- 226 tests (225 passing, 1 skipped) representing comprehensive coverage  
-- Modern plugin-based architecture with 9 core files, 6 parsers, 8 writers
-- Performance characteristics: sub-second processing for datasets up to 500 amplicons
+- 12,853 total lines of Python code across 49 files
+- 226 tests (225 passing, 1 skipped) with comprehensive coverage
+- Plugin-based architecture with security and performance focus
+- Documentation: 16 organized files in 3-tier structure
 
-**Architecture Status:**
-The codebase implements a complete refactor with:
-- Security utilities providing input validation and path sanitization
-- Enhanced configuration system with multi-format support
-- Comprehensive testing framework across multiple methodologies
-- Unified test data structure enabling cross-format validation
-- Performance optimizations with documented benchmarks
+**Key Strengths:**
+- Comprehensive security implementation with path validation
+- Performance benchmarks showing sub-second processing for 500+ amplicons
+- Property-based testing with Hypothesis for robust validation
+- Clean plugin architecture enabling format extensibility
 
-**Development Priorities:**
-1. Maintain comprehensive test coverage across all modules
-2. Ensure security validation for all file operations
-3. Document performance characteristics and limitations
-4. Update documentation with evidence-based claims
+**Documentation Structure (Recently Reorganized):**
+```
+docs/
+├── README.md                 # Navigation hub
+├── technical/               # Security, testing, compatibility (3 files)
+├── developer/               # Architecture, contributing, extending (5 files)
+└── user-guide/              # Installation, usage, CLI reference (7 files)
+```
 
 ## Development Commands
 
@@ -35,36 +36,28 @@ pip install -e .
 pip install -e ".[dev]"
 ```
 
-### Testing Framework
+### Testing Commands
 ```bash
-# Run complete test suite (226 total tests)
+# Run all tests (226 total: 225 passing, 1 skipped)
 python -m pytest
 
-# Run specific test categories
-python -m pytest tests/test_property_based.py -v      # Property-based testing with Hypothesis
-python -m pytest tests/test_benchmarks.py -v         # Performance benchmarking
-python -m pytest tests/test_integration.py -v        # End-to-end integration testing
-python -m pytest tests/test_security.py -v           # Security validation testing
+# Run specific categories
+python -m pytest tests/test_security.py -v           # Security validation
+python -m pytest tests/test_benchmarks.py -v         # Performance benchmarks
+python -m pytest tests/test_property_based.py -v     # Property-based testing
+python -m pytest tests/test_integration.py -v        # End-to-end testing
 
-# Generate coverage reports
-python -m pytest --cov=preprimer --cov-report=html --cov-report=term-missing
-
-# Run performance benchmarks
-python -m pytest tests/test_benchmarks.py --benchmark-only
-
-# Property-based testing with statistical output
-python -m pytest tests/test_property_based.py -v --hypothesis-show-statistics
-
-# Execute mutation testing for test quality assessment
-python scripts/run_mutation_tests.py
+# Coverage and analysis
+python -m pytest --cov=preprimer --cov-report=html
+python scripts/run_mutation_tests.py                 # Test quality assessment
 ```
 
-**Testing Architecture:**
-- **Property-based**: 12 tests with automated input generation via Hypothesis
-- **Performance benchmarks**: 23 tests with statistical analysis and regression detection
-- **Integration testing**: 12 end-to-end workflow validation tests
-- **Security validation**: 18 tests for input validation and vulnerability prevention
-- **Unit testing**: Core functionality validation across parsers, writers, and components
+**Test Categories:**
+- Property-based (12): Automated input generation with Hypothesis
+- Benchmarks (23): Performance validation and regression detection  
+- Integration (12): End-to-end workflow testing
+- Security (18): Input validation and vulnerability prevention
+- Unit tests: Core functionality across all components
 
 ### Code Quality
 ```bash
@@ -97,220 +90,146 @@ preprimer convert --input primers.tsv --output-dir output/ \
                  --output-formats artic fasta sts --prefix MyVirus
 ```
 
-## Architecture Overview
+## Architecture
 
-PrePrimer is a modern, extensible primer scheme converter built around a plugin-based architecture:
+Plugin-based primer scheme converter with clean separation of concerns.
 
-### Core Components
-
-**`preprimer/core/`** - Central abstractions and framework:
-- `interfaces.py`: Abstract base classes for parsers, writers, and alignment providers
-- `registry.py`: Plugin registration system for parsers and writers
-- `converter.py`: Main conversion orchestration logic
-- `config.py`: Configuration management system
-- `exceptions.py`: Custom exception hierarchy
-
-**`preprimer/parsers/`** - Input format parsers:
-- `varvamp_parser.py`: Handles VarVAMP TSV format
-- `artic_parser.py`: Handles ARTIC BED format
-- `olivar_parser.py`: Handles Olivar CSV format
-
-**`preprimer/writers/`** - Output format writers:
-- `artic_writer.py`: Generates ARTIC BED files
-- `fasta_writer.py`: Generates FASTA primer files
-- `sts_writer.py`: Generates STS files for me-pcr validation
-- `varvamp_writer.py`: Generates VarVAMP TSV format
-- `olivar_writer.py`: Generates Olivar CSV format
-
-### Data Structures
-
-The system uses standardized data classes defined in `core/interfaces.py`:
-
-- **`PrimerData`**: Represents individual primers with sequence, coordinates, direction, pool information, and quality metrics
-- **`AmpliconData`**: Groups primers into amplicons with helper methods for primer pair generation
-
-### Plugin System
-
-New parsers and writers are automatically registered through the registry system:
-```python
-from preprimer.core.registry import parser_registry, writer_registry
-
-# Parsers and writers self-register when imported
-# Registration happens automatically during module import
+### Core Structure
+```
+preprimer/
+├── core/                    # Framework and abstractions
+│   ├── interfaces.py        # Abstract base classes (PrimerData, AmpliconData)
+│   ├── registry.py          # Plugin auto-registration system
+│   ├── converter.py         # Main conversion orchestration
+│   ├── config.py            # Configuration management
+│   └── security.py          # Input validation and path sanitization
+├── parsers/                 # Input format handlers
+│   ├── varvamp_parser.py    # VarVAMP TSV format
+│   ├── artic_parser.py      # ARTIC BED format  
+│   └── olivar_parser.py     # Olivar CSV format
+└── writers/                 # Output format generators
+    ├── artic_writer.py      # ARTIC BED files
+    ├── fasta_writer.py      # Multi-FASTA sequences
+    ├── sts_writer.py        # STS validation files
+    ├── varvamp_writer.py    # VarVAMP TSV format
+    └── olivar_writer.py     # Olivar CSV format
 ```
 
 ### Format Support
+**Input**: VarVAMP (.tsv), ARTIC (.bed), Olivar (.csv)  
+**Output**: ARTIC (.bed), FASTA (.fasta), STS (.sts.tsv), VarVAMP (.tsv), Olivar (.csv)
 
-**Supported Input Formats:**
-- VarVAMP (`.tsv`, `.txt`)
-- ARTIC (`.bed`, `.scheme.bed`) 
-- Olivar (`.csv`)
-
-**Supported Output Formats:**
-- ARTIC (`.scheme.bed`) - For `artic minion` workflows
-- FASTA (`.fasta`) - Multi-FASTA primer sequences
-- STS (`.sts.tsv`) - For me-pcr in-silico validation
-- VarVAMP (`.tsv`) - VarVAMP-compatible format
-- Olivar (`.csv`) - Olivar primer design format
+### Plugin Registration
+```python
+from preprimer.core.registry import parser_registry, writer_registry
+# Auto-registration on import - new formats integrate seamlessly
+```
 
 ## Development Guidelines
 
 ### Adding New Formats
 
-1. **Create a Parser** (for input formats):
-   - Inherit from `PrimerParser` in `core/interfaces.py`
-   - Implement required abstract methods
-   - Add to `parsers/` directory
-   - Import in appropriate `__init__.py` for auto-registration
+**Parser** (input format):
+```python
+from preprimer.core.interfaces import PrimerParser
 
-2. **Create a Writer** (for output formats):
-   - Inherit from `OutputWriter` in `core/interfaces.py` 
-   - Implement required abstract methods
-   - Add to `writers/` directory
-   - Import in appropriate `__init__.py` for auto-registration
+class MyFormatParser(PrimerParser):
+    def can_parse(self, file_path: str) -> bool:
+        # Format detection logic
+    
+    def parse(self, file_path: str) -> list[AmpliconData]:
+        # Parsing implementation
+```
 
-### Testing Strategy
+**Writer** (output format):  
+```python
+from preprimer.core.interfaces import OutputWriter
 
-- **Unit tests** for individual parsers and writers in `tests/`
-- **Integration tests** for complete conversion workflows
-- **Test data** located in `tests/test_data/`
-- Use `conftest.py` for shared test fixtures
+class MyFormatWriter(OutputWriter):
+    def write(self, amplicons: list[AmpliconData], output_path: str) -> None:
+        # Writing implementation
+```
 
-### Key Constraints & Technical Specifications
+Place in `parsers/` or `writers/` directory and import in `__init__.py` for auto-registration.
 
-- **Platform Support**: Linux and macOS only (no Windows due to Unicode limitations)
-- **Python Requirements**: Python 3.8+ required (tested up to 3.13)
-- **Core Dependencies**: Pydantic (>=2.0), PyYAML (>=6.0), Click (>=8.0)
-- **Performance**: Sub-second processing for datasets up to 500 amplicons
-- **Memory Usage**: ~50MB baseline, ~200MB for large datasets (2000+ amplicons)
-- **Security**: Input validation, path sanitization, safe file operations
+### Key Specifications
 
-### 🔒 Security Architecture
+- **Platform**: Linux and macOS only (Unicode limitations prevent Windows support)
+- **Python**: 3.8+ (tested through 3.13)
+- **Dependencies**: Pydantic ≥2.0, PyYAML ≥6.0, Click ≥8.0
+- **Performance**: Sub-second processing for 500+ amplicons
+- **Security**: All file operations use path validation and input sanitization
 
-**Enhanced Security Features:**
+### Security Implementation
+
 ```python
 from preprimer.core.security import PathValidator, SecurityError
 
-# Safe path operations
+# All file operations use security validation
 safe_path = PathValidator.sanitize_path(user_input)
 PathValidator.validate_output_directory(output_dir)
-
-# Input validation with size limits
-validated_content = InputValidator.validate_file_content(content, max_size_mb=10)
 ```
 
-**Security Measures:**
-- Path traversal prevention (`../`, `~`, absolute path validation)
-- File size limits (configurable, default 50MB)
-- Input sanitization for all user-provided data
-- Safe temporary file handling with automatic cleanup
-- Comprehensive logging of security events
+**Security Features:**
+- Path traversal prevention and input sanitization
+- Configurable file size limits (default 50MB)
+- Safe temporary file handling with cleanup
+- Comprehensive security event logging
 
-### ⚡ Performance Characteristics
+### Performance Benchmarks
 
-**Benchmark Results (Operations Per Second):**
-- **Parser Creation**: 4,244,769 ops/sec (217ns mean)
-- **Data Structure Creation**: 3,211,140 ops/sec (311ns mean) 
-- **Format Detection**: 44,564 ops/sec (22.4μs mean)
-- **VarVAMP Parsing**: 2,896 ops/sec (345μs mean, small datasets)
-- **ARTIC Parsing**: 3,021 ops/sec (331μs mean)
-- **Large Dataset Processing**: 37 ops/sec (26.6ms mean, 2000+ amplicons)
+**Key Metrics (Operations/Second):**
+- Parser creation: ~4.2M ops/sec
+- Format detection: ~45K ops/sec  
+- Small dataset parsing: ~3K ops/sec
+- Large dataset processing: ~37 ops/sec (2000+ amplicons)
 
-**Scalability Limits:**
-- **Small datasets** (<50 amplicons): ~300μs processing time
-- **Medium datasets** (50-500 amplicons): ~2.5ms processing time  
-- **Large datasets** (500+ amplicons): ~26ms processing time
-- **Memory scaling**: Linear O(n) with amplicon count
+**Processing Times:**
+- Small datasets (<50 amplicons): ~300μs
+- Medium datasets (50-500): ~2.5ms
+- Large datasets (500+): ~26ms
 
-### 🏗️ Advanced Architecture
+## Current Priorities and Future Plans
 
-**Enhanced Configuration System:**
-```python
-from preprimer.core.enhanced_config import EnhancedConfigManager
+### Development Focus Areas
 
-# Multi-format configuration support
-config = EnhancedConfigManager.from_file("config.yaml")
-config = EnhancedConfigManager.from_dict(config_dict)
-config = EnhancedConfigManager.from_env()  # Environment variables
+**Near-term (v0.2.x):**
+- Maintain comprehensive test coverage (currently 225/226 tests passing)  
+- Continue security hardening and input validation improvements
+- Performance optimization for larger datasets (>2000 amplicons)
+- Documentation maintenance following recent reorganization
 
-# Dynamic configuration updates
-config.update_section("parsing", {"strict_validation": True})
-config.merge_with_file("additional_config.json")
+**Medium-term (v0.3.x):**
+- Windows support investigation (Unicode encoding challenges)
+- Additional format support based on community requests
+- Web API/service implementation for remote conversion
+- Enhanced validation rules and biological constraint checking
+
+**Long-term:**
+- Integration with popular sequencing pipelines
+- Real-time format validation and conversion
+- Advanced primer quality assessment algorithms
+
+### Key Implementation Notes
+
+**Essential Principles:**
+- All format conversions preserve data integrity bidirectionally
+- Automatic format detection using content analysis + file extensions
+- Security-first approach: all file operations use validation utilities
+- Plugin architecture enables custom formats without core changes
+- Comprehensive error handling with informative validation messages
+
+**Test Data Structure:**
 ```
-
-**Registry System Deep Dive:**
-```python
-from preprimer.core.registry import parser_registry, writer_registry
-
-# Automatic discovery and registration
-parser_registry.auto_discover("preprimer.parsers")
-writer_registry.auto_discover("preprimer.writers") 
-
-# Runtime plugin loading
-parser_registry.register_from_module("custom_parsers.my_format")
-
-# Performance-optimized lookups O(1)
-parser = parser_registry.get("varvamp")
-writer = writer_registry.get("artic")
+tests/test_data/datasets/
+├── small/      # COVID-19: 5 amplicons (fast testing)
+└── medium/     # ASFV: 80 amplicons (performance testing)
 ```
+Each dataset includes cross-format consistency with realistic biological data.
 
-**Data Validation Pipeline:**
-- **Level 1**: File format detection (extension + content analysis)
-- **Level 2**: Schema validation (Pydantic models)  
-- **Level 3**: Biological constraint validation (primer lengths, coordinates)
-- **Level 4**: Cross-format consistency checks
-- **Level 5**: Security validation (path safety, content sanitization)
+### Quality Standards
 
-### 🧪 Test Data Architecture
-
-**Unified Test Dataset Structure:**
-```
-tests/test_data/
-├── datasets/
-│   ├── small/                   # COVID-19: 5 amplicons, 10 primers
-│   │   ├── reference.fasta      # NC_045512.2 (29,903 bp)
-│   │   ├── varvamp.tsv         # 13-field format with quality metrics
-│   │   ├── artic.scheme.bed    # 7-field format with sequences
-│   │   ├── olivar.csv          # CSV design format
-│   │   └── metadata.yaml       # Dataset documentation
-│   └── medium/                  # ASFV: 80 amplicons, 160 primers
-│       └── [same format structure]
-├── fixtures/                    # Malformed data for error testing
-└── legacy/                      # Original test files (preserved)
-```
-
-**Test Data Characteristics:**
-- **Small dataset**: 5 amplicons, ~1.5kb coverage, COVID-19
-- **Medium dataset**: 80 amplicons, 191kb coverage, ASFV  
-- **Cross-format consistency**: Same biological data across all formats
-- **Quality metrics**: Realistic primer scores, GC content, secondary structure
-- **Edge cases**: Overlapping amplicons, primer dimers, extreme coordinates
-
-## Implementation Guidelines
-
-### Development Workflow
-1. **Testing**: Maintain comprehensive test coverage for all new functionality
-2. **Security**: Validate all file operations and user inputs
-3. **Performance**: Document performance characteristics with benchmarks
-4. **Documentation**: Update relevant documentation with implementation changes
-
-### Architecture Considerations
-- **Plugin system**: New parsers and writers should follow established interfaces
-- **Error handling**: Implement comprehensive error handling with informative messages
-- **Configuration**: Support flexible configuration through multiple sources
-- **Cross-platform**: Ensure compatibility with Linux and macOS platforms
-
-### Quality Assurance
-- **Test coverage**: Maintain >95% test coverage across all modules
-- **Security validation**: All file operations must use security utilities
-- **Performance monitoring**: Benchmark performance-critical operations
-- **Documentation accuracy**: Ensure documentation reflects actual implementation
-
-## Important Notes
-
-- **All format conversions are bidirectional** with data integrity preservation
-- **Automatic format detection** based on content analysis + file extensions  
-- **Quality metrics preservation** across all conversion workflows
-- **Reference sequence association** maintained for alignment-dependent formats
-- **Comprehensive error recovery** with detailed validation messages
-- **Plugin extensibility** for custom formats without core code changes
+- **Test Coverage**: Maintain >95% across all modules
+- **Security**: All file operations require security validation
+- **Performance**: Document benchmarks for performance-critical paths
+- **Documentation**: Keep aligned with actual implementation (recently reorganized)
