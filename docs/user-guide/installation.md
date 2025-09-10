@@ -14,7 +14,20 @@ Complete installation instructions for PrePrimer on all supported platforms.
 
 ### **Python Dependencies**
 PrePrimer automatically installs these required packages:
-- `biopython>=1.80` - Biological sequence analysis
+- `pydantic>=2.0` - Data validation and settings management
+- `pyyaml>=6.0` - YAML configuration file support  
+- `click>=8.0` - Command-line interface framework
+
+**Development dependencies** (installed with `[dev]` option):
+- `pytest>=7.0` - Test framework
+- `pytest-cov>=4.0` - Coverage reporting
+- `pytest-benchmark>=4.0` - Performance benchmarking
+- `hypothesis>=6.0` - Property-based testing
+- `mutmut>=3.0` - Mutation testing
+- `black>=23.0` - Code formatting
+- `isort>=5.0` - Import sorting
+- `flake8>=6.0` - Linting
+- `mypy>=1.0` - Type checking
 
 ## 🚀 **Installation Methods**
 
@@ -165,12 +178,31 @@ cd preprimer
 # Install with development extras
 pip install -e ".[dev]"
 
-# This includes:
-# - pytest (testing)
-# - pytest-cov (coverage)
+# This includes comprehensive testing framework:
+# - pytest (testing framework)
+# - pytest-cov (coverage reporting)
+# - pytest-benchmark (performance benchmarking)
+# - hypothesis (property-based testing)
+# - mutmut (mutation testing)
 # - black (code formatting)
+# - isort (import sorting)
 # - flake8 (linting)
 # - mypy (type checking)
+
+# Run the comprehensive test suite
+python -m pytest
+
+# Run specific test categories
+python -m pytest tests/test_property_based.py -v      # Property-based tests
+python -m pytest tests/test_benchmarks.py -v         # Performance benchmarks
+python -m pytest tests/test_integration.py -v        # Integration tests
+python -m pytest tests/test_security.py -v           # Security tests
+
+# Generate coverage report
+python -m pytest --cov=preprimer --cov-report=html
+
+# Run mutation testing for test quality assessment
+python scripts/run_mutation_tests.py
 ```
 
 ## ✅ **Verify Installation**
@@ -190,17 +222,24 @@ preprimer --help
 # Should show command help
 ```
 
-### **Comprehensive Test**
+### **Comprehensive Test Suite**
 ```bash
-# Run test suite
-python tests/test_parsers_unified.py
+# Run all 226 tests (recommended)
+python -m pytest
 
-# Expected output:
-# 🧪 Running harmonized parser tests...
-# ✅ Testing VarVAMP parser...
-# ✅ Testing ARTIC parser...
-# ✅ Testing Olivar parser...
-# 🎉 All harmonized tests passed!
+# Expected output: 225 passed, 1 skipped
+
+# Run specific test categories
+python -m pytest tests/test_property_based.py -v      # Property-based tests
+python -m pytest tests/test_benchmarks.py -v         # Performance benchmarks  
+python -m pytest tests/test_integration.py -v        # Integration tests
+python -m pytest tests/test_security.py -v           # Security validation
+
+# Run with performance benchmarks
+python -m pytest tests/test_benchmarks.py::test_varvamp_parser_large_benchmark -v
+
+# Generate detailed coverage report
+python -m pytest --cov=preprimer --cov-report=html --cov-report=term-missing
 ```
 
 ### **Python API Test**

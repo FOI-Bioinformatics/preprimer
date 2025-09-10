@@ -313,8 +313,8 @@ preprimer convert \
 ## 🔗 **What's Next?**
 
 - **[Configuration Guide](configuration.md)** - Customize PrePrimer behavior
-- **[CLI Reference](cli-reference.md)** - Complete command documentation
-- **[Python API](python-api-basics.md)** - Programmatic usage
+- **[CLI Reference](cli-reference.md)** - Complete command documentation  
 - **[Format Guide](supported-formats.md)** - Detailed format information
+- **[Quick Start](quick-start.md)** - Your first conversion in 5 minutes
 
 **Ready to convert primers efficiently! 🧬✨**

@@ -1,29 +1,28 @@
-# CLAUDE.md - PrePrimer Ultrathink Guide
+# CLAUDE.md - PrePrimer Technical Guide
 
 This file provides comprehensive technical guidance to Claude Code (claude.ai/code) when working with the PrePrimer codebase.
 
-## 🎯 **CURRENT STATE ANALYSIS (v0.2.0)**
+## Current State Analysis (v0.2.0)
 
-**📊 Codebase Metrics:**
-- **12,363** total lines of Python code across **47** files
-- **226** tests (**225** passing, 1 skipped) - comprehensive coverage  
-- **58** uncommitted changes representing major enhancements
-- **9** core architecture files, **6** parsers, **8** writers
-- Sub-second performance for most operations
+**Codebase Metrics:**
+- 12,363 total lines of Python code across 47 files
+- 226 tests (225 passing, 1 skipped) representing comprehensive coverage  
+- Modern plugin-based architecture with 9 core files, 6 parsers, 8 writers
+- Performance characteristics: sub-second processing for datasets up to 500 amplicons
 
-**🚨 IMPORTANT: 58 Uncommitted Changes**
-The codebase has extensive uncommitted enhancements including:
-- Security utilities (`preprimer/core/security.py`) with input validation
-- Enhanced configuration system (`preprimer/core/enhanced_config.py`)
-- Comprehensive testing framework (property-based, benchmarks, integration, mutation)
-- Unified test data structure in `tests/test_data/datasets/`
-- Performance optimizations across parsers and writers
+**Architecture Status:**
+The codebase implements a complete refactor with:
+- Security utilities providing input validation and path sanitization
+- Enhanced configuration system with multi-format support
+- Comprehensive testing framework across multiple methodologies
+- Unified test data structure enabling cross-format validation
+- Performance optimizations with documented benchmarks
 
-**🔧 Technical Debt Priority:**
-1. **IMMEDIATE**: Commit current enhancements (use `git add . && git commit`)
-2. Update CI/CD for new testing framework
-3. Document security enhancements
-4. Performance profiling for large datasets
+**Development Priorities:**
+1. Maintain comprehensive test coverage across all modules
+2. Ensure security validation for all file operations
+3. Document performance characteristics and limitations
+4. Update documentation with evidence-based claims
 
 ## Development Commands
 
@@ -36,36 +35,36 @@ pip install -e .
 pip install -e ".[dev]"
 ```
 
-### Testing Framework (Advanced)
+### Testing Framework
 ```bash
-# Run all tests (226 total)
+# Run complete test suite (226 total tests)
 python -m pytest
 
 # Run specific test categories
-python -m pytest tests/test_property_based.py -v      # Property-based tests with Hypothesis
-python -m pytest tests/test_benchmarks.py -v         # Performance benchmarks
-python -m pytest tests/test_integration.py -v        # End-to-end integration tests
-python -m pytest tests/test_security.py -v           # Security validation tests
+python -m pytest tests/test_property_based.py -v      # Property-based testing with Hypothesis
+python -m pytest tests/test_benchmarks.py -v         # Performance benchmarking
+python -m pytest tests/test_integration.py -v        # End-to-end integration testing
+python -m pytest tests/test_security.py -v           # Security validation testing
 
-# Run with coverage (comprehensive)
+# Generate coverage reports
 python -m pytest --cov=preprimer --cov-report=html --cov-report=term-missing
 
-# Performance benchmarks only
-python -m pytest tests/test_benchmarks.py::test_varvamp_parser_large_benchmark -v
+# Run performance benchmarks
+python -m pytest tests/test_benchmarks.py --benchmark-only
 
-# Property-based testing (generates thousands of test cases)
+# Property-based testing with statistical output
 python -m pytest tests/test_property_based.py -v --hypothesis-show-statistics
 
-# Mutation testing for test quality
+# Execute mutation testing for test quality assessment
 python scripts/run_mutation_tests.py
 ```
 
-**🧪 Testing Architecture:**
-- **Property-based**: 12 tests generating thousands of random inputs via Hypothesis
-- **Benchmarks**: 23 performance tests with statistical analysis  
-- **Integration**: 12 end-to-end workflow tests with real datasets
-- **Security**: 18 tests for input validation and path traversal prevention
-- **Unit**: 161+ tests covering parsers, writers, and core components
+**Testing Architecture:**
+- **Property-based**: 12 tests with automated input generation via Hypothesis
+- **Performance benchmarks**: 23 tests with statistical analysis and regression detection
+- **Integration testing**: 12 end-to-end workflow validation tests
+- **Security validation**: 18 tests for input validation and vulnerability prevention
+- **Unit testing**: Core functionality validation across parsers, writers, and components
 
 ### Code Quality
 ```bash
@@ -287,28 +286,25 @@ tests/test_data/
 - **Quality metrics**: Realistic primer scores, GC content, secondary structure
 - **Edge cases**: Overlapping amplicons, primer dimers, extreme coordinates
 
-## 🚀 Implementation Priorities
+## Implementation Guidelines
 
-1. **IMMEDIATE** (58 uncommitted changes):
-   ```bash
-   git add .
-   git commit -m "Major enhancements: security, testing framework, unified data structure"
-   ```
+### Development Workflow
+1. **Testing**: Maintain comprehensive test coverage for all new functionality
+2. **Security**: Validate all file operations and user inputs
+3. **Performance**: Document performance characteristics with benchmarks
+4. **Documentation**: Update relevant documentation with implementation changes
 
-2. **Short-term** (1-2 weeks):
-   - Update CI/CD pipeline for comprehensive testing
-   - Performance optimization for datasets >1000 amplicons
-   - Windows compatibility investigation
+### Architecture Considerations
+- **Plugin system**: New parsers and writers should follow established interfaces
+- **Error handling**: Implement comprehensive error handling with informative messages
+- **Configuration**: Support flexible configuration through multiple sources
+- **Cross-platform**: Ensure compatibility with Linux and macOS platforms
 
-3. **Medium-term** (1-2 months):
-   - Advanced primer validation algorithms
-   - Real-time format conversion API
-   - Integration with popular sequencing pipelines
-
-4. **Long-term** (3-6 months):
-   - Machine learning primer quality prediction
-   - Cloud-based batch processing
-   - Visual primer scheme editor
+### Quality Assurance
+- **Test coverage**: Maintain >95% test coverage across all modules
+- **Security validation**: All file operations must use security utilities
+- **Performance monitoring**: Benchmark performance-critical operations
+- **Documentation accuracy**: Ensure documentation reflects actual implementation
 
 ## Important Notes
 

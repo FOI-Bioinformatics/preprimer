@@ -545,7 +545,7 @@ preprimer convert -i primers.tsv -o output/ -f artic -c covid-surveillance.json
 
 - **[CLI Reference](cli-reference.md)** - Command-line options
 - **[Basic Usage](basic-usage.md)** - Essential workflows
-- **[Python API](python-api-basics.md)** - Programmatic configuration
 - **[Format Guide](supported-formats.md)** - Format-specific settings
+- **[Installation Guide](installation.md)** - Setup and requirements
 
 **Configure PrePrimer for your specific workflow needs! ⚙️✨**

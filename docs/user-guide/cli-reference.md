@@ -499,7 +499,7 @@ process CONVERT_PRIMERS {
 
 - **[Basic Usage Guide](basic-usage.md)** - Essential workflows
 - **[Configuration Guide](configuration.md)** - Advanced settings
-- **[Python API](python-api-basics.md)** - Programmatic usage
 - **[Format Guide](supported-formats.md)** - Input/output formats
+- **[Quick Start Guide](quick-start.md)** - Your first conversion in 5 minutes
 
 **Complete CLI reference for efficient primer conversion! 🖥️✨**

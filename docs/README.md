@@ -1,198 +1,101 @@
-# 📚 PrePrimer Documentation
+# PrePrimer Documentation
 
-Welcome to the comprehensive documentation for **PrePrimer** - the modern, extensible primer scheme converter for tiled amplicon sequencing.
+This directory contains the complete documentation for PrePrimer, a primer scheme converter for tiled amplicon sequencing applications.
 
-## 🎯 **Quick Navigation**
+## Quick Navigation
 
-### **👥 For Users**
-- **[Quick Start Guide](user-guide/quick-start.md)** - Get up and running in 5 minutes
-- **[Installation Guide](user-guide/installation.md)** - Detailed installation instructions
-- **[User Guide](user-guide/README.md)** - Complete user documentation
-- **[Format Support](user-guide/supported-formats.md)** - All supported input/output formats
-- **[CLI Reference](user-guide/cli-reference.md)** - Command-line interface guide
-- **[Configuration Guide](user-guide/configuration.md)** - Customizing PrePrimer behavior
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| **[User Guide](user-guide/)** | Installation, usage, and configuration | End users |
+| **[Technical Documentation](#technical-documentation)** | Security, testing, and compatibility | Technical users |
+| **[Developer Documentation](#developer-documentation)** | Architecture, contributing, and extending | Developers |
+| **[API Reference](api/)** | Programming interfaces | Developers |
+| **[Tutorials](tutorials/)** | Examples and use cases | All users |
 
-### **🔬 For Researchers**
-- **[Use Cases](tutorials/use-cases.md)** - Real-world viral genomics workflows
-- **[Format Conversion Guide](tutorials/format-conversion.md)** - Converting between primer formats
-- **[Primer Validation](tutorials/primer-validation.md)** - Quality control and validation
-- **[Integration Workflows](tutorials/integration.md)** - Using PrePrimer with other tools
+## User Documentation
 
-### **🐍 For Developers**
-- **[Python API Guide](api/python-api.md)** - Programmatic access to PrePrimer
-- **[Architecture Overview](developer/architecture.md)** - System design and components
-- **[Adding New Parsers](developer/adding-parsers.md)** - Extending PrePrimer
-- **[Contributing Guide](developer/contributing.md)** - Development guidelines
-- **[Testing Guide](developer/testing.md)** - Test suite and validation
+### Getting Started
+- **[Installation Guide](user-guide/installation.md)** - System requirements and installation procedures
+- **[Quick Start Guide](user-guide/quick-start.md)** - First conversion in 5 minutes
+- **[Basic Usage](user-guide/basic-usage.md)** - Essential commands and workflows
 
-### **💡 Examples & Tutorials**
-- **[Tutorial Collection](tutorials/README.md)** - Step-by-step tutorials
-- **[Code Examples](examples/README.md)** - Ready-to-use examples
-- **[Sample Data](examples/sample-data.md)** - Test data and datasets
+### Reference
+- **[CLI Reference](user-guide/cli-reference.md)** - Complete command-line documentation
+- **[Configuration Guide](user-guide/configuration.md)** - Configuration options and customization
+- **[Supported Formats](user-guide/supported-formats.md)** - Input and output format specifications
 
-## 📖 **Documentation Overview**
+## Technical Documentation
 
-### **Getting Started**
-New to PrePrimer? Start here:
+### System Specifications
+- **[Security Implementation](technical/security.md)** - Security features and best practices
+- **[Testing Framework](technical/testing.md)** - Comprehensive testing methodology (226 tests)
+- **[Platform Compatibility](technical/compatibility.md)** - Platform support and requirements
 
-1. **[Installation](user-guide/installation.md)** - Install PrePrimer on your system
-2. **[Quick Start](user-guide/quick-start.md)** - Your first primer conversion
-3. **[Basic Usage](user-guide/basic-usage.md)** - Essential commands and workflows
+## Developer Documentation
 
-### **Core Features**
-- **Multi-format Support**: Convert between VarVAMP, ARTIC, and Olivar formats
-- **Quality Validation**: Comprehensive primer and amplicon validation
-- **CLI & API**: Both command-line and Python interfaces
-- **Extensible Design**: Easy to add new formats and tools
+### Architecture and Design
+- **[Architecture Overview](developer/architecture.md)** - System design and component structure
+- **[Contributing Guide](developer/contributing.md)** - Development procedures and guidelines
+- **[Extending PrePrimer](developer/extending.md)** - Adding new formats and features
 
-### **Supported Workflows**
+### Development Resources
+- **[Performance Guide](developer/performance.md)** - Performance characteristics and optimization
+- **[CI/CD Pipeline](developer/ci-cd.md)** - Continuous integration and deployment
 
-| Workflow | Input | Output | Documentation |
-|----------|-------|--------|---------------|
-| **VarVAMP → ARTIC** | `.tsv` | `.scheme.bed` | [Guide](tutorials/varvamp-to-artic.md) |
-| **Olivar → ARTIC** | `.csv` | `.scheme.bed` | [Guide](tutorials/olivar-to-artic.md) |
-| **Cross-Platform** | Multiple | Multiple | [Guide](tutorials/cross-platform.md) |
-| **Quality Control** | Any | Validation | [Guide](tutorials/validation.md) |
+## Documentation Standards
 
-## 🔧 **Technical Documentation**
+This documentation follows scientific writing principles:
 
-### **Architecture**
-- **[System Overview](developer/architecture.md)** - High-level design
-- **[Plugin System](developer/plugin-system.md)** - Parser and writer architecture
-- **[Data Models](developer/data-models.md)** - Core data structures
-- **[Configuration System](developer/configuration-system.md)** - Settings and customization
+- **Objective Language**: Technical descriptions use precise, factual language
+- **Evidence-Based**: Claims supported by benchmarks, tests, and measurements
+- **Reproducible Instructions**: Sufficient detail for independent reproduction
+- **Structured Content**: Clear organization for users with varying backgrounds
 
-### **API Reference**
-- **[Python API](api/python-api.md)** - Complete API documentation
-- **[CLI Reference](api/cli-reference.md)** - Command-line interface
-- **[Configuration Schema](api/configuration-schema.md)** - Configuration options
-- **[Error Handling](api/error-handling.md)** - Exception types and handling
+## Examples and Tutorials
 
-### **Development**
-- **[Development Setup](developer/development-setup.md)** - Environment configuration
-- **[Code Style Guide](developer/code-style.md)** - Coding standards
-- **[Testing Guidelines](developer/testing-guidelines.md)** - Test writing and execution
-- **[Release Process](developer/release-process.md)** - Version management
+### Practical Applications
+- **[Use Cases](tutorials/use-cases.md)** - Real-world research applications
+- **[Format Conversion Examples](tutorials/format-conversion.md)** - Step-by-step conversion procedures
+- **[Pipeline Integration](tutorials/integration.md)** - Integration with bioinformatics workflows
 
-## 🧬 **Format Documentation**
+### Code Examples
+- **[API Examples](examples/)** - Programmatic usage examples
+- **[Sample Workflows](examples/)** - Complete workflow implementations
 
-### **Input Formats**
+## Contributing to Documentation
 
-#### **VarVAMP Format**
-- **Extension**: `.tsv`, `.txt`
-- **Description**: Tiled primer schemes from varVAMP tool
-- **[Format Specification](user-guide/formats/varvamp.md)**
-- **[Example Data](examples/varvamp-examples.md)**
+When contributing to documentation:
 
-#### **ARTIC Format**
-- **Extension**: `.bed`, `.scheme.bed`
-- **Description**: ARTIC primer scheme BED format
-- **[Format Specification](user-guide/formats/artic.md)**
-- **[Example Data](examples/artic-examples.md)**
+1. **Follow Structure**: Use established organization and naming conventions
+2. **Scientific Language**: Use objective, evidence-based language
+3. **Include Examples**: Provide practical code snippets and usage examples
+4. **Cross-Reference**: Link to related documentation sections
+5. **Test Instructions**: Verify all instructions work as documented
 
-#### **Olivar Format**
-- **Extension**: `.csv`
-- **Description**: Olivar primer design output
-- **[Format Specification](user-guide/formats/olivar.md)**
-- **[Example Data](examples/olivar-examples.md)**
+For detailed contribution guidelines, see the [Contributing Guide](developer/contributing.md).
 
-### **Output Formats**
+## Quick Reference Commands
 
-#### **ARTIC BED Format**
-- **Extension**: `.scheme.bed`
-- **Use Case**: Ready for `artic minion` workflows
-- **[Specification](user-guide/formats/artic-output.md)**
-
-#### **FASTA Format**
-- **Extension**: `.fasta`
-- **Use Case**: Multi-FASTA with detailed headers
-- **[Specification](user-guide/formats/fasta-output.md)**
-
-#### **STS Format**
-- **Extension**: `.sts.tsv`
-- **Use Case**: For me-pcr in-silico validation
-- **[Specification](user-guide/formats/sts-output.md)**
-
-## 🚀 **Quick Examples**
-
-### **Command Line**
 ```bash
-# Auto-detect format and convert
-preprimer convert --input primers.tsv --output-dir schemes/ --output-formats artic
+# Installation
+pip install -e ".[dev]"
 
-# Multiple output formats
-preprimer convert --input olivar-design.csv \
-                 --output-dir output/ \
-                 --output-formats artic fasta sts \
-                 --prefix COVID19
+# Basic usage
+preprimer convert --input primers.tsv --output-dir output/ --output-formats artic
 
-# Get file information
-preprimer info mysterious_primers.csv
+# Run tests
+python -m pytest
+
+# Check documentation
+python -c "import preprimer; help(preprimer)"
 ```
 
-### **Python API**
-```python
-from preprimer import convert_primers
+## Support and Community
 
-# Simple conversion
-output_files = convert_primers(
-    input_file="primers.tsv",
-    output_dir="schemes/",
-    output_formats=["artic", "fasta"],
-    prefix="MyVirus"
-)
-
-# Access results
-artic_file = output_files["artic"]
-fasta_file = output_files["fasta"]
-```
-
-## 📝 **Contributing to Documentation**
-
-Help us improve the documentation:
-
-1. **Report Issues**: Found something unclear? [Open an issue](https://github.com/FOI-Bioinformatics/preprimer/issues)
-2. **Suggest Improvements**: Have ideas for better docs? We'd love to hear them
-3. **Add Examples**: Share your workflows and use cases
-4. **Fix Typos**: Small improvements make a big difference
-
-### **Documentation Standards**
-- Use clear, concise language
-- Include working code examples
-- Add cross-references between related topics
-- Keep examples up-to-date with latest version
-
-## 🔗 **External Resources**
-
-### **Related Tools**
-- **[VarVAMP](https://github.com/jonas-fuchs/varVAMP)** - Primer design for tiled amplicon sequencing
-- **[ARTIC](https://github.com/artic-network/artic-tools)** - Real-time genomic surveillance toolkit
-- **[Olivar](https://github.com/treangenlab/Olivar)** - Variant-aware primer design
-
-### **Scientific Background**
-- **[Tiled Amplicon Sequencing](tutorials/tiled-sequencing-background.md)** - Scientific background
-- **[Primer Design Principles](tutorials/primer-design-principles.md)** - Best practices
-- **[Viral Genomics Workflows](tutorials/viral-genomics.md)** - Application context
-
-## 📊 **Documentation Statistics**
-
-- **📄 Pages**: 40+ comprehensive documentation pages
-- **💡 Examples**: 20+ working code examples
-- **🎯 Tutorials**: 10+ step-by-step guides
-- **🔧 References**: Complete API and CLI documentation
-- **🧪 Test Coverage**: Documented test procedures and validation
+- **GitHub Issues**: Bug reports and feature requests
+- **Discussions**: Questions and community support
+- **Documentation Issues**: Improvements and corrections
 
 ---
 
-## 🆘 **Need Help?**
-
-Can't find what you're looking for?
-
-- **[FAQ](user-guide/faq.md)** - Frequently asked questions
-- **[Troubleshooting](user-guide/troubleshooting.md)** - Common issues and solutions
-- **[Support](user-guide/support.md)** - How to get help
-- **[GitHub Issues](https://github.com/FOI-Bioinformatics/preprimer/issues)** - Report bugs or request features
-
----
-
-**📚 This documentation is continuously updated to reflect the latest PrePrimer features and best practices. Happy primer converting! 🧬✨**
+For the most current documentation, refer to the version control repository. Documentation is maintained alongside code releases to ensure accuracy and relevance.

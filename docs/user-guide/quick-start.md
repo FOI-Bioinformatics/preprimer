@@ -192,17 +192,12 @@ python tests/test_parsers_unified.py
 1. **[Configuration Guide](configuration.md)** - Customize PrePrimer behavior
 2. **[Format Guide](supported-formats.md)** - Learn about all supported formats  
 3. **[CLI Reference](cli-reference.md)** - Complete command-line guide
-4. **[Python API](python-api-basics.md)** - Programmatic usage
+4. **[Basic Usage](basic-usage.md)** - Essential workflows and examples
 
-### **Real-World Workflows**
-1. **[Viral Genomics Workflows](../tutorials/viral-genomics.md)** - End-to-end examples
-2. **[Quality Control](workflows/quality-control.md)** - Validating primer schemes
-3. **[Batch Processing](workflows/batch-processing.md)** - Processing multiple files
-
-### **Get Help**
-- **[FAQ](faq.md)** - Common questions and answers
-- **[Troubleshooting](troubleshooting/README.md)** - Solving common problems
-- **[Support](support.md)** - Where to get help
+### **Additional Documentation**
+- **[Technical Documentation](../technical/)** - Security, testing, and compatibility
+- **[Developer Documentation](../developer/)** - Architecture and contribution guide
+- **[Installation Guide](installation.md)** - Platform-specific installation instructions
 
 ## 🎉 **You're Ready!**
 

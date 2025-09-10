@@ -567,6 +567,6 @@ preprimer convert --input primers.tsv --validate-sequences --output-formats arti
 - **[Basic Usage](basic-usage.md)** - Converting between formats
 - **[CLI Reference](cli-reference.md)** - Command-line options
 - **[Configuration](configuration.md)** - Format-specific settings
-- **[Python API](python-api-basics.md)** - Programmatic format handling
+- **[Quick Start Guide](quick-start.md)** - Your first format conversion
 
 **Master all primer formats for seamless conversion workflows! 🧬✨**
