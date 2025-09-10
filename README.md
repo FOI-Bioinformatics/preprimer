@@ -1,34 +1,45 @@
 # PrePrimer
 
-A modern, extensible primer scheme converter for tiled amplicon sequencing applications.
+A comprehensive, extensible primer scheme converter for tiled amplicon sequencing applications with support for linear and circular genome architectures.
 
-PrePrimer facilitates interconversion between primer scheme formats commonly used in viral genome sequencing workflows, including VarVAMP, ARTIC, and Olivar formats through a plugin-based architecture.
+PrePrimer enables seamless interconversion between primer scheme formats used in genomic sequencing workflows, including VarVAMP, ARTIC, and Olivar formats. The software incorporates topology-aware processing for both linear and circular genomes, ensuring accurate coordinate handling for diverse biological targets including viral, bacterial, and organellar genomes.
 
 ## Version 0.2.0 Features
 
-- **Modular Architecture**: Plugin-based parser and writer system enabling extensibility
+- **Topology-aware Processing**: Automatic detection and handling of linear and circular genome architectures
+- **Ecosystem Integration**: Full compatibility with official primer design tools and repository standards
 - **Multi-format Support**: Bidirectional conversion between VarVAMP, ARTIC, and Olivar formats
-- **Security Implementation**: Input validation, path sanitization, and secure file operations
-- **Command-line Interface**: Intuitive commands with automatic format detection
-- **Comprehensive Testing**: 226 tests across multiple methodologies including property-based testing
-- **Performance Optimization**: Efficient processing of large primer datasets
-- **Configuration Management**: Flexible configuration system with environment variable support
+- **Standards Compliance**: adherence to primal-page specifications and articbedversion compatibility (v2.0, v3.0)
+- **Degenerate Primer Support**: Complete IUPAC nucleotide code handling for variant-aware designs
+- **Modular Architecture**: Plugin-based parser and writer system enabling extensibility
+- **Security Implementation**: Comprehensive input validation, path sanitization, and secure file operations
+- **Real-world Validation**: Tested with official schemes from PrimerSchemes Labs repository
+- **Command-line Interface**: Intuitive commands with automatic format detection and validation
+- **Comprehensive Testing**: 250+ tests including external validation and property-based testing
+- **Performance Optimization**: Efficient processing validated with datasets up to 2,500+ amplicons
 
 ## Supported Formats
 
 ### Input Formats
-- **VarVAMP** (`.tsv`, `.txt`) - Tiled primer schemes from varVAMP primer design tool
-- **ARTIC** (`.bed`, `.scheme.bed`) - ARTIC primer scheme BED format for tiled amplicon sequencing
-- **Olivar** (`.csv`) - Olivar primer design output format
+- **VarVAMP** (`.tsv`) - Complete 13-column specification with IUPAC degenerate nucleotide support
+- **ARTIC** (`.bed`) - Compatible with articbedversion v2.0 and v3.0 following primal-page specifications  
+- **Olivar** (`.csv`) - Native Olivar-generated CSV format with comprehensive amplicon metadata
+- **STS** (`.sts.tsv`) - Simple primer format for basic conversion workflows
 
 ### Output Formats  
-- **ARTIC** (`.scheme.bed`) - Compatible with ARTIC minion workflows
-- **FASTA** (`.fasta`) - Multi-FASTA format for primer sequences
-- **STS** (`.sts.tsv`) - Sequence Tagged Site format for in-silico PCR validation
-- **VarVAMP** (`.tsv`) - VarVAMP-compatible primer scheme format
-- **Olivar** (`.csv`) - Olivar primer design format
+- **ARTIC** (`.bed`) - Official primerscheme structure (primer.bed + reference.fasta + info.json)
+- **VarVAMP** (`.tsv`) - Complete 13-column format compatible with VarVAMP SADDLE algorithm
+- **Olivar** (`.csv`) - Row-based amplicon format with forward/reverse primer pairs
+- **FASTA** (`.fasta`) - Multi-FASTA primer sequences with standardized headers
+- **STS** (`.sts.tsv`) - Simple primer validation format for in-silico PCR tools
 
-The software supports bidirectional conversion between all implemented formats, maintaining data integrity and biological relevance throughout the conversion process.
+### Ecosystem Compatibility
+- **PrimerSchemes Labs**: Validated compatibility with official repository schemes
+- **Topology Support**: Automatic handling of circular genomes (mitochondria, plasmids, viral episomes)
+- **Standards Compliance**: Full adherence to primal-page specifications and ecosystem standards
+- **Coordinate Systems**: Proper conversion between 0-based BED and 1-based coordinate systems
+
+The software maintains complete bidirectional conversion fidelity across all implemented formats, preserving data integrity and biological accuracy throughout the conversion process.
 
 ## Installation
 
@@ -61,10 +72,11 @@ PrePrimer incorporates security measures for safe file processing:
 
 ### Performance Characteristics
 
-- Efficient processing capabilities for datasets containing up to 500 amplicons
-- Linear computational complexity O(n) scaling with dataset size
-- Memory utilization: approximately 50MB baseline, scaling to ~200MB for large datasets
-- Performance optimization through benchmarked parser implementations
+- Validated processing capabilities for datasets up to 2,500+ amplicons (Yale TB whole genome)
+- Linear computational complexity O(n) scaling with dataset size  
+- Memory utilization: approximately 50MB baseline, scaling efficiently for large datasets
+- Sub-second processing for typical viral genome schemes (≤500 amplicons)
+- Topology detection and coordinate conversion with minimal computational overhead
 
 ## Quick Start
 
@@ -171,31 +183,38 @@ PrePrimer 0.2.0 features a completely refactored, extensible architecture:
 
 ```
 preprimer/
-├── core/                    # Core abstractions and interfaces
-│   ├── interfaces.py        # Abstract base classes
-│   ├── config.py           # Configuration management  
-│   ├── converter.py        # Main conversion logic
-│   ├── registry.py         # Plugin registration system
-│   └── exceptions.py       # Custom exceptions
-├── parsers/                 # Input format parsers
-│   ├── varvamp_parser.py   # VarVAMP format
-│   ├── artic_parser.py     # ARTIC BED format
-│   └── olivar_parser.py    # Olivar CSV format
-├── writers/                 # Output format writers  
-│   ├── artic_writer.py     # ARTIC BED output
-│   ├── fasta_writer.py     # FASTA output
-│   └── sts_writer.py       # STS output for me-pcr
-└── cli.py                  # Modern command-line interface
+├── core/                          # Framework and abstractions
+│   ├── interfaces.py              # Abstract base classes (PrimerData, AmpliconData)
+│   ├── converter.py               # Main conversion orchestration
+│   ├── registry.py                # Plugin auto-registration system
+│   ├── topology.py                # Genome topology detection and circular coordinate handling
+│   ├── standardized_parser.py     # Base parser with topology integration
+│   ├── primerscheme_info.py       # Primal-page info.json schema implementation
+│   └── security.py                # Input validation and path sanitization
+├── parsers/                       # Input format handlers
+│   ├── varvamp_parser.py          # VarVAMP TSV format with IUPAC degenerate support
+│   ├── artic_parser.py            # ARTIC BED format (v2.0/v3.0 articbedversion)
+│   ├── olivar_parser.py           # Olivar CSV format with enhanced validation
+│   └── sts_parser.py              # STS TSV format
+├── writers/                       # Output format generators
+│   ├── artic_writer.py            # Official primerscheme structure (primer.bed + info.json)
+│   ├── varvamp_writer.py          # VarVAMP TSV format (full column specification)
+│   ├── olivar_writer.py           # Olivar CSV format
+│   ├── fasta_writer.py            # Multi-FASTA sequences
+│   └── sts_writer.py              # STS validation files
+└── cli.py                         # Modern command-line interface
 ```
 
 ### **Key Features**
 
-- **🔌 Plugin Architecture**: Easy to add new parsers and writers
-- **🛡️ Robust Validation**: Comprehensive error handling and data validation  
-- **⚙️ Flexible Configuration**: JSON-based configuration system
-- **🔍 Auto-detection**: Automatic format detection based on content
-- **📊 Data Structures**: Standardized primer and amplicon data models
-- **🧪 Extensible**: Clean interfaces for adding new functionality
+- **🧬 Topology-aware**: Automatic detection and handling of circular genome architectures
+- **🔌 Plugin Architecture**: Extensible parser and writer system with auto-registration
+- **🛡️ Standards Compliance**: Full adherence to primal-page specifications and ecosystem standards
+- **🧪 IUPAC Support**: Complete degenerate nucleotide handling for variant-aware primer designs
+- **🔍 Auto-detection**: Intelligent format detection based on content analysis and metadata
+- **📊 Data Integrity**: Standardized data models preserving biological accuracy across conversions
+- **⚙️ Flexible Configuration**: JSON-based configuration with primal-page info.json support
+- **🔐 Security-first**: Comprehensive input validation and secure file operations
 
 ## 🤝 **Contributing**
 
@@ -243,11 +262,14 @@ PrePrimer is licensed under the MIT License - see the [LICENSE](LICENSE) file fo
 
 ## 🙏 **Acknowledgments**
 
-- Original PrePrimer codebase
-- [VarVAMP](https://github.com/jonas-fuchs/varVAMP) primer design tool
-- [ARTIC](https://github.com/artic-network/artic-tools) tiled amplicon sequencing  
-- [Olivar](https://github.com/treangenlab/Olivar) variant-aware primer design
-- Contributors and users of the bioinformatics community
+- Original PrePrimer codebase foundation
+- [VarVAMP](https://github.com/jonas-fuchs/varVAMP) - SADDLE algorithm for variant-aware primer design
+- [ARTIC Network](https://github.com/artic-network) - Tiled amplicon sequencing protocols and tools
+- [Olivar](https://github.com/treangenlab/Olivar) - Advanced variant-aware primer design platform
+- [Primal-page](https://github.com/artic-network/primal-page) - Primer scheme metadata standards
+- [PrimerSchemes Labs](https://labs.primalscheme.com/) - Official primer scheme repository
+- Yale Grubaugh Laboratory - Real-world validation schemes (TB, West Nile Virus)
+- Contributors and users of the computational biology community
 
 ---
 

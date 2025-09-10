@@ -60,17 +60,18 @@ class VarVAMPWriter(OutputWriter):
             for primer in amplicon.primers:
                 row = {
                     "amplicon_name": amplicon_name,
+                    "amplicon_length": amplicon.length or 400,
                     "primer_name": primer.name,
-                    "sequence": primer.sequence,
+                    "pool": primer.pool or 1,
                     "start": primer.start,
                     "stop": primer.stop,
-                    "length": len(primer.sequence),
-                    "gc_content": self._calculate_gc_content(primer.sequence),
-                    # Default Tm if not available
-                    "tm": getattr(primer, "tm", 60.0),
-                    # Use score as penalty
-                    "penalty": getattr(primer, "score", 0.0),
-                    "pool": primer.pool or 1,
+                    "seq": primer.sequence,
+                    "size": len(primer.sequence),
+                    "gc_best": self._calculate_gc_content(primer.sequence) * 100,  # Convert to percentage
+                    "temp_best": getattr(primer, "tm", 60.0),
+                    "mean_gc": self._calculate_gc_content(primer.sequence) * 100,  # Convert to percentage
+                    "mean_temp": getattr(primer, "tm", 60.0),
+                    "score": getattr(primer, "score", 90.0),
                 }
                 primer_rows.append(row)
 
@@ -79,15 +80,18 @@ class VarVAMPWriter(OutputWriter):
             if primer_rows:
                 fieldnames = [
                     "amplicon_name",
+                    "amplicon_length", 
                     "primer_name",
-                    "sequence",
+                    "pool",
                     "start",
                     "stop",
-                    "length",
-                    "gc_content",
-                    "tm",
-                    "penalty",
-                    "pool",
+                    "seq",
+                    "size",
+                    "gc_best",
+                    "temp_best",
+                    "mean_gc",
+                    "mean_temp",
+                    "score",
                 ]
                 writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
                 writer.writeheader()
@@ -134,11 +138,18 @@ class VarVAMPWriter(OutputWriter):
                 # Check required columns
                 required_columns = {
                     "amplicon_name",
+                    "amplicon_length", 
                     "primer_name",
-                    "sequence",
+                    "pool",
                     "start",
                     "stop",
-                    "pool",
+                    "seq",
+                    "size",
+                    "gc_best",
+                    "temp_best",
+                    "mean_gc",
+                    "mean_temp",
+                    "score",
                 }
 
                 if not required_columns.issubset(set(reader.fieldnames or [])):
@@ -167,8 +178,8 @@ class VarVAMPWriter(OutputWriter):
             "description": self.description,
             "use_case": "VarVAMP primer design tool input",
             "columns": (
-                "amplicon_name, primer_name, sequence, start, stop, "
-                "length, gc_content, tm, penalty, pool"
+                "amplicon_name, amplicon_length, primer_name, pool, start, stop, "
+                "seq, size, gc_best, temp_best, mean_gc, mean_temp, score"
             ),
             "separator": "tab",
             "coordinate_system": "1-based",

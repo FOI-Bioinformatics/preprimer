@@ -100,17 +100,25 @@ class ARTICParser(PrimerParser):
                     sequence = parts[6]
 
                     # Parse primer name to get amplicon info
-                    # Format: PREFIX_AMPLICON_SIDE_ALT
-                    # Example: SARS-CoV-2_400_1_LEFT_1
+                    # Format: PREFIX_AMPLICON_SIDE_ALT (e.g., SARS-CoV-2_400_1_LEFT_1)
+                    # Or: PREFIX_AMPLICON_SIDE (e.g., SARS-CoV-2_1_LEFT)
                     name_parts = primer_name.split("_")
-                    if len(name_parts) < 4:
+                    if len(name_parts) < 3:
                         raise ParserError(
                             f"Invalid ARTIC primer name format: {primer_name}"
                         )
 
-                    # Extract amplicon number
-                    # Second to last before SIDE_ALT
-                    amplicon_num = name_parts[-3]
+                    # Extract amplicon number based on format
+                    if len(name_parts) >= 4 and (name_parts[-2] in ["LEFT", "RIGHT"]):
+                        # Format: PREFIX_SIZE_AMPLICON_SIDE_ALT
+                        amplicon_num = name_parts[-3]
+                    elif len(name_parts) >= 3 and (name_parts[-1] in ["LEFT", "RIGHT"]):
+                        # Format: PREFIX_AMPLICON_SIDE
+                        amplicon_num = name_parts[-2]
+                    else:
+                        # Fallback: assume second-to-last is amplicon number
+                        amplicon_num = name_parts[-2] if len(name_parts) > 2 else name_parts[1]
+                    
                     amplicon_id = f"amplicon_{amplicon_num}"
 
                     # Determine direction

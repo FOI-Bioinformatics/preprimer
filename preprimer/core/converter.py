@@ -155,7 +155,7 @@ class PrimerConverter:
             # ARTIC needs special directory structure
             output_path = output_dir / "artic" / prefix / "V1" / f"{prefix}.scheme.bed"
         else:
-            extension = writer.file_extension
+            extension = writer.file_extension()
             output_path = output_dir / output_format / f"{prefix}{extension}"
 
         # Check if file exists and force flag

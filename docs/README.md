@@ -1,6 +1,6 @@
 # PrePrimer Documentation
 
-This directory contains the complete documentation for PrePrimer, a primer scheme converter for tiled amplicon sequencing applications.
+This directory contains the complete documentation for PrePrimer, a comprehensive primer scheme converter for tiled amplicon sequencing applications with support for linear and circular genome architectures.
 
 ## Quick Navigation
 
@@ -27,16 +27,16 @@ This directory contains the complete documentation for PrePrimer, a primer schem
 ## Technical Documentation
 
 ### System Specifications
-- **[Security Implementation](technical/security.md)** - Security features and best practices
-- **[Testing Framework](technical/testing.md)** - Comprehensive testing methodology (226 tests)
-- **[Platform Compatibility](technical/compatibility.md)** - Platform support and requirements
+- **[Security Implementation](technical/security.md)** - Comprehensive security features and validation
+- **[Testing Framework](technical/testing.md)** - Extensive testing methodology (250+ tests with external validation)
+- **[Platform Compatibility](technical/compatibility.md)** - Platform support, topology handling, and ecosystem integration
 
 ## Developer Documentation
 
 ### Architecture and Design
-- **[Architecture Overview](developer/architecture.md)** - System design and component structure
-- **[Contributing Guide](developer/contributing.md)** - Development procedures and guidelines
-- **[Extending PrePrimer](developer/extending.md)** - Adding new formats and features
+- **[Architecture Overview](developer/architecture.md)** - Topology-aware system design and component structure
+- **[Contributing Guide](developer/contributing.md)** - Development procedures and ecosystem standards
+- **[Extending PrePrimer](developer/extending.md)** - Adding new formats with topology and standards support
 
 ### Development Resources
 - **[Performance Guide](developer/performance.md)** - Performance characteristics and optimization
