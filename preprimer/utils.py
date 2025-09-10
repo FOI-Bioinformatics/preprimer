@@ -1,60 +1,167 @@
 import os
 import re
-import shutil
+import logging
 import subprocess
 import tempfile
 from pathlib import Path
+from typing import Optional
+
+from .core.security import SecureFileOperations, SecurityError, secure_subprocess_call, InputValidator
+
+logger = logging.getLogger(__name__)
 
 ##
 # Contains three classes:
-# - FileHandler
+# - FileHandler (Security-enhanced)
 # - AmpliconUpdater
 # - Aligners
 
 
 class FileHandler:
+    """
+    Secure file operations handler with path validation.
+    
+    This class provides secure alternatives to common file operations,
+    preventing path traversal and other security vulnerabilities.
+    """
+    
+    def __init__(self, base_dir: Optional[Path] = None):
+        """
+        Initialize FileHandler with optional base directory restriction.
+        
+        Args:
+            base_dir: Optional base directory to restrict operations to
+        """
+        self.secure_ops = SecureFileOperations(base_dir)
+
     @staticmethod
     def ask_remove_folder(directory, force=False):
-        if not force:
-            response = (
-                input(
-                    f"Do you want to remove the existing folder and create "
-                    f"a new '{directory}'? (y/n): "
+        """
+        Securely ask for confirmation and remove a folder.
+        
+        Args:
+            directory: Directory to remove (validated for security)
+            force: Skip confirmation if True
+            
+        Returns:
+            bool: True if folder was removed, False otherwise
+        """
+        try:
+            # Use secure file operations
+            secure_ops = SecureFileOperations()
+            
+            if not force:
+                response = (
+                    input(
+                        f"Do you want to remove the existing folder and create "
+                        f"a new '{directory}'? (y/n): "
+                    )
+                    .strip()
+                    .lower()
                 )
-                .strip()
-                .lower()
-            )
-            if response == "y":
-                shutil.rmtree(directory)
+                if response == "y":
+                    secure_ops.safe_remove_tree(directory)
+                    logger.info(f"Folder '{directory}' has been removed.")
+                    print(f"Folder '{directory}' has been removed.")
+                    return True
+                else:
+                    print("Folder removal canceled.")
+                    return False
+            else:
+                secure_ops.safe_remove_tree(directory)
+                logger.info(f"Folder '{directory}' has been removed.")
                 print(f"Folder '{directory}' has been removed.")
                 return True
-            else:
-                print("Folder removal canceled.")
-                return False
-        else:
-            shutil.rmtree(directory)
-            print(f"Folder '{directory}' has been removed.")
-            return True
+                
+        except SecurityError as e:
+            logger.error(f"Security error removing folder '{directory}': {e}")
+            print(f"Error: Cannot remove folder '{directory}' - {e}")
+            return False
+        except Exception as e:
+            logger.error(f"Unexpected error removing folder '{directory}': {e}")
+            print(f"Error removing folder '{directory}': {e}")
+            return False
 
     @staticmethod
     def check_folder_exists(directory, force=False):
-        if not os.path.exists(directory):
-            Path(directory).mkdir(parents=True, exist_ok=True)
-            print(f"Output folder {directory} created successfully!")
-            return True
-        else:
-            print(f"Output folder {directory} already exists")
-            if FileHandler.ask_remove_folder(directory, force):
-                Path(directory).mkdir(parents=True, exist_ok=True)
+        """
+        Securely check if folder exists and create or remove as needed.
+        
+        Args:
+            directory: Directory to check/create (validated for security)
+            force: Skip confirmation for removal if True
+            
+        Returns:
+            bool: True if folder was created successfully, False otherwise
+        """
+        try:
+            secure_ops = SecureFileOperations()
+            
+            if not os.path.exists(directory):
+                secure_ops.safe_create_directories(directory)
+                logger.info(f"Output folder {directory} created successfully!")
                 print(f"Output folder {directory} created successfully!")
                 return True
             else:
-                print("end")
-                return False
+                print(f"Output folder {directory} already exists")
+                if FileHandler.ask_remove_folder(directory, force):
+                    secure_ops.safe_create_directories(directory)
+                    logger.info(f"Output folder {directory} created successfully!")
+                    print(f"Output folder {directory} created successfully!")
+                    return True
+                else:
+                    print("Operation cancelled")
+                    return False
+                    
+        except SecurityError as e:
+            logger.error(f"Security error with folder '{directory}': {e}")
+            print(f"Error: Cannot access folder '{directory}' - {e}")
+            return False
+        except Exception as e:
+            logger.error(f"Unexpected error with folder '{directory}': {e}")
+            print(f"Error with folder '{directory}': {e}")
+            return False
 
     @staticmethod
     def copy_file(src, dst):
-        shutil.copy(src, dst)
+        """
+        Securely copy a file with path validation.
+        
+        Args:
+            src: Source file path (validated for security)
+            dst: Destination file path (validated for security)
+            
+        Raises:
+            SecurityError: If paths are unsafe or operation fails
+        """
+        try:
+            secure_ops = SecureFileOperations()
+            
+            # Validate and sanitize paths
+            src_path = secure_ops.validator.sanitize_path(src)
+            dst_path = secure_ops.validator.sanitize_path(dst)
+            
+            # Ensure source file exists and is readable
+            if not src_path.exists():
+                raise SecurityError(f"Source file does not exist: {src_path}")
+            
+            if not src_path.is_file():
+                raise SecurityError(f"Source is not a file: {src_path}")
+            
+            # Ensure destination directory exists
+            dst_dir = dst_path.parent
+            if not dst_dir.exists():
+                secure_ops.safe_create_directories(dst_dir)
+            
+            # Perform the copy operation
+            import shutil
+            shutil.copy2(src_path, dst_path)
+            logger.info(f"File copied successfully: {src_path} -> {dst_path}")
+            
+        except SecurityError:
+            raise  # Re-raise security errors
+        except Exception as e:
+            raise SecurityError(f"Failed to copy file: {e}") from e
 
 
 # ___________________________________________________________
@@ -166,58 +273,151 @@ class AmpliconUpdater:
 class Aligner:
     @staticmethod
     def run_me_pcr(primer_sts_file, reference_genome, use_temp_file, regular_filepath):
-        if use_temp_file:
-            # Create a temporary file in the specified folder
-            with tempfile.NamedTemporaryFile(mode="w", delete=False) as output_file:
-                output_file_path = output_file.name
-        else:
-            # Create a regular file in the specified folder
-            if regular_filepath is None:
-                raise ValueError(
-                    "A regular filename must be provided if not using a temporary file."
-                )
-            output_file_path = regular_filepath
+        """
+        Securely execute me-PCR command with input validation.
+        
+        Args:
+            primer_sts_file: Path to primer STS file
+            reference_genome: Path to reference genome
+            use_temp_file: Whether to use temporary file for output
+            regular_filepath: Regular file path if not using temp file
+            
+        Returns:
+            str: Path to output file
+            
+        Raises:
+            SecurityError: If paths are unsafe or command fails
+        """
+        try:
+            secure_ops = SecureFileOperations()
+            
+            # Validate and sanitize input paths
+            primer_path = secure_ops.validator.sanitize_path(primer_sts_file)
+            reference_path = secure_ops.validator.sanitize_path(reference_genome)
+            
+            if use_temp_file:
+                # Create a temporary file in the specified folder
+                with tempfile.NamedTemporaryFile(mode="w", delete=False) as output_file:
+                    output_file_path = output_file.name
+            else:
+                # Create a regular file in the specified folder
+                if regular_filepath is None:
+                    raise ValueError(
+                        "A regular filename must be provided if not using a temporary file."
+                    )
+                output_file_path = str(secure_ops.validator.sanitize_path(regular_filepath))
 
-        # Define me-PCR command
-        me_pcr_command = (
-            f"me-PCR {primer_sts_file} {reference_genome} O={output_file_path} M=1000"
-        )
-        # Run me-PCR command
-        subprocess.run(me_pcr_command, shell=True)
-
-        return output_file_path
+            # Define me-PCR command as list (safer than shell=True)
+            me_pcr_command = [
+                "me-PCR",
+                str(primer_path),
+                str(reference_path),
+                f"O={output_file_path}",
+                "M=1000"
+            ]
+            
+            # Run me-PCR command securely
+            result = secure_subprocess_call(me_pcr_command)
+            
+            if result.returncode != 0:
+                logger.error(f"me-PCR failed with return code {result.returncode}")
+                logger.error(f"Error output: {result.stderr}")
+                raise SecurityError(f"me-PCR execution failed: {result.stderr}")
+            
+            logger.info(f"me-PCR completed successfully, output: {output_file_path}")
+            return output_file_path
+            
+        except SecurityError:
+            raise  # Re-raise security errors
+        except Exception as e:
+            raise SecurityError(f"Failed to run me-PCR: {e}") from e
 
     @staticmethod
     def run_exonerate(id, output_path, sequence, reference_genome):
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as seq_file:
-            seq_file.write(f">{id}\n" + sequence)
-            seq_file_path = seq_file.name
-
-        exonerate_command = [
-            "exonerate",
-            "--model",
-            "affine:local",
-            "--query",
-            seq_file_path,
-            "--target",
-            reference_genome,
-            "--showalignment",
-            "TRUE",
-            "--showvulgar",
-            "FALSE",
-            "--showcigar",
-            "TRUE",
-            "--ryo",
-            "%qas",
-            "--percent",
-            "90",
-            "--bestn",
-            "1",
-        ]
-        output_file_path = f"{output_path}/{id}.aln"
-        with open(output_file_path, "w") as output_file:
-            subprocess.run(exonerate_command, stdout=output_file, text=True)
-        return output_file_path
+        """
+        Securely execute exonerate alignment with input validation.
+        
+        Args:
+            id: Sequence identifier
+            output_path: Directory for output files
+            sequence: Primer sequence to align
+            reference_genome: Path to reference genome file
+            
+        Returns:
+            str: Path to alignment output file
+            
+        Raises:
+            SecurityError: If inputs are unsafe or command fails
+        """
+        try:
+            secure_ops = SecureFileOperations()
+            input_validator = InputValidator()
+            
+            # Validate inputs
+            input_validator.validate_amplicon_name(id)
+            input_validator.validate_primer_sequence(sequence)
+            
+            # Validate and sanitize paths
+            output_dir = secure_ops.validator.sanitize_path(output_path)
+            reference_path = secure_ops.validator.sanitize_path(reference_genome)
+            
+            # Create secure temporary sequence file
+            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".fasta") as seq_file:
+                seq_file.write(f">{id}\n{sequence}\n")
+                seq_file_path = seq_file.name
+            
+            try:
+                # Validate sequence file path
+                seq_path = secure_ops.validator.sanitize_path(seq_file_path)
+                
+                exonerate_command = [
+                    "exonerate",
+                    "--model",
+                    "affine:local",
+                    "--query",
+                    str(seq_path),
+                    "--target",
+                    str(reference_path),
+                    "--showalignment",
+                    "TRUE",
+                    "--showvulgar",
+                    "FALSE",
+                    "--showcigar",
+                    "TRUE",
+                    "--ryo",
+                    "%qas",
+                    "--percent",
+                    "90",
+                    "--bestn",
+                    "1",
+                ]
+                
+                # Create secure output file path
+                output_file_path = output_dir / f"{id}.aln"
+                
+                # Run exonerate securely
+                with secure_ops.safe_open_file(output_file_path, "w") as output_file:
+                    result = secure_subprocess_call(exonerate_command)
+                    output_file.write(result.stdout)
+                
+                if result.returncode != 0:
+                    logger.warning(f"Exonerate returned non-zero exit code {result.returncode}")
+                    logger.warning(f"Error output: {result.stderr}")
+                
+                logger.info(f"Exonerate alignment completed for {id}")
+                return str(output_file_path)
+                
+            finally:
+                # Clean up temporary sequence file
+                try:
+                    os.unlink(seq_file_path)
+                except OSError:
+                    pass  # File might already be deleted
+                    
+        except (SecurityError, ValueError):
+            raise  # Re-raise security and validation errors
+        except Exception as e:
+            raise SecurityError(f"Failed to run exonerate alignment: {e}") from e
 
     @staticmethod
     def parse_exonerate_output(output_file_path):
@@ -261,65 +461,115 @@ class Aligner:
 
     @staticmethod
     def run_blast(id, output_path, sequence, reference_genome, format):
-        # Ensure absolute paths
-        reference_genome = os.path.abspath(reference_genome)
-        output_path = os.path.abspath(output_path)
-
-        # Create a temporary FASTA file for the query sequence
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as seq_file:
-            print("Analysing: " + id)
-            seq_file.write(f">{id}\n{sequence}")
-            seq_file_path = seq_file.name
-
-        # Ensure the reference genome is formatted as a BLAST database
-        blast_db_prefix = os.path.splitext(os.path.basename(reference_genome))[0]
-        blastdb_output = output_path + "/db/" + f"{blast_db_prefix}"
-        if not os.path.exists(blastdb_output + ".nhr"):
-            if not os.path.exists(reference_genome):
-                raise FileNotFoundError(
-                    f"Reference genome file not found: {reference_genome}"
-                )
-            try:
-                blastdb_command = [
-                    "makeblastdb",
-                    "-in",
-                    reference_genome,
-                    "-dbtype",
-                    "nucl",
-                    "-out",
-                    blastdb_output,
-                ]
-                # print(' '.join(blastdb_command))
-                subprocess.run(blastdb_command, check=True)
-            except subprocess.CalledProcessError as e:
-                raise RuntimeError(f"Failed to create BLAST database: {e}")
-
-        # Define the BLAST output file
-        output_file_path = os.path.join(output_path, f"{id}.blast")
-        # Run BLAST
-        blast_command = [
-            "blastn",
-            "-query",
-            seq_file_path,
-            "-db",
-            blastdb_output,
-            "-out",
-            output_file_path,
-            "-outfmt",
-            format,  # Tabular format
-            "-evalue",
-            "1e-4",
-            "-task",
-            "blastn-short",
-        ]
+        """
+        Securely execute BLAST alignment with input validation.
+        
+        Args:
+            id: Sequence identifier
+            output_path: Directory for output files
+            sequence: Primer sequence to align
+            reference_genome: Path to reference genome file
+            format: BLAST output format
+            
+        Returns:
+            str: Path to BLAST output file
+            
+        Raises:
+            SecurityError: If inputs are unsafe or command fails
+        """
         try:
-            subprocess.run(blast_command, check=True)
-        except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"BLAST alignment failed: {e}")
-        finally:
-            os.remove(seq_file_path)
-
-        return output_file_path
+            secure_ops = SecureFileOperations()
+            input_validator = InputValidator()
+            
+            # Validate inputs
+            input_validator.validate_amplicon_name(id)
+            input_validator.validate_primer_sequence(sequence)
+            
+            if format not in ['6', '7', '10', '11']:  # Valid BLAST tabular formats
+                raise SecurityError(f"Invalid BLAST format: {format}")
+                
+            # Validate and sanitize paths
+            output_dir = secure_ops.validator.sanitize_path(output_path)
+            reference_path = secure_ops.validator.sanitize_path(reference_genome)
+            
+            if not reference_path.exists():
+                raise SecurityError(f"Reference genome file not found: {reference_path}")
+                
+            # Create secure temporary sequence file
+            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".fasta") as seq_file:
+                logger.info(f"Analyzing sequence: {id}")
+                seq_file.write(f">{id}\n{sequence}\n")
+                seq_file_path = seq_file.name
+            
+            try:
+                # Validate sequence file path
+                seq_path = secure_ops.validator.sanitize_path(seq_file_path)
+                
+                # Prepare BLAST database paths securely
+                blast_db_prefix = reference_path.stem
+                db_dir = output_dir / "db"
+                secure_ops.safe_create_directories(db_dir)
+                blastdb_output = db_dir / blast_db_prefix
+                
+                # Create BLAST database if needed
+                db_check_file = Path(str(blastdb_output) + ".nhr")
+                if not db_check_file.exists():
+                    blastdb_command = [
+                        "makeblastdb",
+                        "-in",
+                        str(reference_path),
+                        "-dbtype",
+                        "nucl",
+                        "-out",
+                        str(blastdb_output),
+                    ]
+                    
+                    result = secure_subprocess_call(blastdb_command)
+                    if result.returncode != 0:
+                        raise SecurityError(f"Failed to create BLAST database: {result.stderr}")
+                    
+                    logger.info("BLAST database created successfully")
+                
+                # Create secure output file path
+                output_file_path = output_dir / f"{id}.blast"
+                
+                # Run BLAST alignment securely
+                blast_command = [
+                    "blastn",
+                    "-query",
+                    str(seq_path),
+                    "-db",
+                    str(blastdb_output),
+                    "-out",
+                    str(output_file_path),
+                    "-outfmt",
+                    format,
+                    "-evalue",
+                    "1e-4",
+                    "-task",
+                    "blastn-short",
+                ]
+                
+                result = secure_subprocess_call(blast_command)
+                if result.returncode != 0:
+                    logger.warning(f"BLAST returned non-zero exit code {result.returncode}")
+                    logger.warning(f"Error output: {result.stderr}")
+                    raise SecurityError(f"BLAST alignment failed: {result.stderr}")
+                
+                logger.info(f"BLAST alignment completed for {id}")
+                return str(output_file_path)
+                
+            finally:
+                # Clean up temporary sequence file
+                try:
+                    os.unlink(seq_file_path)
+                except OSError:
+                    pass  # File might already be deleted
+                    
+        except (SecurityError, ValueError):
+            raise  # Re-raise security and validation errors
+        except Exception as e:
+            raise SecurityError(f"Failed to run BLAST alignment: {e}") from e
 
     @staticmethod
     def parse_blast_output(output_file_path):

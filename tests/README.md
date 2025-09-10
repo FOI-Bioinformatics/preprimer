@@ -1,6 +1,6 @@
 # 🧪 PrePrimer Test Suite
 
-This directory contains a comprehensive, harmonized test suite for all PrePrimer parsers and functionality.
+This directory contains a clean, focused test suite for all PrePrimer core functionality.
 
 ## 📁 **Test Structure**
 
@@ -8,10 +8,11 @@ This directory contains a comprehensive, harmonized test suite for all PrePrimer
 tests/
 ├── README.md                    # This file
 ├── conftest.py                  # Pytest configuration and shared fixtures
-├── test_all_parsers.py         # Harmonized tests for all parsers
-├── test_parsers_unified.py     # Unified test framework (manual execution)
-├── test_olivar_parser.py       # Specific Olivar parser tests
-├── test_refactored_system.py   # System architecture tests
+├── test_all_parsers.py         # Harmonized tests for all parsers (28 tests)
+├── test_core_config.py         # Configuration management tests (20 tests)
+├── test_core_interfaces.py     # Data structure tests (16 tests)
+├── test_refactored_system.py   # System architecture tests (12 tests)
+├── test_security.py            # Security validation tests (18 tests)
 └── test_data/                  # Test data for all parsers
     ├── ASFV_long/              # VarVAMP test data
     │   ├── primers.tsv
@@ -61,15 +62,32 @@ tests/
 
 ### **Complete Test Suite (Recommended)**
 ```bash
-# Run all harmonized tests with pytest
-python -m pytest tests/test_all_parsers.py -v
+# Run all tests (94 tests total)
+python -m pytest tests/ -v
 
 # Run with coverage
-python -m pytest tests/test_all_parsers.py --cov=preprimer --cov-report=html
+python -m pytest tests/ --cov=preprimer --cov-report=html
 
-# Run specific test categories
-python -m pytest tests/test_all_parsers.py::TestParserValidation -v
-python -m pytest tests/test_all_parsers.py::TestOutputConsistency -v
+# Quick run (quiet mode)
+python -m pytest tests/ -q
+```
+
+### **Individual Test Categories**
+```bash
+# Security tests (18 tests)
+python -m pytest tests/test_security.py -v
+
+# Parser tests (28 tests)
+python -m pytest tests/test_all_parsers.py -v
+
+# Core configuration tests (20 tests)
+python -m pytest tests/test_core_config.py -v
+
+# Data structure tests (16 tests) 
+python -m pytest tests/test_core_interfaces.py -v
+
+# System integration tests (12 tests)
+python -m pytest tests/test_refactored_system.py -v
 ```
 
 ### **Specific Parser Tests**
@@ -82,21 +100,6 @@ python -m pytest tests/test_all_parsers.py -k "artic" -v
 
 # Test only Olivar parser
 python -m pytest tests/test_all_parsers.py -k "olivar" -v
-```
-
-### **Integration Tests**
-```bash
-# Run integration tests only
-python -m pytest tests/test_all_parsers.py -m integration -v
-
-# Skip slow tests
-python -m pytest tests/test_all_parsers.py -m "not slow" -v
-```
-
-### **Manual Test Runner**
-```bash
-# Run unified tests manually (comprehensive output)
-python tests/test_parsers_unified.py
 ```
 
 ## 📊 **Test Coverage**
@@ -113,8 +116,8 @@ The harmonized test suite provides comprehensive coverage:
 | **Integration** | ✅ End-to-end workflows, cross-parser compatibility | 100% |
 
 ### **Test Statistics**
-- **28 pytest tests** across all components
-- **Parametrized tests** for all 3 parser types
+- **94 pytest tests** across all components
+- **5 test modules** covering core functionality
 - **3 test data sets** with real-world examples
 - **100% pass rate** on all supported platforms
 

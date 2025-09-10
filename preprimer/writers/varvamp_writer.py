@@ -14,12 +14,12 @@ from preprimer.core.interfaces import AmpliconData, OutputWriter
 class VarVAMPWriter(OutputWriter):
     """Writer for VarVAMP TSV format."""
 
-    @property
-    def format_name(self) -> str:
+    @classmethod
+    def format_name(cls) -> str:
         return "varvamp"
 
-    @property
-    def file_extension(self) -> str:
+    @classmethod
+    def file_extension(cls) -> str:
         return ".tsv"
 
     @property

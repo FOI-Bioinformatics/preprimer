@@ -1,0 +1,51 @@
+# Mutation testing configuration for preprimer
+# This file configures mutmut for comprehensive test quality assessment
+
+[mutmut]
+# Test runner configuration
+runner = python -m pytest tests/ -x --tb=no --disable-warnings
+
+# Paths to mutate (focus on core functionality)
+paths_to_mutate = preprimer/
+
+# Exclude patterns
+paths_to_exclude = 
+    tests/
+    examples/
+    docs/
+    setup.py
+    conftest.py
+    __pycache__/
+    .git/
+    .pytest_cache/
+    htmlcov/
+    .mutmut-cache/
+
+# File patterns to mutate
+include_patterns =
+    *.py
+
+# File patterns to exclude  
+exclude_patterns =
+    *test*.py
+    *__init__.py
+    *conftest*.py
+    *setup*.py
+
+# Backup before mutation (recommended for safety)
+backup = true
+
+# Show which mutants survived
+show_mutants = true
+
+# Use multiprocessing for faster execution
+use_multiprocessing = true
+
+# Number of processes (auto-detect if not specified)
+# processes = 4
+
+# Cache results to speed up re-runs
+use_cache = true
+
+# Timeout for individual test runs (seconds)
+timeout = 300

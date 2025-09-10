@@ -31,8 +31,8 @@ class TestParserValidation:
         format_name = parser_test_data["format"]
         parser = parser_registry.get_parser(format_name)
 
-        assert parser.format_name == format_name
-        assert len(parser.file_extensions) >= 1
+        assert parser.format_name() == format_name
+        assert len(parser.file_extensions()) >= 1
 
         # Test file validation
         file_path = parser_test_data["file"]
@@ -215,13 +215,14 @@ class TestCrossParserCompatibility:
         test_files = [
             (
                 "varvamp",
-                Path(__file__).parent / "test_data" / "ASFV_long" / "primers.tsv",
+                Path(__file__).parent / "test_data" / "legacy" / "ASFV_long" / "primers.tsv",
             ),
-            ("artic", Path(__file__).parent / "test_data" / "ASFV.scheme.bed"),
+            ("artic", Path(__file__).parent / "test_data" / "legacy" / "ASFV.scheme.bed"),
             (
                 "olivar",
                 Path(__file__).parent
                 / "test_data"
+                / "legacy"
                 / "olivar_examples"
                 / "olivar-design.csv",
             ),

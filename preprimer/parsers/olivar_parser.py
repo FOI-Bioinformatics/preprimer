@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 class OlivarParser(PrimerParser):
     """Parser for Olivar primer format."""
 
-    @property
-    def format_name(self) -> str:
+    @classmethod
+    def format_name(cls) -> str:
         return "olivar"
 
-    @property
-    def file_extensions(self) -> List[str]:
+    @classmethod
+    def file_extensions(cls) -> List[str]:
         return [".csv"]
 
     def validate_file(self, file_path: Union[str, Path]) -> bool:

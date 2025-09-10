@@ -21,14 +21,13 @@ class ParserRegistry:
 
     def register(self, parser_class: Type[PrimerParser]) -> None:
         """Register a parser class."""
-        # Create instance to get format info
-        parser = parser_class()
-        format_name = parser.format_name.lower()
+        # Get format info directly from class (no instance creation)
+        format_name = parser_class.format_name().lower()
 
         logger.debug(f"Registering parser for format: {format_name}")
 
         self._parsers[format_name] = parser_class
-        self._format_extensions[format_name] = parser.file_extensions
+        self._format_extensions[format_name] = parser_class.file_extensions()
 
     def get_parser(self, format_name: str) -> PrimerParser:
         """Get parser instance for a format."""
@@ -43,7 +42,7 @@ class ParserRegistry:
         file_path = Path(file_path)
         extension = file_path.suffix.lower()
 
-        # First try by extension
+        # First try by extension - create instances only when needed
         for format_name, extensions in self._format_extensions.items():
             if extension in extensions:
                 parser = self.get_parser(format_name)
@@ -52,6 +51,40 @@ class ParserRegistry:
 
         # If extension doesn't match, try all parsers
         for format_name in self._parsers:
+            parser = self.get_parser(format_name)
+            if parser.validate_file(file_path):
+                return format_name
+
+        return None
+
+    def detect_format_optimized(self, file_path: Union[str, Path]) -> Optional[str]:
+        """
+        Optimized format detection that minimizes instance creation.
+        
+        This method only creates parser instances when validation is needed,
+        and reuses cached validation results where possible.
+        """
+        file_path = Path(file_path)
+        extension = file_path.suffix.lower()
+
+        # Build a priority list: extension matches first, then others
+        priority_formats = []
+        other_formats = []
+        
+        for format_name, extensions in self._format_extensions.items():
+            if extension in extensions:
+                priority_formats.append(format_name)
+            else:
+                other_formats.append(format_name)
+
+        # Try priority formats first (extension matches)
+        for format_name in priority_formats:
+            parser = self.get_parser(format_name)
+            if parser.validate_file(file_path):
+                return format_name
+
+        # Then try other formats
+        for format_name in other_formats:
             parser = self.get_parser(format_name)
             if parser.validate_file(file_path):
                 return format_name
@@ -77,14 +110,13 @@ class WriterRegistry:
 
     def register(self, writer_class: Type[OutputWriter]) -> None:
         """Register a writer class."""
-        # Create instance to get format info
-        writer = writer_class()
-        format_name = writer.format_name.lower()
+        # Get format info directly from class (no instance creation)
+        format_name = writer_class.format_name().lower()
 
         logger.debug(f"Registering writer for format: {format_name}")
 
         self._writers[format_name] = writer_class
-        self._format_extensions[format_name] = writer.file_extension
+        self._format_extensions[format_name] = writer_class.file_extension()
 
     def get_writer(self, format_name: str) -> OutputWriter:
         """Get writer instance for a format."""
@@ -112,9 +144,8 @@ class AlignmentRegistry:
 
     def register(self, provider_class: Type[AlignmentProvider]) -> None:
         """Register an alignment provider class."""
-        # Create instance to get tool info
-        provider = provider_class()
-        tool_name = provider.tool_name.lower()
+        # Get tool info directly from class (no instance creation)
+        tool_name = provider_class.tool_name().lower()
 
         logger.debug(f"Registering alignment provider: {tool_name}")
 

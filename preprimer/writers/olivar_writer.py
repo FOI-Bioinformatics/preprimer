@@ -14,12 +14,12 @@ from preprimer.core.interfaces import AmpliconData, OutputWriter
 class OlivarWriter(OutputWriter):
     """Writer for Olivar CSV format."""
 
-    @property
-    def format_name(self) -> str:
+    @classmethod
+    def format_name(cls) -> str:
         return "olivar"
 
-    @property
-    def file_extension(self) -> str:
+    @classmethod
+    def file_extension(cls) -> str:
         return ".csv"
 
     @property

@@ -15,12 +15,12 @@ logger = logging.getLogger(__name__)
 class STSWriter(OutputWriter):
     """Writer for STS format used by me-pcr."""
 
-    @property
-    def format_name(self) -> str:
+    @classmethod
+    def format_name(cls) -> str:
         return "sts"
 
-    @property
-    def file_extension(self) -> str:
+    @classmethod
+    def file_extension(cls) -> str:
         return ".sts.tsv"
 
     def write(
@@ -62,9 +62,11 @@ class STSWriter(OutputWriter):
                     reverse_primer = reverse_primers[0]
 
                     # Create STS name (amplicon identifier)
-                    sts_name = f"{amplicon.amplicon_id}"
+                    sts_name = amplicon.amplicon_id
                     if hasattr(amplicon, "reference_id") and amplicon.reference_id:
-                        sts_name = f"{amplicon.reference_id}_{amplicon.amplicon_id}"
+                        # Check if amplicon_id already contains reference_id to avoid duplication
+                        if not amplicon.amplicon_id.startswith(amplicon.reference_id):
+                            sts_name = f"{amplicon.reference_id}_{amplicon.amplicon_id}"
 
                     # Write STS line: NAME FORWARD REVERSE
                     sts_line = (

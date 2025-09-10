@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 class ARTICWriter(OutputWriter):
     """Writer for ARTIC primer scheme format."""
 
-    @property
-    def format_name(self) -> str:
+    @classmethod
+    def format_name(cls) -> str:
         return "artic"
 
-    @property
-    def file_extension(self) -> str:
+    @classmethod
+    def file_extension(cls) -> str:
         return ".scheme.bed"
 
     def write(

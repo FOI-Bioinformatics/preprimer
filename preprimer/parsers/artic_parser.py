@@ -15,12 +15,12 @@ logger = logging.getLogger(__name__)
 class ARTICParser(PrimerParser):
     """Parser for ARTIC primer format (BED format)."""
 
-    @property
-    def format_name(self) -> str:
+    @classmethod
+    def format_name(cls) -> str:
         return "artic"
 
-    @property
-    def file_extensions(self) -> List[str]:
+    @classmethod
+    def file_extensions(cls) -> List[str]:
         return [".bed", ".scheme.bed"]
 
     def validate_file(self, file_path: Union[str, Path]) -> bool:

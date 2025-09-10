@@ -83,14 +83,14 @@ class AmpliconData:
 class PrimerParser(ABC):
     """Abstract base class for primer format parsers."""
 
-    @property
+    @classmethod
     @abstractmethod
-    def format_name(self) -> str:
+    def format_name(cls) -> str:
         """Return the format name this parser handles."""
 
-    @property
+    @classmethod
     @abstractmethod
-    def file_extensions(self) -> List[str]:
+    def file_extensions(cls) -> List[str]:
         """Return supported file extensions."""
 
     @abstractmethod
@@ -111,14 +111,14 @@ class PrimerParser(ABC):
 class OutputWriter(ABC):
     """Abstract base class for output format writers."""
 
-    @property
+    @classmethod
     @abstractmethod
-    def format_name(self) -> str:
+    def format_name(cls) -> str:
         """Return the output format name."""
 
-    @property
+    @classmethod
     @abstractmethod
-    def file_extension(self) -> str:
+    def file_extension(cls) -> str:
         """Return the file extension for this format."""
 
     @abstractmethod
@@ -141,9 +141,9 @@ class OutputWriter(ABC):
 class AlignmentProvider(ABC):
     """Abstract base class for alignment tools."""
 
-    @property
+    @classmethod
     @abstractmethod
-    def tool_name(self) -> str:
+    def tool_name(cls) -> str:
         """Return the alignment tool name."""
 
     @abstractmethod

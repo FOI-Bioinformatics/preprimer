@@ -7,7 +7,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from .config import PrePrimerConfig
-from .exceptions import OutputError, ParserError, ValidationError
+from .exceptions import (
+    OutputError, ParserError, ValidationError, FileNotFoundError,
+    InvalidFormatError, ErrorContext, handle_common_exceptions
+)
 from .interfaces import AmpliconData
 from .registry import parser_registry, writer_registry
 
@@ -48,30 +51,55 @@ class PrimerConverter:
         input_file = Path(input_file)
         output_dir = Path(output_dir)
 
-        # Validate input
-        if not input_file.exists():
-            raise ParserError(f"Input file not found: {input_file}")
+        with ErrorContext("primer format conversion"):
+            # Validate input file exists
+            if not input_file.exists():
+                raise FileNotFoundError(str(input_file))
 
-        # Auto-detect format if not specified
-        if input_format is None:
-            input_format = parser_registry.detect_format(input_file)
+            # Auto-detect format if not specified
             if input_format is None:
-                available_formats = parser_registry.list_formats()
+                input_format = parser_registry.detect_format(input_file)
+                if input_format is None:
+                    available_formats = parser_registry.list_formats()
+                    error = InvalidFormatError(
+                        str(input_file),
+                        user_message=f"Could not detect the format of {input_file}. "
+                                   f"Available formats: {', '.join(available_formats)}"
+                    )
+                    error.add_suggestion("Try specifying the input format explicitly")
+                    error.add_suggestion("Check that the file is in a supported format")
+                    raise error
+
+            logger.info(f"Detected input format: {input_format}")
+
+            # Parse input file with error handling
+            try:
+                parser = parser_registry.get_parser(input_format)
+                amplicons = parser.parse(input_file, prefix)
+            except ParserError:
+                # Re-raise parser errors as-is (they already have good context)
+                raise
+            except Exception as e:
+                # Wrap unexpected parsing errors
                 raise ParserError(
-                    f"Could not detect input format. Available formats: "
-                    f"{available_formats}"
-                )
+                    f"Unexpected error parsing {input_format} file: {e}",
+                    file_path=str(input_file),
+                    user_message=f"Failed to parse {input_file} as {input_format} format."
+                ).add_suggestion(f"Verify that {input_file} is a valid {input_format} file") from e
 
-        logger.info(f"Detected input format: {input_format}")
+            logger.info(f"Parsed {len(amplicons)} amplicons")
 
-        # Parse input file
-        parser = parser_registry.get_parser(input_format)
-        amplicons = parser.parse(input_file, prefix)
-
-        logger.info(f"Parsed {len(amplicons)} amplicons")
-
-        # Validate amplicons
-        self._validate_amplicons(amplicons)
+            # Validate amplicons
+            try:
+                self._validate_amplicons(amplicons)
+            except ValidationError:
+                # Re-raise validation errors as-is
+                raise
+            except Exception as e:
+                raise ValidationError(
+                    f"Unexpected error during amplicon validation: {e}",
+                    user_message="Error validating parsed amplicon data."
+                ).add_suggestion("Check that the input data is complete and valid") from e
 
         # Get reference file if not provided
         if reference_file is None:

@@ -15,12 +15,12 @@ logger = logging.getLogger(__name__)
 class FASTAWriter(OutputWriter):
     """Writer for FASTA primer format."""
 
-    @property
-    def format_name(self) -> str:
+    @classmethod
+    def format_name(cls) -> str:
         return "fasta"
 
-    @property
-    def file_extension(self) -> str:
+    @classmethod
+    def file_extension(cls) -> str:
         return ".fasta"
 
     def write(
