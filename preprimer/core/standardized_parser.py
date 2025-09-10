@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, Union, Any
 from .exceptions import ParserError, SecurityError, InvalidFormatError
 from .interfaces import AmpliconData, PrimerData, PrimerParser
 from .security import InputValidator, PathValidator
+from .topology import TopologyDetector, GenomeInfo, GenomeTopology
 
 logger = logging.getLogger(__name__)
 
@@ -53,16 +54,19 @@ class StandardizedParser(PrimerParser):
                 user_message=f"File {validated_path} is not in valid {self.__class__.format_name()} format."
             )
         
-        # Step 3: Parse file with standardized error handling
+        # Step 3: Detect genome topology
+        genome_info = self._detect_topology(validated_path, prefix)
+        
+        # Step 4: Parse file with standardized error handling
         logger.info(f"Parsing {self.__class__.format_name()} file: {validated_path}")
         
         try:
             amplicons = self._parse_file_content(validated_path, prefix)
             
-            # Step 4: Post-process results
-            amplicon_list = self._finalize_amplicons(amplicons)
+            # Step 5: Post-process results with topology validation
+            amplicon_list = self._finalize_amplicons(amplicons, genome_info)
             
-            # Step 5: Log results
+            # Step 6: Log results
             self._log_parse_results(amplicon_list)
             
             return amplicon_list
@@ -96,6 +100,33 @@ class StandardizedParser(PrimerParser):
             self.input_validator.validate_amplicon_name(prefix)
         
         return validated_path
+    
+    def _detect_topology(self, file_path: Path, prefix: str) -> GenomeInfo:
+        """
+        Detect genome topology from available information.
+        
+        Args:
+            file_path: Validated file path
+            prefix: Validated prefix (reference ID)
+            
+        Returns:
+            GenomeInfo with detected topology
+        """
+        # Look for metadata file in same directory
+        metadata_file = file_path.parent / "metadata.yaml"
+        
+        # Try loading from metadata file first
+        if metadata_file.exists():
+            genome_info = TopologyDetector.load_from_metadata_file(metadata_file)
+            if genome_info:
+                logger.info(f"Detected {genome_info.topology.value} topology from metadata file")
+                return genome_info
+        
+        # Fall back to detection based on reference ID/prefix
+        genome_info = TopologyDetector.detect_topology(reference_id=prefix)
+        logger.info(f"Detected {genome_info.topology.value} topology for reference {prefix or 'unknown'}")
+        
+        return genome_info
     
     def _validate_required_fields(
         self, row: Dict[str, str], required_fields: List[str], row_num: int
@@ -285,12 +316,17 @@ class StandardizedParser(PrimerParser):
             **kwargs
         )
     
-    def _finalize_amplicons(self, amplicons: Dict[str, AmpliconData]) -> List[AmpliconData]:
+    def _finalize_amplicons(
+        self, 
+        amplicons: Dict[str, AmpliconData], 
+        genome_info: GenomeInfo
+    ) -> List[AmpliconData]:
         """
-        Finalize amplicon data with length calculations and validation.
+        Finalize amplicon data with length calculations and topology validation.
         
         Args:
             amplicons: Dictionary of amplicon data
+            genome_info: Genome topology information
             
         Returns:
             List of finalized AmpliconData objects
@@ -301,12 +337,35 @@ class StandardizedParser(PrimerParser):
         if not amplicons:
             raise ParserError(f"No valid amplicons found in {self.__class__.format_name()} file")
         
-        # Calculate amplicon lengths and validate
+        # Calculate amplicon lengths and validate with topology awareness
         for amplicon in amplicons.values():
             if amplicon.primers:
                 starts = [p.start for p in amplicon.primers]
                 stops = [p.stop for p in amplicon.primers]
-                amplicon.length = max(stops) - min(starts)
+                
+                # Calculate length with topology awareness
+                if genome_info.topology == GenomeTopology.CIRCULAR and genome_info.length:
+                    # For circular genomes, use topology-aware length calculation
+                    from .topology import calculate_amplicon_length
+                    amplicon_start = min(starts)
+                    amplicon_end = max(stops)
+                    amplicon.length = calculate_amplicon_length(
+                        amplicon_start, amplicon_end, 
+                        genome_info.topology, genome_info.length
+                    )
+                else:
+                    # Linear calculation
+                    amplicon.length = max(stops) - min(starts)
+                
+                # Validate coordinates against topology
+                coordinates = [(p.start, p.stop) for p in amplicon.primers]
+                warnings = TopologyDetector.validate_coordinates(
+                    coordinates, genome_info, strict=False
+                )
+                
+                # Log coordinate validation warnings
+                for warning in warnings:
+                    logger.warning(f"Amplicon {amplicon.amplicon_id}: {warning}")
                 
                 # Validate amplicon has both forward and reverse primers
                 directions = {p.direction for p in amplicon.primers}

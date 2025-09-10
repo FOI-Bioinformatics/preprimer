@@ -215,6 +215,7 @@ PathValidator.validate_output_directory(output_dir)
 **Essential Principles:**
 - All format conversions preserve data integrity bidirectionally
 - Automatic format detection using content analysis + file extensions
+- Circular genome support with coordinate wrapping (e.g., mitochondrial DNA)
 - Security-first approach: all file operations use validation utilities
 - Plugin architecture enables custom formats without core changes
 - Comprehensive error handling with informative validation messages
@@ -222,10 +223,11 @@ PathValidator.validate_output_directory(output_dir)
 **Test Data Structure:**
 ```
 tests/test_data/datasets/
-├── small/      # COVID-19: 5 amplicons (fast testing)
-└── medium/     # ASFV: 80 amplicons (performance testing)
+├── small/          # COVID-19: 5 amplicons (fast testing)
+├── medium/         # ASFV: 80 amplicons (performance testing)
+└── mitochondrial/  # Human mito: 8 amplicons (circular genome testing)
 ```
-Each dataset includes cross-format consistency with realistic biological data.
+Each dataset includes cross-format consistency with realistic biological data. The mitochondrial dataset specifically tests circular genome coordinate wrapping.
 
 ### Quality Standards
 

@@ -1,0 +1,16 @@
+amplicon_count: 8
+coverage_bp: 4200
+created_by: human_design_for_circular_genome_testing
+description: Human mitochondrial genome dataset for circular genome and coordinate wrapping testing
+formats:
+  artic: 7-field BED with sequences
+  olivar: CSV design + primer BED
+  sts: 4-field amplicon format  
+  varvamp: 13-field TSV with quality metrics
+name: Human Mitochondrial Circular Dataset
+organism: Homo sapiens mitochondrion
+primer_count: 16
+reference_id: NC_012920.1
+source: Designed for circular genome edge case testing
+topology: circular
+genome_length: 16569

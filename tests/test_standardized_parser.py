@@ -281,8 +281,12 @@ class TestStandardizedParserInterface:
         
         amplicons_dict = {"test_amp": amplicon}
         
+        # Create mock genome info for testing
+        from preprimer.core.topology import GenomeInfo, GenomeTopology
+        genome_info = GenomeInfo("test", GenomeTopology.LINEAR, 30000)
+        
         # Test finalization
-        result = parser._finalize_amplicons(amplicons_dict)
+        result = parser._finalize_amplicons(amplicons_dict, genome_info)
         
         assert len(result) == 1
         assert result[0].amplicon_id == "test_amp"
@@ -292,8 +296,12 @@ class TestStandardizedParserInterface:
         """Test finalization with empty amplicons dict."""
         parser = MockStandardizedParser()
         
+        # Create mock genome info for testing
+        from preprimer.core.topology import GenomeInfo, GenomeTopology
+        genome_info = GenomeInfo("test", GenomeTopology.LINEAR, 30000)
+        
         with pytest.raises(ParserError, match="No valid amplicons found"):
-            parser._finalize_amplicons({})
+            parser._finalize_amplicons({}, genome_info)
     
     def test_logging_functionality(self):
         """Test standardized logging."""
@@ -376,15 +384,15 @@ class TestStandardizedParserIntegration:
         
         parser = VarVAMPParser()
         
-        # Get test data path
-        test_data_path = Path(__file__).parent / "test_data" / "ASFV_long"
+        # Get test data path - use legacy ASFV_long data
+        test_data_path = Path(__file__).parent / "test_data" / "legacy" / "ASFV_long"
         if not test_data_path.exists():
-            pytest.skip("VarVAMP test data not available")
+            pytest.skip("Legacy ASFV_long test data not available")
             return
         
         varvamp_files = list(test_data_path.glob("*.tsv"))
         if not varvamp_files:
-            pytest.skip("No VarVAMP TSV files found")
+            pytest.skip("No VarVAMP TSV files found in legacy data")
             return
         
         # Parse first available file

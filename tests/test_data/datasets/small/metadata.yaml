@@ -12,3 +12,5 @@ organism: SARS-CoV-2
 primer_count: 10
 reference_id: EPI_ISL_402124
 source: Generated from olivar_examples/olivar-design.csv
+topology: linear
+genome_length: 29903

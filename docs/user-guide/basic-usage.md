@@ -142,6 +142,55 @@ preprimer convert \
     --config strict-validation.json
 ```
 
+### **5. Circular Genome Example**
+
+PrePrimer automatically detects circular genomes and handles coordinate wrapping for biologically accurate interpretation:
+
+```bash
+# Convert human mitochondrial primers (automatically detected as circular)
+preprimer convert \
+    --input mitochondrial_primers.tsv \
+    --output-dir mito_schemes/ \
+    --output-formats artic fasta sts \
+    --prefix NC_012920.1
+
+# Log output shows automatic topology detection:
+# INFO: Detected circular topology for reference NC_012920.1
+# INFO: Amplicon NC_012920.1_1: length 370 (wrapping boundary)
+```
+
+**Topology Detection Examples:**
+
+```bash
+# Automatic detection from reference ID
+preprimer convert --input primers.tsv --prefix NC_012920.1 --output-formats artic
+# → Detects: circular, 16,569 bp (human mitochondrial genome)
+
+# Automatic detection from metadata file
+echo "topology: circular\ngenome_length: 16569" > metadata.yaml
+preprimer convert --input primers.tsv --output-formats artic
+# → Uses metadata specification
+
+# Warning for potential mismatches
+preprimer convert --input suspicious_primers.tsv --output-formats artic
+# → WARNING: High start (16400) with low end (200) on linear genome - check topology
+```
+
+**Coordinate Wrapping Example:**
+```tsv
+# Amplicon spanning genome boundary (16,569 bp circular genome)
+amplicon_name       primer_name           start  stop  sequence
+NC_012920.1_1      NC_012920.1_1_FW      16400  16420  ATCGATCG...
+NC_012920.1_1      NC_012920.1_1_RW      200    220    CGATCGAT...
+# Amplicon length: (16569-16400) + 200 + 1 = 370 bp
+```
+
+**Key features for circular genomes:**
+- Automatic topology detection from multiple sources
+- Biologically accurate amplicon length calculation
+- Validation warnings for coordinate mismatches
+- Support for all standard formats (VarVAMP, ARTIC, Olivar)
+
 ## ⚙️ **Command Options**
 
 ### **Input Options**

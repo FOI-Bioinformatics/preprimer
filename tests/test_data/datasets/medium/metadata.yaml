@@ -12,3 +12,5 @@ organism: African Swine Fever Virus
 primer_count: 160
 reference_id: LR722600.1
 source: Generated from legacy ASFV test data
+topology: linear
+genome_length: 191232

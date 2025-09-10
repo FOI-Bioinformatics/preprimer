@@ -553,6 +553,83 @@ preprimer convert --input file.txt --format varvamp --output-formats artic
 preprimer info problematic_file.bed --detailed
 ```
 
+### **Genome Topology Detection**
+
+PrePrimer automatically detects whether genomes are linear or circular for biologically accurate interpretation.
+
+#### **Topology Detection Methods**
+
+**1. Metadata File Detection:**
+```yaml
+# metadata.yaml in same directory as primer file
+topology: circular
+genome_length: 16569
+reference_id: NC_012920.1
+organism: Homo sapiens mitochondrion
+```
+
+**2. Known Reference Detection:**
+```bash
+# Automatically detected topologies for common references
+# NC_012920.1 → circular (human mitochondrial genome, 16,569 bp)
+# NC_045512.2 → linear (SARS-CoV-2 genome, 29,903 bp)
+# LR722600.1 → linear (ASFV genome, 191,232 bp)
+```
+
+**3. Organism Pattern Detection:**
+```bash
+# Patterns that suggest circular topology:
+# "mitochondrion", "mitochondrial", "chloroplast", "plastid"
+```
+
+#### **Circular Genome Coordinate Handling**
+
+**Valid Wrapping Coordinates:**
+```tsv
+# Mitochondrial genome (16,569 bp) - coordinates can wrap around
+amplicon_name	primer_name	sequence	start	stop	pool
+NC_012920.1_1	NC_012920.1_1_FW	ATCGATCG...	16400	16420	1
+NC_012920.1_1	NC_012920.1_1_RW	CGATCGAT...	200	220	1
+```
+
+**Topology-Aware Length Calculation:**
+```python
+# Linear genome: 16420 - 200 = 16220 bp (biologically impossible for PCR)
+# Circular genome: (16569 - 16400) + 200 + 1 = 370 bp (valid amplicon)
+```
+
+**Automatic Validation Warnings:**
+```bash
+# PrePrimer warns about potential topology mismatches
+preprimer convert --input primers.tsv --output-formats artic
+# WARNING: High start (16400) with low end (200) on linear genome - check topology
+```
+
+#### **Topology Examples**
+
+**Human Mitochondrial DNA (Circular):**
+```bash
+# Example with coordinate wrapping
+preprimer convert --input mitochondrial_primers.tsv --output-formats artic
+# INFO: Detected circular topology from metadata file
+# INFO: Amplicon NC_012920.1_1: length 370 (wrapping boundary)
+```
+
+**COVID-19 Genome (Linear):**  
+```bash
+# Standard linear coordinates
+preprimer convert --input covid_primers.tsv --output-formats artic
+# INFO: Detected linear topology for reference NC_045512.2
+# INFO: All coordinates within linear genome bounds
+```
+
+**Custom Topology Specification:**
+```bash
+# Override topology detection with metadata file
+echo "topology: circular\ngenome_length: 16569" > metadata.yaml
+preprimer convert --input primers.tsv --output-formats artic
+```
+
 ### **Invalid Sequences**
 ```bash
 # Problem: "Invalid DNA sequence characters"
