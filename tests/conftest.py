@@ -6,17 +6,16 @@ for harmonized testing across all parser types using the unified test data struc
 """
 
 import tempfile
-import yaml
 from pathlib import Path
 
 import pytest
-
-from preprimer.core.config import PrePrimerConfig
-from preprimer.core.registry import parser_registry, writer_registry
+import yaml
 
 # Import and register all components
 import preprimer.parsers  # noqa: E402, F401
 import preprimer.writers  # noqa: E402, F401
+from preprimer.core.config import PrePrimerConfig
+from preprimer.core.registry import parser_registry, writer_registry
 
 
 @pytest.fixture(scope="session")
@@ -55,12 +54,12 @@ def small_dataset(unified_datasets_dir):
     """Small dataset (COVID-19, 5 amplicons)."""
     dataset_dir = unified_datasets_dir / "small"
     metadata_file = dataset_dir / "metadata.yaml"
-    
+
     metadata = {}
     if metadata_file.exists():
-        with open(metadata_file, 'r') as f:
+        with open(metadata_file, "r") as f:
             metadata = yaml.safe_load(f)
-    
+
     return {
         "name": "small",
         "dir": dataset_dir,
@@ -74,7 +73,7 @@ def small_dataset(unified_datasets_dir):
         "expected_amplicons": metadata.get("amplicon_count", 5),
         "expected_primers": metadata.get("primer_count", 10),
         "organism": metadata.get("organism", "SARS-CoV-2"),
-        "prefix": "COVID19"
+        "prefix": "COVID19",
     }
 
 
@@ -83,14 +82,14 @@ def medium_dataset(unified_datasets_dir):
     """Medium dataset (ASFV, 80 amplicons)."""
     dataset_dir = unified_datasets_dir / "medium"
     metadata_file = dataset_dir / "metadata.yaml"
-    
+
     metadata = {}
     if metadata_file.exists():
-        with open(metadata_file, 'r') as f:
+        with open(metadata_file, "r") as f:
             metadata = yaml.safe_load(f)
-    
+
     return {
-        "name": "medium", 
+        "name": "medium",
         "dir": dataset_dir,
         "metadata": metadata,
         "reference": dataset_dir / "reference.fasta",
@@ -102,14 +101,14 @@ def medium_dataset(unified_datasets_dir):
         "expected_amplicons": metadata.get("amplicon_count", 80),
         "expected_primers": metadata.get("primer_count", 160),
         "organism": metadata.get("organism", "ASFV"),
-        "prefix": "ASFV"
+        "prefix": "ASFV",
     }
 
 
 @pytest.fixture(scope="session")
 def dataset(request, small_dataset, medium_dataset):
     """Dynamic dataset fixture based on parameter."""
-    dataset_name = getattr(request, 'param', 'small')
+    dataset_name = getattr(request, "param", "small")
     if dataset_name == "small":
         return small_dataset
     elif dataset_name == "medium":
@@ -129,41 +128,43 @@ def format_type(request):
 def unified_parser_test_data(request, unified_datasets_dir):
     """
     Unified parametrized fixture providing test data for all parsers.
-    
+
     This replaces the old parser_test_data fixture with the new unified structure.
     """
     # Get parameters (format and dataset size)
-    format_param = getattr(request, 'param', 'varvamp')
-    
+    format_param = getattr(request, "param", "varvamp")
+
     # Support both old parameter style and new tuple style
     if isinstance(format_param, tuple):
         format_name, dataset_name = format_param
     else:
         format_name = format_param
         dataset_name = "small"  # Default to small dataset
-    
+
     dataset_dir = unified_datasets_dir / dataset_name
     metadata_file = dataset_dir / "metadata.yaml"
-    
+
     # Load metadata
     metadata = {}
     if metadata_file.exists():
-        with open(metadata_file, 'r') as f:
+        with open(metadata_file, "r") as f:
             metadata = yaml.safe_load(f)
-    
+
     # File mappings
     file_mappings = {
         "varvamp": dataset_dir / "varvamp.tsv",
-        "artic": dataset_dir / "artic.scheme.bed", 
-        "olivar": dataset_dir / "olivar.csv"
+        "artic": dataset_dir / "artic.scheme.bed",
+        "olivar": dataset_dir / "olivar.csv",
     }
-    
+
     reference_file = dataset_dir / "reference.fasta"
     test_file = file_mappings.get(format_name)
-    
+
     if not test_file or not test_file.exists():
-        pytest.skip(f"Test file not available for {format_name} in {dataset_name}: {test_file}")
-    
+        pytest.skip(
+            f"Test file not available for {format_name} in {dataset_name}: {test_file}"
+        )
+
     return {
         "format": format_name,
         "dataset": dataset_name,
@@ -172,7 +173,7 @@ def unified_parser_test_data(request, unified_datasets_dir):
         "expected_amplicons": metadata.get("amplicon_count", 5),
         "expected_primers": metadata.get("primer_count", 10),
         "prefix": metadata.get("organism", "TEST"),
-        "metadata": metadata
+        "metadata": metadata,
     }
 
 
@@ -211,7 +212,7 @@ def olivar_reference_file(legacy_data_dir):
 def parser_test_data(request, legacy_data_dir):
     """
     Parametrized fixture providing test data for all parsers (legacy).
-    
+
     This maintains backward compatibility with existing tests.
     """
     parser_files = {
@@ -231,7 +232,9 @@ def parser_test_data(request, legacy_data_dir):
         },
         "olivar": {
             "file": legacy_data_dir / "olivar_examples" / "olivar-design.csv",
-            "reference": legacy_data_dir / "olivar_examples" / "EPI_ISL_402124_ref.fasta",
+            "reference": legacy_data_dir
+            / "olivar_examples"
+            / "EPI_ISL_402124_ref.fasta",
             "expected_amplicons": 5,
             "expected_primers": 10,
             "prefix": "COVID19",
@@ -256,39 +259,45 @@ def parser_test_data(request, legacy_data_dir):
 
 
 # Fixture for cross-format testing
-@pytest.fixture(params=[
-    ("varvamp", "small"), ("artic", "small"), ("olivar", "small"),
-    ("varvamp", "medium"), ("artic", "medium"), ("olivar", "medium")
-])
+@pytest.fixture(
+    params=[
+        ("varvamp", "small"),
+        ("artic", "small"),
+        ("olivar", "small"),
+        ("varvamp", "medium"),
+        ("artic", "medium"),
+        ("olivar", "medium"),
+    ]
+)
 def cross_format_test_data(request, unified_datasets_dir):
     """
     Parametrized fixture for testing across all formats and datasets.
-    
+
     This enables comprehensive cross-format conversion testing.
     """
     format_name, dataset_name = request.param
     dataset_dir = unified_datasets_dir / dataset_name
-    
+
     # Load metadata
-    metadata_file = dataset_dir / "metadata.yaml" 
+    metadata_file = dataset_dir / "metadata.yaml"
     metadata = {}
     if metadata_file.exists():
-        with open(metadata_file, 'r') as f:
+        with open(metadata_file, "r") as f:
             metadata = yaml.safe_load(f)
-    
+
     # All available files for this dataset
     files = {
         "varvamp": dataset_dir / "varvamp.tsv",
         "artic": dataset_dir / "artic.scheme.bed",
         "olivar": dataset_dir / "olivar.csv",
-        "sts": dataset_dir / "sts.tsv"
+        "sts": dataset_dir / "sts.tsv",
     }
-    
+
     # Primary test file
     test_file = files[format_name]
     if not test_file.exists():
         pytest.skip(f"Test file not available: {test_file}")
-    
+
     return {
         "format": format_name,
         "dataset": dataset_name,
@@ -298,7 +307,7 @@ def cross_format_test_data(request, unified_datasets_dir):
         "metadata": metadata,
         "expected_amplicons": metadata.get("amplicon_count", 5),
         "expected_primers": metadata.get("primer_count", 10),
-        "prefix": metadata.get("organism", "TEST")
+        "prefix": metadata.get("organism", "TEST"),
     }
 
 
@@ -311,11 +320,11 @@ def malformed_data_fixtures(test_fixtures_dir):
         "invalid_varvamp": malformed_dir / "invalid_varvamp.tsv",
         "invalid_artic": malformed_dir / "invalid_artic.bed",
         "invalid_olivar": malformed_dir / "invalid_olivar.csv",
-        "corrupt_reference": malformed_dir / "corrupt_reference.fasta"
+        "corrupt_reference": malformed_dir / "corrupt_reference.fasta",
     }
 
 
-@pytest.fixture(scope="session") 
+@pytest.fixture(scope="session")
 def minimal_data_fixtures(test_fixtures_dir):
     """Minimal valid data files for testing."""
     minimal_dir = test_fixtures_dir / "minimal"
@@ -323,7 +332,7 @@ def minimal_data_fixtures(test_fixtures_dir):
         "minimal_varvamp": minimal_dir / "minimal_varvamp.tsv",
         "minimal_artic": minimal_dir / "minimal_artic.bed",
         "minimal_olivar": minimal_dir / "minimal_olivar.csv",
-        "minimal_reference": minimal_dir / "minimal_reference.fasta"
+        "minimal_reference": minimal_dir / "minimal_reference.fasta",
     }
 
 
@@ -372,7 +381,9 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "integration: marks tests as integration tests")
     config.addinivalue_line("markers", "parser: marks tests for specific parsers")
     config.addinivalue_line("markers", "unified: marks tests using unified test data")
-    config.addinivalue_line("markers", "cross_format: marks cross-format conversion tests")
+    config.addinivalue_line(
+        "markers", "cross_format: marks cross-format conversion tests"
+    )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -389,7 +400,7 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.parser)
         elif "olivar" in item.nodeid.lower():
             item.add_marker(pytest.mark.parser)
-            
+
         # Mark unified data tests
         if "unified" in item.nodeid.lower() or "cross_format" in item.nodeid.lower():
             item.add_marker(pytest.mark.unified)

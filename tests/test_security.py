@@ -9,19 +9,21 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+
 import pytest
 
 # Add preprimer to path for testing
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from preprimer.core.exceptions import ParserError
+from preprimer.core.exceptions import SecurityError as CoreSecurityError
 from preprimer.core.security import (
-    SecurityError,
+    InputValidator,
     PathValidator,
     SecureFileOperations,
-    InputValidator,
-    secure_subprocess_call
+    SecurityError,
+    secure_subprocess_call,
 )
-from preprimer.core.exceptions import SecurityError as CoreSecurityError, ParserError
 from preprimer.parsers.varvamp_parser import VarVAMPParser
 
 
@@ -31,7 +33,7 @@ class TestPathValidator:
     def test_path_traversal_prevention(self):
         """Test that path traversal attempts are blocked."""
         validator = PathValidator()
-        
+
         # Test various path traversal attempts
         malicious_paths = [
             "../../../etc/passwd",
@@ -41,9 +43,9 @@ class TestPathValidator:
             "../../../../../../root/.ssh/id_rsa",
             "file/../../../etc/shadow",
             "normal/path/../../etc/passwd",
-            "./../../../../../../etc/passwd"
+            "./../../../../../../etc/passwd",
         ]
-        
+
         for malicious_path in malicious_paths:
             with pytest.raises(SecurityError):
                 validator.sanitize_path(malicious_path)
@@ -51,7 +53,7 @@ class TestPathValidator:
     def test_filename_validation(self):
         """Test filename validation against dangerous characters."""
         validator = PathValidator()
-        
+
         # Test dangerous filenames
         dangerous_names = [
             "file<script>",
@@ -69,7 +71,7 @@ class TestPathValidator:
             "file ",  # Ends with space
             "." * 300,  # Too long
         ]
-        
+
         for dangerous_name in dangerous_names:
             with pytest.raises(SecurityError):
                 validator.validate_filename(dangerous_name)
@@ -77,15 +79,15 @@ class TestPathValidator:
     def test_safe_filenames(self):
         """Test that safe filenames are accepted."""
         validator = PathValidator()
-        
+
         safe_names = [
             "normal_file.txt",
             "file-with-dashes.csv",
             "file123.tsv",
             "a.b.c.txt",
-            "CamelCaseFile.bed"
+            "CamelCaseFile.bed",
         ]
-        
+
         for safe_name in safe_names:
             # Should not raise exception
             validator.validate_filename(safe_name)
@@ -95,7 +97,7 @@ class TestPathValidator:
         with tempfile.TemporaryDirectory() as temp_dir:
             base_dir = Path(temp_dir).resolve()  # Resolve base directory
             validator = PathValidator()
-            
+
             # Test valid path within base
             safe_path = base_dir / "subdir" / "file.txt"
             result = validator.sanitize_path(safe_path, base_dir)
@@ -105,7 +107,7 @@ class TestPathValidator:
                 # If this succeeds, the path is under base_dir
             except ValueError:
                 pytest.fail(f"Path {result} should be within base directory {base_dir}")
-            
+
             # Test path outside base directory
             with pytest.raises(SecurityError):
                 validator.sanitize_path("/tmp/outside", base_dir)
@@ -118,16 +120,16 @@ class TestSecureFileOperations:
         """Test that directory removal validates paths."""
         with tempfile.TemporaryDirectory() as temp_dir:
             secure_ops = SecureFileOperations(Path(temp_dir))
-            
+
             # Create a test directory
             test_dir = Path(temp_dir) / "test_remove"
             test_dir.mkdir()
             assert test_dir.exists()
-            
+
             # Should successfully remove
             secure_ops.safe_remove_tree(test_dir)
             assert not test_dir.exists()
-            
+
             # Test path traversal attempt
             with pytest.raises(SecurityError):
                 secure_ops.safe_remove_tree("../../../etc")
@@ -136,14 +138,14 @@ class TestSecureFileOperations:
         """Test secure directory creation."""
         with tempfile.TemporaryDirectory() as temp_dir:
             secure_ops = SecureFileOperations(Path(temp_dir))
-            
+
             # Create nested directories
             nested_path = Path(temp_dir) / "a" / "b" / "c"
             result = secure_ops.safe_create_directories(nested_path)
-            
+
             assert result.exists()
             assert result.is_dir()
-            
+
             # Test path traversal prevention
             with pytest.raises(SecurityError):
                 secure_ops.safe_create_directories("../outside")
@@ -152,21 +154,21 @@ class TestSecureFileOperations:
         """Test secure file opening with validation."""
         with tempfile.TemporaryDirectory() as temp_dir:
             secure_ops = SecureFileOperations(Path(temp_dir))
-            
+
             test_file = Path(temp_dir) / "test.txt"
-            
+
             # Write to file
-            with secure_ops.safe_open_file(test_file, 'w') as f:
+            with secure_ops.safe_open_file(test_file, "w") as f:
                 f.write("test content")
-            
+
             # Read from file
-            with secure_ops.safe_open_file(test_file, 'r') as f:
+            with secure_ops.safe_open_file(test_file, "r") as f:
                 content = f.read()
                 assert content == "test content"
-            
+
             # Test path traversal prevention
             with pytest.raises(SecurityError):
-                secure_ops.safe_open_file("../../../etc/passwd", 'r')
+                secure_ops.safe_open_file("../../../etc/passwd", "r")
 
 
 class TestInputValidator:
@@ -175,17 +177,17 @@ class TestInputValidator:
     def test_primer_sequence_validation(self):
         """Test primer sequence validation."""
         validator = InputValidator()
-        
+
         # Test valid sequences
         valid_sequences = [
             "ATCGATCGATCG",
             "ATCGRYSWKMBDHVN",  # IUPAC codes
             "atcgryswkmbdhvn",  # Lowercase
         ]
-        
+
         for seq in valid_sequences:
             validator.validate_primer_sequence(seq)  # Should not raise
-        
+
         # Test invalid sequences
         invalid_sequences = [
             "",  # Empty
@@ -194,7 +196,7 @@ class TestInputValidator:
             "ATCG-GC",  # Hyphen
             "A" * 1001,  # Too long
         ]
-        
+
         for seq in invalid_sequences:
             with pytest.raises(SecurityError):
                 validator.validate_primer_sequence(seq)
@@ -202,17 +204,17 @@ class TestInputValidator:
     def test_amplicon_name_validation(self):
         """Test amplicon name validation."""
         validator = InputValidator()
-        
+
         # Test valid names
         valid_names = [
             "amplicon_1",
             "COVID-19_amplicon",
             "region_A",
         ]
-        
+
         for name in valid_names:
             validator.validate_amplicon_name(name)  # Should not raise
-        
+
         # Test invalid names
         invalid_names = [
             "",  # Empty
@@ -222,7 +224,7 @@ class TestInputValidator:
             "name|command",  # Pipe
             "A" * 201,  # Too long
         ]
-        
+
         for name in invalid_names:
             with pytest.raises(SecurityError):
                 validator.validate_amplicon_name(name)
@@ -230,18 +232,18 @@ class TestInputValidator:
     def test_string_sanitization(self):
         """Test string sanitization functionality."""
         validator = InputValidator()
-        
+
         # Test normal sanitization
         result = validator.sanitize_string("  normal text  ")
         assert result == "normal text"
-        
+
         # Test control character removal
         dirty_string = "text\x00with\x01control\x02chars"
         result = validator.sanitize_string(dirty_string)
         assert "\x00" not in result
         assert "\x01" not in result
         assert "\x02" not in result
-        
+
         # Test length validation
         with pytest.raises(SecurityError):
             validator.sanitize_string("A" * 1001, max_length=1000)
@@ -260,7 +262,7 @@ class TestSecureSubprocessCall:
             ["echo", "`whoami`"],
             ["echo", "$(rm -rf /)"],
         ]
-        
+
         for cmd in dangerous_commands:
             with pytest.raises(SecurityError):
                 secure_subprocess_call(cmd)
@@ -277,10 +279,10 @@ class TestSecureSubprocessCall:
         # Test invalid command formats
         with pytest.raises(SecurityError):
             secure_subprocess_call("echo hello")  # String instead of list
-        
+
         with pytest.raises(SecurityError):
             secure_subprocess_call([])  # Empty command
-        
+
         with pytest.raises(SecurityError):
             secure_subprocess_call([123, "hello"])  # Non-string argument
 
@@ -291,13 +293,13 @@ class TestVarVAMPParserSecurity:
     def test_malicious_file_path_rejection(self):
         """Test that malicious file paths are rejected."""
         parser = VarVAMPParser()
-        
+
         malicious_paths = [
             "../../../etc/passwd",
-            "/etc/shadow", 
+            "/etc/shadow",
             "C:\\Windows\\System32\\config\\SAM",
         ]
-        
+
         for path in malicious_paths:
             # Should raise SecurityError during path validation
             with pytest.raises((SecurityError, ParserError)) as exc_info:
@@ -312,14 +314,14 @@ class TestVarVAMPParserSecurity:
         # This test would require creating a malicious VarVAMP file
         # For now, we test the validation functions directly
         parser = VarVAMPParser()
-        
+
         # Test with empty/invalid prefix
         malicious_prefixes = [
             "<script>alert('xss')</script>",
             "'; DROP TABLE primers; --",
             "$(rm -rf /)",
         ]
-        
+
         for prefix in malicious_prefixes:
             with pytest.raises(SecurityError):
                 # This should trigger validation in the parse method
@@ -328,16 +330,20 @@ class TestVarVAMPParserSecurity:
     def test_file_size_limits(self):
         """Test that extremely large files are handled safely."""
         # Create a temporary file that simulates a large malicious file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.tsv', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False) as f:
             # Write a header
-            f.write("amplicon_name\tamplicon_length\tprimer_name\tpool\tstart\tstop\tseq\tsize\tgc_best\ttemp_best\tmean_gc\tmean_temp\tscore\n")
-            
+            f.write(
+                "amplicon_name\tamplicon_length\tprimer_name\tpool\tstart\tstop\tseq\tsize\tgc_best\ttemp_best\tmean_gc\tmean_temp\tscore\n"
+            )
+
             # Write a row with extremely large sequence
             large_sequence = "A" * 100000  # Very large sequence
-            f.write(f"amp1\t1000\tFW_primer\t1\t1\t100\t{large_sequence}\t100\t50.0\t60.0\t50.0\t60.0\t1.0\n")
-            
+            f.write(
+                f"amp1\t1000\tFW_primer\t1\t1\t100\t{large_sequence}\t100\t50.0\t60.0\t50.0\t60.0\t1.0\n"
+            )
+
             temp_path = f.name
-        
+
         try:
             parser = VarVAMPParser()
             # This should raise a SecurityError due to sequence length validation
@@ -355,21 +361,21 @@ class TestIntegrationSecurity:
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create a secure operations instance
             secure_ops = SecureFileOperations(Path(temp_dir))
-            
+
             # Test directory creation
             work_dir = Path(temp_dir) / "work"
             secure_ops.safe_create_directories(work_dir)
-            
+
             # Test file operations
             test_file = work_dir / "test.txt"
-            with secure_ops.safe_open_file(test_file, 'w') as f:
+            with secure_ops.safe_open_file(test_file, "w") as f:
                 f.write("secure content")
-            
+
             # Verify content
-            with secure_ops.safe_open_file(test_file, 'r') as f:
+            with secure_ops.safe_open_file(test_file, "r") as f:
                 content = f.read()
                 assert content == "secure content"
-            
+
             # Test cleanup
             secure_ops.safe_remove_tree(work_dir)
             assert not work_dir.exists()
@@ -377,19 +383,19 @@ class TestIntegrationSecurity:
     def test_error_handling_security(self):
         """Test that errors don't leak sensitive information."""
         validator = PathValidator()
-        
+
         # Test that error messages are informative but don't reveal system details
         with pytest.raises(SecurityError) as exc_info:
             validator.sanitize_path("../../../etc/passwd")
-        
+
         error_msg = str(exc_info.value)
         # Error message should indicate path traversal was detected
         assert "Path traversal attempt detected" in error_msg
-        
+
         # Test that system directory access is denied
         with pytest.raises(SecurityError) as exc_info:
             validator.sanitize_path("/etc/shadow")
-        
+
         error_msg = str(exc_info.value)
         assert "system directory denied" in error_msg
 

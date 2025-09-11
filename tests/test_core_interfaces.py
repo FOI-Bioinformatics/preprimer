@@ -7,7 +7,7 @@ abstract base classes that form the foundation of PrePrimer.
 
 import pytest
 
-from preprimer.core.interfaces import PrimerData, AmpliconData
+from preprimer.core.interfaces import AmpliconData, PrimerData
 
 
 class TestPrimerData:
@@ -80,7 +80,7 @@ class TestPrimerData:
             gc_content=50.0,
             tm=60.0,
             score=0.95,
-            pool=2
+            pool=2,
         )
 
         assert primer.gc_content == 50.0
@@ -100,7 +100,7 @@ class TestPrimerData:
             direction="forward",
             amplicon_id="amplicon_1",
             reference_id="test_ref",
-            metadata=metadata
+            metadata=metadata,
         )
 
         assert primer.metadata == metadata
@@ -114,7 +114,7 @@ class TestPrimerData:
             start=100,
             stop=112,
             strand="+",
-            direction="forward"
+            direction="forward",
         )
 
         assert primer.pool is None
@@ -180,26 +180,23 @@ class TestAmpliconData:
 
         pairs = amplicon.get_primer_pairs()
         assert len(pairs) == 4  # 2 forward × 2 reverse
-        
+
         # Check all combinations are present
-        expected_pairs = [
-            (fwd1, rev1), (fwd1, rev2),
-            (fwd2, rev1), (fwd2, rev2)
-        ]
-        
+        expected_pairs = [(fwd1, rev1), (fwd1, rev2), (fwd2, rev1), (fwd2, rev2)]
+
         for expected_pair in expected_pairs:
             assert expected_pair in pairs
 
     def test_amplicon_optional_fields(self):
         """Test AmpliconData optional fields."""
         primer1 = PrimerData("p1", "ATCG", 100, 104, "+", "forward", amplicon_id="amp1")
-        
+
         amplicon = AmpliconData(
             amplicon_id="amp1",
             primers=[primer1],
             length=500,
             reference_id="ref1",
-            metadata={"custom": "data"}
+            metadata={"custom": "data"},
         )
 
         assert amplicon.length == 500
@@ -261,13 +258,23 @@ class TestDataStructureIntegration:
     def test_complex_amplicon_structure(self):
         """Test amplicon with multiple primers per direction."""
         # Multiple forward primers
-        f1 = PrimerData("f1", "ATCGATCG", 100, 108, "+", "forward", amplicon_id="complex")
-        f2 = PrimerData("f2", "ATCGATCC", 105, 113, "+", "forward", amplicon_id="complex")
-        f3 = PrimerData("f3", "ATCGATCT", 110, 118, "+", "forward", amplicon_id="complex")
+        f1 = PrimerData(
+            "f1", "ATCGATCG", 100, 108, "+", "forward", amplicon_id="complex"
+        )
+        f2 = PrimerData(
+            "f2", "ATCGATCC", 105, 113, "+", "forward", amplicon_id="complex"
+        )
+        f3 = PrimerData(
+            "f3", "ATCGATCT", 110, 118, "+", "forward", amplicon_id="complex"
+        )
 
         # Multiple reverse primers
-        r1 = PrimerData("r1", "CGATCGAT", 400, 408, "-", "reverse", amplicon_id="complex")
-        r2 = PrimerData("r2", "GGATCGAT", 405, 413, "-", "reverse", amplicon_id="complex")
+        r1 = PrimerData(
+            "r1", "CGATCGAT", 400, 408, "-", "reverse", amplicon_id="complex"
+        )
+        r2 = PrimerData(
+            "r2", "GGATCGAT", 405, 413, "-", "reverse", amplicon_id="complex"
+        )
 
         amplicon = AmpliconData("complex", [f1, f2, f3, r1, r2])
 

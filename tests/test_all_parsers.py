@@ -215,9 +215,16 @@ class TestCrossParserCompatibility:
         test_files = [
             (
                 "varvamp",
-                Path(__file__).parent / "test_data" / "legacy" / "ASFV_long" / "primers.tsv",
+                Path(__file__).parent
+                / "test_data"
+                / "legacy"
+                / "ASFV_long"
+                / "primers.tsv",
             ),
-            ("artic", Path(__file__).parent / "test_data" / "legacy" / "ASFV.scheme.bed"),
+            (
+                "artic",
+                Path(__file__).parent / "test_data" / "legacy" / "ASFV.scheme.bed",
+            ),
             (
                 "olivar",
                 Path(__file__).parent

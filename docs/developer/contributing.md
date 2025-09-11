@@ -5,7 +5,7 @@ Guidelines and procedures for contributing to PrePrimer development.
 ## Development Environment Setup
 
 ### Prerequisites
-- Python 3.8 or later
+- Python 3.11 or later
 - Git version control
 - Virtual environment support
 

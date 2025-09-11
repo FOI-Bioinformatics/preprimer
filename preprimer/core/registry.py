@@ -60,7 +60,7 @@ class ParserRegistry:
     def detect_format_optimized(self, file_path: Union[str, Path]) -> Optional[str]:
         """
         Optimized format detection that minimizes instance creation.
-        
+
         This method only creates parser instances when validation is needed,
         and reuses cached validation results where possible.
         """
@@ -70,7 +70,7 @@ class ParserRegistry:
         # Build a priority list: extension matches first, then others
         priority_formats = []
         other_formats = []
-        
+
         for format_name, extensions in self._format_extensions.items():
             if extension in extensions:
                 priority_formats.append(format_name)

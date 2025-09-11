@@ -31,7 +31,7 @@ class VarVAMPWriter(OutputWriter):
         amplicons: List[AmpliconData],
         output_path: Union[str, Path],
         prefix: str = "",
-        **kwargs
+        **kwargs,
     ) -> Path:
         """
         Write amplicons to VarVAMP TSV format.
@@ -67,9 +67,11 @@ class VarVAMPWriter(OutputWriter):
                     "stop": primer.stop,
                     "seq": primer.sequence,
                     "size": len(primer.sequence),
-                    "gc_best": self._calculate_gc_content(primer.sequence) * 100,  # Convert to percentage
+                    "gc_best": self._calculate_gc_content(primer.sequence)
+                    * 100,  # Convert to percentage
                     "temp_best": getattr(primer, "tm", 60.0) or 60.0,
-                    "mean_gc": self._calculate_gc_content(primer.sequence) * 100,  # Convert to percentage
+                    "mean_gc": self._calculate_gc_content(primer.sequence)
+                    * 100,  # Convert to percentage
                     "mean_temp": getattr(primer, "tm", 60.0) or 60.0,
                     "score": getattr(primer, "score", 90.0) or 90.0,
                 }
@@ -80,7 +82,7 @@ class VarVAMPWriter(OutputWriter):
             if primer_rows:
                 fieldnames = [
                     "amplicon_name",
-                    "amplicon_length", 
+                    "amplicon_length",
                     "primer_name",
                     "pool",
                     "start",
@@ -138,7 +140,7 @@ class VarVAMPWriter(OutputWriter):
                 # Check required columns
                 required_columns = {
                     "amplicon_name",
-                    "amplicon_length", 
+                    "amplicon_length",
                     "primer_name",
                     "pool",
                     "start",

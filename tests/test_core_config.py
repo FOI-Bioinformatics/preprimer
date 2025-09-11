@@ -42,7 +42,7 @@ class TestPrePrimerConfig:
             min_primer_length=20,
             max_primer_length=30,
             validate_sequences=False,
-            custom_settings={"test": "value"}
+            custom_settings={"test": "value"},
         )
 
         assert config.aligner == "exonerate"
@@ -71,17 +71,24 @@ class TestPrePrimerConfig:
         # Minimum too small
         config = PrePrimerConfig(min_primer_length=5)
         issues = config.validate()
-        assert any("Minimum primer length should be at least 10" in issue for issue in issues)
+        assert any(
+            "Minimum primer length should be at least 10" in issue for issue in issues
+        )
 
         # Maximum too large
         config = PrePrimerConfig(max_primer_length=60)
         issues = config.validate()
-        assert any("Maximum primer length should be at most 50" in issue for issue in issues)
+        assert any(
+            "Maximum primer length should be at most 50" in issue for issue in issues
+        )
 
         # Min >= Max
         config = PrePrimerConfig(min_primer_length=30, max_primer_length=25)
         issues = config.validate()
-        assert any("Minimum primer length must be less than maximum" in issue for issue in issues)
+        assert any(
+            "Minimum primer length must be less than maximum" in issue
+            for issue in issues
+        )
 
     def test_config_validation_invalid_naming_scheme(self):
         """Test configuration validation with invalid naming scheme."""
@@ -97,7 +104,7 @@ class TestPrePrimerConfig:
             "force_overwrite": True,
             "min_primer_length": 18,
             "max_primer_length": 32,
-            "custom_settings": {"key": "value"}
+            "custom_settings": {"key": "value"},
         }
 
         config = PrePrimerConfig.from_dict(data)
@@ -113,7 +120,7 @@ class TestPrePrimerConfig:
         data = {
             "aligner": "blast",
             "invalid_key": "should_be_ignored",
-            "another_invalid": 123
+            "another_invalid": 123,
         }
 
         config = PrePrimerConfig.from_dict(data)
@@ -128,14 +135,21 @@ class TestPrePrimerConfig:
             aligner="exonerate",
             output_formats=["fasta"],
             force_overwrite=True,
-            custom_settings={"test": "data"}
+            custom_settings={"test": "data"},
         )
 
         data = config.to_dict()
         expected_keys = {
-            "aligner", "alignment_params", "output_formats", "force_overwrite",
-            "default_pool", "primer_naming_scheme", "validate_sequences",
-            "min_primer_length", "max_primer_length", "custom_settings"
+            "aligner",
+            "alignment_params",
+            "output_formats",
+            "force_overwrite",
+            "default_pool",
+            "primer_naming_scheme",
+            "validate_sequences",
+            "min_primer_length",
+            "max_primer_length",
+            "custom_settings",
         }
 
         assert set(data.keys()) == expected_keys
@@ -155,10 +169,10 @@ class TestConfigFileSerialization:
             output_formats=["fasta", "sts"],
             force_overwrite=True,
             min_primer_length=18,
-            custom_settings={"key": "value"}
+            custom_settings={"key": "value"},
         )
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             config_path = Path(f.name)
 
         try:
@@ -184,7 +198,7 @@ class TestConfigFileSerialization:
         """Test that saving configuration creates necessary directories."""
         with tempfile.TemporaryDirectory() as temp_dir:
             config_path = Path(temp_dir) / "subdir" / "config.json"
-            
+
             config = PrePrimerConfig()
             config.save(config_path)
 
@@ -198,7 +212,7 @@ class TestConfigFileSerialization:
 
     def test_config_from_file_invalid_json(self):
         """Test loading configuration from file with invalid JSON."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             f.write("invalid json content {")
             config_path = Path(f.name)
 
@@ -220,10 +234,10 @@ class TestConfigFileSerialization:
             validate_sequences=False,
             min_primer_length=18,
             max_primer_length=32,
-            custom_settings={"custom": "data", "number": 42}
+            custom_settings={"custom": "data", "number": 42},
         )
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             config_path = Path(f.name)
 
         try:
@@ -237,8 +251,13 @@ class TestConfigFileSerialization:
             assert loaded_config.output_formats == original_config.output_formats
             assert loaded_config.force_overwrite == original_config.force_overwrite
             assert loaded_config.default_pool == original_config.default_pool
-            assert loaded_config.primer_naming_scheme == original_config.primer_naming_scheme
-            assert loaded_config.validate_sequences == original_config.validate_sequences
+            assert (
+                loaded_config.primer_naming_scheme
+                == original_config.primer_naming_scheme
+            )
+            assert (
+                loaded_config.validate_sequences == original_config.validate_sequences
+            )
             assert loaded_config.min_primer_length == original_config.min_primer_length
             assert loaded_config.max_primer_length == original_config.max_primer_length
             assert loaded_config.custom_settings == original_config.custom_settings
@@ -254,7 +273,7 @@ class TestConfigValidationComprehensive:
     def test_all_valid_aligners(self):
         """Test all valid aligner options."""
         valid_aligners = ["blast", "exonerate"]
-        
+
         for aligner in valid_aligners:
             config = PrePrimerConfig(aligner=aligner)
             issues = config.validate()
@@ -263,7 +282,7 @@ class TestConfigValidationComprehensive:
     def test_all_valid_naming_schemes(self):
         """Test all valid naming scheme options."""
         valid_schemes = ["artic", "custom"]
-        
+
         for scheme in valid_schemes:
             config = PrePrimerConfig(primer_naming_scheme=scheme)
             issues = config.validate()
@@ -292,12 +311,12 @@ class TestConfigValidationComprehensive:
             aligner="invalid_aligner",
             min_primer_length=5,  # Too small
             max_primer_length=60,  # Too large
-            primer_naming_scheme="invalid_scheme"
+            primer_naming_scheme="invalid_scheme",
         )
 
         issues = config.validate()
         assert len(issues) >= 4  # Should have multiple issues
-        
+
         issue_text = " ".join(issues)
         assert "Invalid aligner" in issue_text
         assert "Minimum primer length" in issue_text
@@ -312,15 +331,17 @@ class TestConfigDefaults:
         """Ensure default configuration passes validation."""
         config = PrePrimerConfig()
         issues = config.validate()
-        assert len(issues) == 0, f"Default config should be valid, but has issues: {issues}"
+        assert (
+            len(issues) == 0
+        ), f"Default config should be valid, but has issues: {issues}"
 
     def test_default_config_serialization(self):
         """Test that default configuration can be serialized."""
         config = PrePrimerConfig()
         data = config.to_dict()
-        
+
         # Should be able to recreate from dict
         new_config = PrePrimerConfig.from_dict(data)
-        
+
         # Should match original
         assert new_config.to_dict() == data

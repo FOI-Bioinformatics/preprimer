@@ -43,7 +43,7 @@ The software maintains bidirectional conversion compatibility across implemented
 
 ## Installation
 
-PrePrimer requires Python 3.8 or later and is supported on **Linux** and **macOS** only.
+PrePrimer requires Python 3.11 or later and is supported on **Linux** and **macOS** only.
 
 > ⚠️ **Note**: Windows is not currently supported due to Unicode character encoding limitations.
 

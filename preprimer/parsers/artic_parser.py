@@ -117,8 +117,10 @@ class ARTICParser(PrimerParser):
                         amplicon_num = name_parts[-2]
                     else:
                         # Fallback: assume second-to-last is amplicon number
-                        amplicon_num = name_parts[-2] if len(name_parts) > 2 else name_parts[1]
-                    
+                        amplicon_num = (
+                            name_parts[-2] if len(name_parts) > 2 else name_parts[1]
+                        )
+
                     amplicon_id = f"amplicon_{amplicon_num}"
 
                     # Determine direction

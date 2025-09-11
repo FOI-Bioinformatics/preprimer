@@ -202,7 +202,7 @@ The testing framework integrates with CI/CD pipelines:
 
 **CI Features:**
 - Multi-platform testing (Ubuntu, macOS)
-- Multi-Python version support (3.8-3.13)
+- Multi-Python version support (3.11-3.13)
 - Automated benchmark comparison
 - Security vulnerability scanning
 

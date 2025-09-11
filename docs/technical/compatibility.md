@@ -8,13 +8,13 @@ PrePrimer compatibility requirements and platform-specific considerations.
 - **Status**: Fully supported
 - **Distributions**: Ubuntu 20.04+, CentOS 7+, Debian 10+, Fedora 30+
 - **Architecture**: x86_64, ARM64
-- **Python**: 3.8-3.13
+- **Python**: 3.11-3.13
 
 ### macOS  
 - **Status**: Fully supported
 - **Versions**: macOS 10.15 (Catalina) and later
 - **Architecture**: Intel x86_64, Apple Silicon (M1/M2)
-- **Python**: 3.8-3.13
+- **Python**: 3.11-3.13
 
 ### Windows
 - **Status**: Not supported
@@ -48,12 +48,10 @@ pip3 install -e ".[dev]"
 
 | Python Version | Status | Notes |
 |---------------|---------|-------|
-| 3.8 | ✅ Supported | Minimum required version |
-| 3.9 | ✅ Supported | Full feature support |
-| 3.10 | ✅ Supported | Recommended for development |
-| 3.11 | ✅ Supported | Improved performance |
-| 3.12 | ✅ Supported | Latest stable features |
-| 3.13 | ✅ Supported | Experimental support |
+| 3.11 | ✅ Supported | Minimum required version |
+| 3.12 | ✅ Supported | Recommended for development |
+| 3.13 | ✅ Supported | Latest stable features |
+| 3.8-3.10 | ❌ Deprecated | No longer supported as of v0.3.0 |
 | <3.8 | ❌ Unsupported | Missing required language features |
 
 ## Hardware Requirements
@@ -116,9 +114,9 @@ pip install -e ".[dev]"
 ## Testing Across Platforms
 
 ### CI/CD Testing Matrix
-- **Ubuntu Latest**: Python 3.8, 3.10, 3.12, 3.13
-- **macOS Latest**: Python 3.8, 3.10, 3.12, 3.13
-- **Test Coverage**: 226 tests across all supported configurations
+- **Ubuntu Latest**: Python 3.11, 3.12, 3.13
+- **macOS Latest**: Python 3.11, 3.12, 3.13
+- **Test Coverage**: 581 tests across all supported configurations
 
 ### Platform-Specific Tests
 ```bash

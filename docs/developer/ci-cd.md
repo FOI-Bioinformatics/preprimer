@@ -32,7 +32,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ["3.8", "3.10", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13"]
     
     steps:
       - name: Run core tests with coverage
@@ -58,7 +58,7 @@ jobs:
 smoke-tests:
   strategy:
     matrix:
-      python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+      python-version: ["3.11", "3.12", "3.13"]
   
   steps:
     - name: Validate installation
@@ -72,7 +72,7 @@ comprehensive-tests:
   strategy:
     matrix:
       os: [ubuntu-latest, macos-latest]
-      python-version: ["3.8", "3.10", "3.12", "3.13"]
+      python-version: ["3.11", "3.12", "3.13"]
   
   steps:
     - name: Run comprehensive test suite
@@ -96,8 +96,8 @@ comprehensive-tests:
 ### Test Matrix
 | Platform | Python Versions | Test Types |
 |----------|----------------|------------|
-| Ubuntu Latest | 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 | All tests |
-| macOS Latest | 3.8, 3.10, 3.12, 3.13 | Core + Integration |
+| Ubuntu Latest | 3.11, 3.12, 3.13 | All tests |
+| macOS Latest | 3.11, 3.12, 3.13 | Core + Integration |
 
 ### Performance Benchmarking
 ```yaml
@@ -248,7 +248,7 @@ secrets:
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   
 variables:
-  PYTHON_VERSION_MATRIX: '["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]'
+  PYTHON_VERSION_MATRIX: '["3.11", "3.12", "3.13"]'
 ```
 
 ### Caching Strategy

@@ -5,7 +5,7 @@ Installation instructions for PrePrimer on supported platforms.
 ## Prerequisites
 
 ### System Requirements
-- **Python**: 3.8 or later
+- **Python**: 3.11 or later
 - **Operating System**: Linux or macOS only
 - **Memory**: 512 MB RAM minimum (2 GB recommended for large files)
 - **Storage**: 100 MB free space
@@ -274,7 +274,7 @@ pip install -e .
 python --version
 python3 --version
 
-# PrePrimer requires Python 3.8+
+# PrePrimer requires Python 3.11+
 # Update Python if needed
 ```
 
@@ -356,7 +356,7 @@ rm -rf preprimer-env  # or your environment name
 
 If you encounter installation issues:
 
-1. **Check Prerequisites**: Ensure Python 3.8+ is installed
+1. **Check Prerequisites**: Ensure Python 3.11+ is installed
 2. **Use Virtual Environment**: Isolate dependencies
 3. **Check GitHub Issues**: [Search existing issues](https://github.com/FOI-Bioinformatics/preprimer/issues)
 4. **Report New Issues**: Include:
@@ -367,7 +367,7 @@ If you encounter installation issues:
 
 ## 📋 **Installation Checklist**
 
-- [ ] Python 3.8+ installed
+- [ ] Python 3.11+ installed
 - [ ] Git installed
 - [ ] Virtual environment created (recommended)
 - [ ] PrePrimer cloned and installed

@@ -8,8 +8,13 @@ from typing import Dict, List, Optional, Union
 
 from .config import PrePrimerConfig
 from .exceptions import (
-    OutputError, ParserError, ValidationError, FileNotFoundError,
-    InvalidFormatError, ErrorContext, handle_common_exceptions
+    ErrorContext,
+    FileNotFoundError,
+    InvalidFormatError,
+    OutputError,
+    ParserError,
+    ValidationError,
+    handle_common_exceptions,
 )
 from .interfaces import AmpliconData
 from .registry import parser_registry, writer_registry
@@ -64,7 +69,7 @@ class PrimerConverter:
                     error = InvalidFormatError(
                         str(input_file),
                         user_message=f"Could not detect the format of {input_file}. "
-                                   f"Available formats: {', '.join(available_formats)}"
+                        f"Available formats: {', '.join(available_formats)}",
                     )
                     error.add_suggestion("Try specifying the input format explicitly")
                     error.add_suggestion("Check that the file is in a supported format")
@@ -84,8 +89,10 @@ class PrimerConverter:
                 raise ParserError(
                     f"Unexpected error parsing {input_format} file: {e}",
                     file_path=str(input_file),
-                    user_message=f"Failed to parse {input_file} as {input_format} format."
-                ).add_suggestion(f"Verify that {input_file} is a valid {input_format} file") from e
+                    user_message=f"Failed to parse {input_file} as {input_format} format.",
+                ).add_suggestion(
+                    f"Verify that {input_file} is a valid {input_format} file"
+                ) from e
 
             logger.info(f"Parsed {len(amplicons)} amplicons")
 
@@ -98,8 +105,10 @@ class PrimerConverter:
             except Exception as e:
                 raise ValidationError(
                     f"Unexpected error during amplicon validation: {e}",
-                    user_message="Error validating parsed amplicon data."
-                ).add_suggestion("Check that the input data is complete and valid") from e
+                    user_message="Error validating parsed amplicon data.",
+                ).add_suggestion(
+                    "Check that the input data is complete and valid"
+                ) from e
 
         # Get reference file if not provided
         if reference_file is None:

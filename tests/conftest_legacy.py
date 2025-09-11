@@ -10,12 +10,11 @@ from pathlib import Path
 
 import pytest
 
-from preprimer.core.config import PrePrimerConfig
-from preprimer.core.registry import parser_registry, writer_registry
-
 # Import and register all components
 import preprimer.parsers  # noqa: E402, F401
 import preprimer.writers  # noqa: E402, F401
+from preprimer.core.config import PrePrimerConfig
+from preprimer.core.registry import parser_registry, writer_registry
 
 
 @pytest.fixture(scope="session")
