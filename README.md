@@ -1,8 +1,8 @@
 # PrePrimer
 
-A comprehensive, extensible primer scheme converter for tiled amplicon sequencing applications with support for linear and circular genome architectures.
+A primer scheme converter for tiled amplicon sequencing applications supporting linear and circular genome architectures.
 
-PrePrimer enables seamless interconversion between primer scheme formats used in genomic sequencing workflows, including VarVAMP, ARTIC, and Olivar formats. The software incorporates topology-aware processing for both linear and circular genomes, ensuring accurate coordinate handling for diverse biological targets including viral, bacterial, and organellar genomes.
+PrePrimer facilitates format conversion between primer schemes used in genomic sequencing workflows, including VarVAMP, ARTIC, and Olivar formats. The software includes topology detection for linear and circular genomes, with coordinate system handling for viral, bacterial, and organellar targets.
 
 ## Version 0.2.0 Features
 
@@ -15,7 +15,7 @@ PrePrimer enables seamless interconversion between primer scheme formats used in
 - **Security Implementation**: Comprehensive input validation, path sanitization, and secure file operations
 - **Real-world Validation**: Tested with official schemes from PrimerSchemes Labs repository
 - **Command-line Interface**: Intuitive commands with automatic format detection and validation
-- **Comprehensive Testing**: 250+ tests including external validation and property-based testing
+- **Testing Coverage**: 581 tests with 96.90% coverage including external validation and property-based testing
 - **Performance Optimization**: Efficient processing validated with datasets up to 2,500+ amplicons
 
 ## Supported Formats
@@ -39,7 +39,7 @@ PrePrimer enables seamless interconversion between primer scheme formats used in
 - **Standards Compliance**: Full adherence to primal-page specifications and ecosystem standards
 - **Coordinate Systems**: Proper conversion between 0-based BED and 1-based coordinate systems
 
-The software maintains complete bidirectional conversion fidelity across all implemented formats, preserving data integrity and biological accuracy throughout the conversion process.
+The software maintains bidirectional conversion compatibility across implemented formats, preserving data integrity during conversion.
 
 ## Installation
 
@@ -64,19 +64,19 @@ python -m pytest
 
 ### Security Implementation
 
-PrePrimer incorporates security measures for safe file processing:
-- Path validation to prevent directory traversal vulnerabilities
-- Input sanitization with configurable file size limitations  
-- Secure file operations with automatic resource cleanup
-- Comprehensive logging for security event monitoring
+PrePrimer includes security measures for file processing:
+- Path validation to prevent directory traversal
+- Input sanitization with configurable file size limits
+- Secure file operations with resource cleanup
+- Security event logging
 
 ### Performance Characteristics
 
-- Validated processing capabilities for datasets up to 2,500+ amplicons (Yale TB whole genome)
-- Linear computational complexity O(n) scaling with dataset size  
-- Memory utilization: approximately 50MB baseline, scaling efficiently for large datasets
-- Sub-second processing for typical viral genome schemes (≤500 amplicons)
-- Topology detection and coordinate conversion with minimal computational overhead
+- Tested with datasets up to 2,500 amplicons (Yale TB whole genome)
+- Linear computational complexity O(n) scaling
+- Memory usage: approximately 50MB baseline
+- Processing time under 1 second for schemes with ≤500 amplicons
+- Efficient topology detection and coordinate conversion
 
 ## Quick Start
 
@@ -141,7 +141,7 @@ preprimer convert --input primers.tsv --output-dir output/ \
                  --output-formats artic fasta sts --prefix MyVirus
 ```
 
-## 🧬 **Use Cases**
+## Use Cases
 
 ### **Viral Genome Sequencing Workflows**
 
@@ -177,9 +177,9 @@ preprimer info suspicious_primers.tsv
 preprimer convert --input primers.tsv --output-dir /tmp --validate-only
 ```
 
-## 🏗️ **Architecture**
+## Architecture
 
-PrePrimer 0.2.0 features a completely refactored, extensible architecture:
+PrePrimer implements a plugin-based architecture:
 
 ```
 preprimer/
@@ -205,22 +205,24 @@ preprimer/
 └── cli.py                         # Modern command-line interface
 ```
 
-### **Key Features**
+### Key Features
 
-- **🧬 Topology-aware**: Automatic detection and handling of circular genome architectures
-- **🔌 Plugin Architecture**: Extensible parser and writer system with auto-registration
-- **🛡️ Standards Compliance**: Full adherence to primal-page specifications and ecosystem standards
-- **🧪 IUPAC Support**: Complete degenerate nucleotide handling for variant-aware primer designs
-- **🔍 Auto-detection**: Intelligent format detection based on content analysis and metadata
-- **📊 Data Integrity**: Standardized data models preserving biological accuracy across conversions
-- **⚙️ Flexible Configuration**: JSON-based configuration with primal-page info.json support
-- **🔐 Security-first**: Comprehensive input validation and secure file operations
+- **Topology Detection**: Automatic detection and handling of circular genome architectures
+- **Plugin Architecture**: Extensible parser and writer system with auto-registration
+- **Standards Compliance**: Adherence to primal-page specifications
+- **IUPAC Support**: Degenerate nucleotide handling for variant-aware primer designs
+- **Format Detection**: Automatic format detection based on content analysis
+- **Data Models**: Standardized data structures for conversion accuracy
+- **Configuration**: JSON-based configuration with primal-page info.json support
+- **Security**: Input validation and secure file operations
 
-## 🤝 **Contributing**
+For detailed architecture documentation, see [docs/developer/architecture.md](docs/developer/architecture.md).
 
-We welcome contributions! PrePrimer is designed to be easily extensible.
+## Contributing
 
-### **Adding New Formats**
+Contributions are welcome. PrePrimer is designed for extensibility.
+
+### Adding New Formats
 
 1. **Create a Parser** (for input formats):
    ```python
@@ -241,7 +243,7 @@ We welcome contributions! PrePrimer is designed to be easily extensible.
    writer_registry.register(MyWriter)
    ```
 
-### **Development Setup**
+### Development Setup
 ```bash
 git clone https://github.com/FOI-Bioinformatics/preprimer.git
 cd preprimer
@@ -256,11 +258,11 @@ python -m pytest
 python -m pytest tests/test_refactored_system.py -v
 ```
 
-## 📄 **License**
+## License
 
 PrePrimer is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 **Acknowledgments**
+## Acknowledgments
 
 - Original PrePrimer codebase foundation
 - [VarVAMP](https://github.com/jonas-fuchs/varVAMP) - SADDLE algorithm for variant-aware primer design
@@ -273,4 +275,3 @@ PrePrimer is licensed under the MIT License - see the [LICENSE](LICENSE) file fo
 
 ---
 
-**PrePrimer 0.2.0 - Modern primer scheme conversion made easy! 🧬✨**

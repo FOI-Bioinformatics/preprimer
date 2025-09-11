@@ -1,16 +1,16 @@
-# 💿 Installation Guide
+# Installation Guide
 
-Complete installation instructions for PrePrimer on all supported platforms.
+Installation instructions for PrePrimer on supported platforms.
 
-## 🎯 **Prerequisites**
+## Prerequisites
 
-### **System Requirements**
+### System Requirements
 - **Python**: 3.8 or later
 - **Operating System**: Linux or macOS only
 - **Memory**: 512 MB RAM minimum (2 GB recommended for large files)
 - **Storage**: 100 MB free space
 
-> ⚠️ **Windows Support**: Windows is not currently supported due to Unicode character encoding limitations. Consider using WSL2 on Windows.
+> Note: Windows is not currently supported due to Unicode character encoding limitations. WSL2 may provide an alternative for Windows users.
 
 ### **Python Dependencies**
 PrePrimer automatically installs these required packages:
@@ -18,7 +18,7 @@ PrePrimer automatically installs these required packages:
 - `pyyaml>=6.0` - YAML configuration file support  
 - `click>=8.0` - Command-line interface framework
 
-**Development dependencies** (installed with `[dev]` option):
+Development dependencies (installed with `[dev]` option):
 - `pytest>=7.0` - Test framework
 - `pytest-cov>=4.0` - Coverage reporting
 - `pytest-benchmark>=4.0` - Performance benchmarking
@@ -29,11 +29,11 @@ PrePrimer automatically installs these required packages:
 - `flake8>=6.0` - Linting
 - `mypy>=1.0` - Type checking
 
-## 🚀 **Installation Methods**
+## Installation Methods
 
-### **Method 1: From Source (Recommended)**
+### Method 1: From Source (Recommended)
 
-This is the most up-to-date installation method:
+Installation from source provides the most current version:
 
 ```bash
 # 1. Clone the repository
@@ -47,7 +47,7 @@ pip install -e .
 preprimer --version
 ```
 
-### **Method 2: Direct pip Install (Coming Soon)**
+### Method 2: Direct pip Install (Coming Soon)
 
 ```bash
 # When available on PyPI

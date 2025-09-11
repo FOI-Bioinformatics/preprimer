@@ -5,8 +5,8 @@ Technical guidance for Claude Code when working with the PrePrimer codebase.
 ## Current State (v0.2.0)
 
 **Codebase Metrics:**
-- 12,853+ total lines of Python code across 49+ files
-- 250+ tests with comprehensive coverage including external scheme validation
+- 19,985 total lines of Python code across 59 files
+- 581 tests with 96.90% comprehensive coverage including external scheme validation
 - Plugin-based architecture with security and performance focus
 - Documentation: 16 organized files in 3-tier structure
 
@@ -41,11 +41,19 @@ pip install -e ".[dev]"
 
 ### Testing Commands
 ```bash
-# Run all tests (250+ total with comprehensive coverage)
+# Run all tests (581 total with 96.90% comprehensive coverage)
 python -m pytest
 
+# Run comprehensive test suites (new coverage-focused tests)
+python -m pytest tests/test_security_comprehensive.py -v         # Security validation (38 tests)
+python -m pytest tests/test_main_api_comprehensive.py -v          # Main API testing (12 tests)
+python -m pytest tests/test_converter_comprehensive_gaps.py -v    # Core converter (9 tests)
+python -m pytest tests/test_exceptions_comprehensive.py -v        # Exception system (25 tests)
+python -m pytest tests/test_registry_comprehensive.py -v          # Registry system (16 tests)
+python -m pytest tests/test_artic_parser_comprehensive.py -v      # ARTIC parser (22 tests)
+python -m pytest tests/test_sts_writer_comprehensive.py -v        # STS writer (12 tests)
+
 # Run specific categories
-python -m pytest tests/test_security.py -v              # Security validation
 python -m pytest tests/test_benchmarks.py -v            # Performance benchmarks
 python -m pytest tests/test_property_based.py -v        # Property-based testing
 python -m pytest tests/test_integration.py -v           # End-to-end testing
@@ -59,13 +67,14 @@ python scripts/run_mutation_tests.py                    # Test quality assessmen
 ```
 
 **Test Categories:**
-- Property-based (12): Automated input generation with Hypothesis
-- Benchmarks (23): Performance validation and regression detection  
-- Integration (12+): End-to-end workflow testing
-- Security (18): Input validation and vulnerability prevention
-- Topology (20): Circular genome coordinate handling and detection
-- External validation: Real-world schemes from PrimerSchemes Labs repository
-- Unit tests: Core functionality across all components
+- **Comprehensive Coverage Tests (134)**: Security (38), Main API (12), Converter (9), Exceptions (25), Registry (16), Parser edge cases (22), Writer coverage (12)
+- **Property-based (12)**: Automated input generation with Hypothesis
+- **Benchmarks (23)**: Performance validation and regression detection  
+- **Integration (12+)**: End-to-end workflow testing
+- **Topology (20)**: Circular genome coordinate handling and detection
+- **External validation**: Real-world schemes from PrimerSchemes Labs repository
+- **Unit tests**: Core functionality across all components
+- **Total: 581 tests with 96.90% coverage**
 
 ### Code Quality
 ```bash
@@ -271,10 +280,12 @@ info.save("info.json")
 ### Development Focus Areas
 
 **Near-term (v0.2.x):**
-- Maintain comprehensive test coverage (currently 250+ tests with external validation)
-- Continue security hardening and input validation improvements
+- Maintain exceptional test coverage (currently 581 tests with 96.90% coverage)
+- **Completed**: Comprehensive security hardening with 100% security module coverage
+- **Completed**: Main API entry point testing achieving 100% coverage
+- **Completed**: Core infrastructure testing (converter, registry, exceptions) with 95-100% coverage
 - Performance monitoring with large-scale datasets (validated up to 2,500+ amplicons)
-- Documentation maintenance following ecosystem integration updates
+- Documentation maintenance following comprehensive testing improvements
 
 **Medium-term (v0.3.x):**
 - Windows support investigation (Unicode encoding challenges)
@@ -303,26 +314,40 @@ info.save("info.json")
 - Comprehensive error handling with informative validation messages
 - JSON metadata support: Olivar configurations and primal-page info.json schema
 
-**Test Data Structure:**
+**Test Suite Structure:**
 ```
-tests/test_data/
-├── datasets/                          # Internal test datasets
-│   ├── small/                         # COVID-19: 5 amplicons (fast testing)
-│   ├── medium/                        # ASFV: 80 amplicons (performance testing)
-│   └── mitochondrial/                 # Human mito: 8 amplicons (circular genome testing)
-└── external_schemes/                  # Real-world validation schemes
-    ├── yale-tb/                       # Mycobacterium tuberculosis: 2,564 amplicons
-    ├── yale-west-nile-virus/          # West Nile Virus: 38 amplicons
-    ├── varvamp-hav/                   # Hepatitis A with degenerate primers
-    ├── nCoV-2019-V532/                # ARTIC SARS-CoV-2 V5.3.2: 96 amplicons
-    └── olivar-mitochondrial/          # Olivar-generated: 15 amplicons
+tests/
+├── test_*_comprehensive.py           # Comprehensive coverage test suites (134 tests)
+│   ├── test_security_comprehensive.py         # Security validation (38 tests, 100% coverage)
+│   ├── test_main_api_comprehensive.py         # Main API entry point (12 tests, 100% coverage)
+│   ├── test_converter_comprehensive_gaps.py   # Core converter edge cases (9 tests, 99.34% coverage)
+│   ├── test_exceptions_comprehensive.py       # Exception system (25 tests, 95.67% coverage)
+│   ├── test_registry_comprehensive.py         # Registry system (16 tests, 96.97% coverage)
+│   ├── test_artic_parser_comprehensive.py     # ARTIC parser edge cases (22 tests, 97.22% coverage)
+│   └── test_sts_writer_comprehensive.py       # STS writer complete coverage (12 tests, 100% coverage)
+├── test_data/                         # Test datasets
+│   ├── datasets/                      # Internal test datasets
+│   │   ├── small/                     # COVID-19: 5 amplicons (fast testing)
+│   │   ├── medium/                    # ASFV: 80 amplicons (performance testing)
+│   │   └── mitochondrial/             # Human mito: 8 amplicons (circular genome testing)
+│   └── external_schemes/              # Real-world validation schemes
+│       ├── yale-tb/                   # Mycobacterium tuberculosis: 2,564 amplicons
+│       ├── yale-west-nile-virus/      # West Nile Virus: 38 amplicons
+│       ├── varvamp-hav/               # Hepatitis A with degenerate primers
+│       ├── nCoV-2019-V532/            # ARTIC SARS-CoV-2 V5.3.2: 96 amplicons
+│       └── olivar-mitochondrial/      # Olivar-generated: 15 amplicons
+└── [other test categories...]         # 447 additional tests across all other categories
 ```
 Each dataset includes cross-format consistency with realistic biological data. The mitochondrial datasets specifically test circular genome coordinate wrapping, while external schemes validate real-world compatibility with official primer design tools and repositories.
 
 ### Quality Standards
 
-- **Test Coverage**: Maintain >95% across all modules
-- **Security**: All file operations require security validation
+- **Test Coverage**: **Achieved 96.90% across 581 comprehensive tests**
+  - Security Module: 100% coverage with comprehensive edge case testing
+  - Main API: 100% coverage of primary user-facing functions
+  - Core Infrastructure: 95-100% coverage (converter 99.34%, registry 96.97%, exceptions 95.67%)
+  - Parser/Writer System: 95-100% coverage with comprehensive error path testing
+- **Security**: All file operations require security validation (100% security module coverage)
 - **Performance**: Document benchmarks for performance-critical paths
 - **Documentation**: Keep aligned with actual implementation (recently reorganized)
 - **Real-world Validation**: Continuous testing with official schemes from PrimerSchemes Labs repository

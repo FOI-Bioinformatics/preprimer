@@ -1,10 +1,10 @@
-# 🚀 Quick Start Guide
+# Quick Start Guide
 
-Get up and running with PrePrimer in 5 minutes! This guide will walk you through your first primer scheme conversion.
+This guide demonstrates basic PrePrimer usage for primer scheme conversion.
 
-## ⚡ **5-Minute Setup**
+## Setup
 
-### **1. Installation (2 minutes)**
+### Installation
 
 ```bash
 # Clone the repository
@@ -21,27 +21,27 @@ preprimer --version
 # PrePrimer 0.2.0
 ```
 
-### **2. Check Available Formats (30 seconds)**
+### Check Available Formats
 
 ```bash
 # See what formats PrePrimer supports
 preprimer list
 
 # Output:
-# 📥 Available input formats:
+# Available input formats:
 #   varvamp: .tsv, .txt
 #   artic: .bed, .scheme.bed
 #   olivar: .csv
 # 
-# 📤 Available output formats:
+# Available output formats:
 #   artic: .scheme.bed
 #   fasta: .fasta
 #   sts: .sts.tsv
 ```
 
-### **3. Your First Conversion (2 minutes)**
+### First Conversion
 
-#### **Option A: Using Test Data**
+#### Using Test Data
 ```bash
 # Convert VarVAMP test data to ARTIC format
 preprimer convert \
