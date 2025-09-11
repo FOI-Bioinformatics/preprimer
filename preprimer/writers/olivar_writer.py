@@ -154,8 +154,8 @@ class OlivarWriter(OutputWriter):
             Dictionary with format information
         """
         return {
-            "format": self.format_name,
-            "extension": self.file_extension,
+            "format": self.format_name(),
+            "extension": self.file_extension(),
             "description": self.description,
             "use_case": "Olivar variant-aware primer design tool input",
             "columns": (

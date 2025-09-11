@@ -68,10 +68,10 @@ class VarVAMPWriter(OutputWriter):
                     "seq": primer.sequence,
                     "size": len(primer.sequence),
                     "gc_best": self._calculate_gc_content(primer.sequence) * 100,  # Convert to percentage
-                    "temp_best": getattr(primer, "tm", 60.0),
+                    "temp_best": getattr(primer, "tm", 60.0) or 60.0,
                     "mean_gc": self._calculate_gc_content(primer.sequence) * 100,  # Convert to percentage
-                    "mean_temp": getattr(primer, "tm", 60.0),
-                    "score": getattr(primer, "score", 90.0),
+                    "mean_temp": getattr(primer, "tm", 60.0) or 60.0,
+                    "score": getattr(primer, "score", 90.0) or 90.0,
                 }
                 primer_rows.append(row)
 
@@ -173,8 +173,8 @@ class VarVAMPWriter(OutputWriter):
             Dictionary with format information
         """
         return {
-            "format": self.format_name,
-            "extension": self.file_extension,
+            "format": self.format_name(),
+            "extension": self.file_extension(),
             "description": self.description,
             "use_case": "VarVAMP primer design tool input",
             "columns": (
