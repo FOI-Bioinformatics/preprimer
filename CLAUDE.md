@@ -2,369 +2,480 @@
 
 Technical guidance for Claude Code when working with the PrePrimer codebase.
 
-## Current State (v0.2.0)
+## Current State (v1.0.0 Ready)
+
+**Status:** Production-ready for v1.0.0 release
 
 **Codebase Metrics:**
-- 19,985 total lines of Python code across 59 files
-- 581 tests with 96.90% comprehensive coverage including external scheme validation
-- Plugin-based architecture with security and performance focus
-- Documentation: 16 organized files in 3-tier structure
+- **Code**: ~20,000 lines of Python across 59 files
+- **Tests**: 611 tests with 96.90% coverage
+- **Architecture**: Plugin-based with security focus
+- **Documentation**: Complete, organized in docs/
 
-**Key Strengths:**
-- Comprehensive security implementation with path validation
-- Performance benchmarks showing sub-second processing for 500+ amplicons
-- Property-based testing with Hypothesis for robust validation
-- Clean plugin architecture enabling format extensibility
-- Circular genome topology detection and coordinate wrapping support
-- Real-world validation with official PrimerSchemes Labs repository data
-- Complete articbedversion compatibility (v2.0, v3.0) following primal-page specifications
+**Key Capabilities:**
+- 4 input formats: VarVAMP, ARTIC, Olivar, STS
+- 5 output formats: ARTIC, VarVAMP, Olivar, FASTA, STS
+- 20 bidirectional conversion pathways
+- Circular genome topology detection and handling
+- IUPAC degenerate nucleotide support
+- Security hardening with 100% security module coverage
 
-**Documentation Structure (Recently Reorganized):**
-```
-docs/
-├── README.md                 # Navigation hub
-├── technical/               # Security, testing, compatibility (3 files)
-├── developer/               # Architecture, contributing, extending (5 files)
-└── user-guide/              # Installation, usage, CLI reference (7 files)
-```
+## Quick Commands
 
-## Development Commands
+### Development
 
-### Installation and Setup
 ```bash
-# Install the package in development mode
-pip install -e .
-
-# Install with development dependencies
+# Install for development
 pip install -e ".[dev]"
-```
 
-### Testing Commands
-```bash
-# Run all tests (581 total with 96.90% comprehensive coverage)
+# Run tests (fast)
 python -m pytest
 
-# Run comprehensive test suites (new coverage-focused tests)
-python -m pytest tests/test_security_comprehensive.py -v         # Security validation (38 tests)
-python -m pytest tests/test_main_api_comprehensive.py -v          # Main API testing (12 tests)
-python -m pytest tests/test_converter_comprehensive_gaps.py -v    # Core converter (9 tests)
-python -m pytest tests/test_exceptions_comprehensive.py -v        # Exception system (25 tests)
-python -m pytest tests/test_registry_comprehensive.py -v          # Registry system (16 tests)
-python -m pytest tests/test_artic_parser_comprehensive.py -v      # ARTIC parser (22 tests)
-python -m pytest tests/test_sts_writer_comprehensive.py -v        # STS writer (12 tests)
-
-# Run specific categories
-python -m pytest tests/test_benchmarks.py -v            # Performance benchmarks
-python -m pytest tests/test_property_based.py -v        # Property-based testing
-python -m pytest tests/test_integration.py -v           # End-to-end testing
-python -m pytest tests/test_topology.py -v              # Circular genome testing
-python -m pytest tests/test_all_parsers.py -v           # Parser consistency validation
-python -m pytest tests/test_olivar_parser.py -v         # Olivar format testing
-
-# Coverage and analysis
+# Run tests with coverage
 python -m pytest --cov=preprimer --cov-report=html
-python scripts/run_mutation_tests.py                    # Test quality assessment
-```
 
-**Test Categories:**
-- **Comprehensive Coverage Tests (134)**: Security (38), Main API (12), Converter (9), Exceptions (25), Registry (16), Parser edge cases (22), Writer coverage (12)
-- **Property-based (12)**: Automated input generation with Hypothesis
-- **Benchmarks (23)**: Performance validation and regression detection  
-- **Integration (12+)**: End-to-end workflow testing
-- **Topology (20)**: Circular genome coordinate handling and detection
-- **External validation**: Real-world schemes from PrimerSchemes Labs repository
-- **Unit tests**: Core functionality across all components
-- **Total: 581 tests with 96.90% coverage**
-
-### Code Quality
-```bash
-# Format code with black
+# Format code
 black preprimer/ tests/
+isort preprimer/ tests/
 
-# Lint with flake8
-flake8 preprimer/ tests/
-
-# Type checking with mypy
-mypy preprimer/
+# Check code quality
+flake8 preprimer/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+mypy preprimer/ --ignore-missing-imports
+bandit -r preprimer/ -ll
 ```
 
-### Running PrePrimer
-```bash
-# CLI entry point
-preprimer --help
+### Testing Categories
 
-# List supported formats
+```bash
+# Security tests (38 tests, 100% coverage)
+python -m pytest tests/test_security_comprehensive.py -v
+
+# Core tests
+python -m pytest tests/test_core_interfaces.py -v
+python -m pytest tests/test_converter*.py -v
+
+# Parser tests
+python -m pytest tests/test_*_parser*.py -v
+
+# Writer tests
+python -m pytest tests/test_*_writer*.py -v
+
+# Topology tests (circular genomes)
+python -m pytest tests/test_topology.py -v
+python -m pytest tests/test_circular_genome.py -v
+
+# Integration tests
+python -m pytest tests/test_integration.py -v
+
+# Benchmarks
+python -m pytest tests/test_benchmarks.py -v --benchmark-only
+```
+
+### CLI Usage
+
+```bash
+# List formats
 preprimer list
 
-# Get file information
+# Get file info
 preprimer info your_primers.tsv
 
-# Convert formats
-preprimer convert --input primers.tsv --output-dir schemes/ --output-formats artic
+# Convert
+preprimer convert --input primers.tsv --output-dir output/ --output-formats artic
 
-# Multiple formats with custom prefix
+# Multiple formats
 preprimer convert --input primers.tsv --output-dir output/ \
-                 --output-formats artic fasta sts --prefix MyVirus
+                  --output-formats artic fasta sts varvamp olivar --prefix MyVirus
 ```
 
 ## Architecture
 
-Plugin-based primer scheme converter with clean separation of concerns.
-
-### Core Structure
 ```
 preprimer/
-├── core/                          # Framework and abstractions
-│   ├── interfaces.py              # Abstract base classes (PrimerData, AmpliconData)
-│   ├── registry.py                # Plugin auto-registration system
+├── core/                          # Framework
 │   ├── converter.py               # Main conversion orchestration
-│   ├── config.py                  # Configuration management
-│   ├── security.py                # Input validation and path sanitization
-│   ├── topology.py                # Genome topology detection and circular coordinate handling
-│   ├── standardized_parser.py     # Base parser with topology integration
-│   └── primerscheme_info.py       # Primal-page info.json schema implementation
+│   ├── interfaces.py              # Data models (PrimerData, AmpliconData)
+│   ├── registry.py                # Plugin auto-registration
+│   ├── topology.py                # Circular genome detection
+│   ├── security.py                # Input validation (100% coverage)
+│   ├── standardized_parser.py     # Base parser class
+│   └── primerscheme_info.py       # Primal-page info.json schema
 ├── parsers/                       # Input format handlers
-│   ├── varvamp_parser.py          # VarVAMP TSV format with IUPAC degenerate support
-│   ├── artic_parser.py            # ARTIC BED format (v2.0/v3.0 articbedversion)
-│   ├── olivar_parser.py           # Olivar CSV format with enhanced validation
-│   └── sts_parser.py              # STS TSV format
+│   ├── varvamp_parser.py          # VarVAMP TSV (13-column, IUPAC)
+│   ├── artic_parser.py            # ARTIC BED (v2.0/v3.0)
+│   ├── olivar_parser.py           # Olivar CSV (circular genome support)
+│   └── sts_parser.py              # STS TSV (3-column, minimal)
 └── writers/                       # Output format generators
-    ├── artic_writer.py            # Official primerscheme structure (primer.bed + info.json)
-    ├── fasta_writer.py            # Multi-FASTA sequences
-    ├── sts_writer.py              # STS validation files
-    ├── varvamp_writer.py          # VarVAMP TSV format (full column specification)
-    └── olivar_writer.py           # Olivar CSV format
+    ├── artic_writer.py            # ARTIC primerscheme structure
+    ├── varvamp_writer.py          # VarVAMP TSV output
+    ├── olivar_writer.py           # Olivar CSV output
+    ├── fasta_writer.py            # Multi-FASTA with metadata
+    └── sts_writer.py              # STS TSV output
 ```
 
-### Format Support
+## Key Implementation Patterns
 
-**Input Formats:**
-- **VarVAMP** (.tsv): Full 13-column specification with IUPAC degenerate nucleotide support
-- **ARTIC** (.bed): Compatible with articbedversion v2.0 and v3.0 following primal-page specifications
-- **Olivar** (.csv): Native Olivar-generated CSV format with comprehensive metadata
-- **STS** (.sts.tsv): Simple primer format for basic conversion workflows
+### 1. Adding a New Parser
 
-**Output Formats:**
-- **ARTIC** (.bed): Official primerscheme structure (primer.bed + reference.fasta + info.json)
-- **VarVAMP** (.tsv): Complete 13-column format compatible with VarVAMP SADDLE algorithm
-- **Olivar** (.csv): Row-based amplicon format with forward/reverse primer pairs
-- **FASTA** (.fasta): Multi-FASTA primer sequences with metadata
-- **STS** (.sts.tsv): Simple primer validation format
-
-**Ecosystem Integration:**
-- **PrimerSchemes Labs**: Validated with official repository schemes (Yale TB, Yale WNV, VarVAMP HAV)
-- **Primal-page**: Full info.json schema compliance with MD5 validation
-- **Topology Awareness**: Automatic detection and handling of circular genomes (mitochondrial, plasmids)
-- **Real-world Testing**: Verified with ARTIC nCoV-2019 V5.3.2, Olivar mitochondrial designs
-
-### Plugin Registration
 ```python
-from preprimer.core.registry import parser_registry, writer_registry
-# Auto-registration on import - new formats integrate seamlessly
+from preprimer.core.standardized_parser import StandardizedParser
+from preprimer.core.interfaces import AmpliconData
+
+class MyFormatParser(StandardizedParser):
+    @classmethod
+    def format_name(cls) -> str:
+        return "myformat"
+
+    @classmethod
+    def file_extensions(cls) -> List[str]:
+        return [".myformat"]
+
+    def validate_file(self, file_path: Union[str, Path]) -> bool:
+        # Check if file is this format
+        pass
+
+    def _parse_file_content(self, file_path: Path, prefix: str) -> Dict[str, AmpliconData]:
+        # Parse and return amplicons
+        pass
 ```
 
-## Development Guidelines
-
-### Adding New Formats
-
-**Parser** (input format):
+Register in `preprimer/parsers/__init__.py`:
 ```python
-from preprimer.core.interfaces import PrimerParser
-
-class MyFormatParser(PrimerParser):
-    def can_parse(self, file_path: str) -> bool:
-        # Format detection logic
-    
-    def parse(self, file_path: str) -> list[AmpliconData]:
-        # Parsing implementation
+from .myformat_parser import MyFormatParser
+parser_registry.register(MyFormatParser)
 ```
 
-**Writer** (output format):  
+### 2. Security Validation
+
+ALL file operations must use security validation:
+
 ```python
-from preprimer.core.interfaces import OutputWriter
+from preprimer.core.security import PathValidator
 
-class MyFormatWriter(OutputWriter):
-    def write(self, amplicons: list[AmpliconData], output_path: str) -> None:
-        # Writing implementation
+# Validate and sanitize paths
+safe_path = PathValidator.sanitize_path(user_input)
+PathValidator.validate_file_size(safe_path)
+PathValidator.validate_output_directory(output_dir)
 ```
 
-Place in `parsers/` or `writers/` directory and import in `__init__.py` for auto-registration.
+### 3. Topology Handling
 
-### Key Specifications
-
-- **Platform**: Linux and macOS only (Unicode limitations prevent Windows support)
-- **Python**: 3.8+ (tested through 3.13)
-- **Dependencies**: Pydantic ≥2.0, PyYAML ≥6.0, Click ≥8.0
-- **Performance**: Sub-second processing for 500+ amplicons, validated with 2,500+ amplicon schemes
-- **Security**: All file operations use path validation and input sanitization
-- **Genome Types**: Linear and circular genome topology with automatic detection
-- **Coordinate Systems**: Handles 0-based BED and 1-based coordinate systems with proper conversion
-- **Standards Compliance**: Follows primal-page specifications and articbedversion standards
-
-### Topology Detection and Circular Genome Support
+For circular genomes (mitochondrial, plasmids):
 
 ```python
 from preprimer.core.topology import TopologyDetector, GenomeTopology
 
-# Automatic topology detection
 detector = TopologyDetector()
 topology = detector.detect_topology(amplicons, reference_length=16569)
 
-# Topology-aware amplicon length calculation
 if topology == GenomeTopology.CIRCULAR:
-    length = detector.calculate_amplicon_length(start, end, reference_length, is_circular=True)
+    # Handle cross-origin amplicons (start > end)
+    actual_length = detector.calculate_amplicon_length(
+        start=16400, end=200, reference_length=16569, is_circular=True
+    )
 ```
 
-**Topology Features:**
-- Automatic detection of linear vs. circular genome architecture
-- Coordinate wrapping support for circular genomes (mitochondria, plasmids, viral episomes)
-- Topology-aware amplicon length calculation with multiple detection methods
-- Cross-origin amplicon handling (e.g., start=16400, end=200 in 16569bp genome)
-- Integration with all parsers through standardized base class
+### 4. Error Handling
 
-### Security Implementation
+Use structured exceptions:
 
 ```python
-from preprimer.core.security import PathValidator, SecurityError
-
-# All file operations use security validation
-safe_path = PathValidator.sanitize_path(user_input)
-PathValidator.validate_output_directory(output_dir)
-```
-
-**Security Features:**
-- Path traversal prevention and input sanitization
-- Configurable file size limits (default 50MB)
-- Safe temporary file handling with cleanup
-- Comprehensive security event logging
-
-### Primal-page Integration and Metadata Support
-
-```python
-from preprimer.core.primerscheme_info import PrimerschemeInfo, generate_info_json
-
-# Create official info.json metadata
-info = generate_info_json(
-    schemename="my-scheme",
-    schemeversion="v1.0.0", 
-    ampliconsize=400,
-    species="SARS-CoV-2",
-    primer_bed_path="primer.bed",
-    reference_fasta_path="reference.fasta"
+from preprimer.core.exceptions import (
+    ParserError,
+    InvalidFormatError,
+    CorruptedDataError,
+    SecurityError,
 )
-info.save("info.json")
+
+# Raise with user-friendly messages
+raise InvalidFormatError(
+    file_path,
+    expected_format="VarVAMP TSV",
+    user_message="File does not match VarVAMP format."
+).add_suggestion("Check file has 13 tab-separated columns")
 ```
 
-**Metadata Features:**
-- Full primal-page info.json schema implementation with validation
-- MD5 hash generation and verification for scheme integrity
-- articbedversion compatibility (v2.0, v3.0) with format-specific features
-- JSON configuration parsing for Olivar and other tools
-- Official primerscheme directory structure generation (primer.bed + reference.fasta + info.json)
+## Test Data
 
-### Performance Benchmarks
+```
+tests/test_data/datasets/
+├── small/              # COVID-19, 5 amplicons (fast testing)
+├── medium/             # ASFV, 80 amplicons (performance)
+└── mitochondrial/      # Human mtDNA, 8 amplicons (circular genome)
 
-**Key Metrics (Operations/Second):**
+tests/test_data/external_schemes/
+├── yale-tb/            # M. tuberculosis, 2,564 amplicons
+├── yale-west-nile-virus/  # WNV, 38 amplicons
+├── varvamp-hav/        # Hepatitis A with degenerate primers
+├── nCoV-2019-V532/     # ARTIC SARS-CoV-2 V5.3.2
+└── olivar-mitochondrial/  # Olivar-generated, 15 amplicons
+```
+
+## Code Quality Standards
+
+### Required Before Commit
+
+```bash
+# Format code
+black preprimer/ tests/
+
+# Sort imports
+isort preprimer/ tests/
+
+# Check linting (warnings OK, errors not OK)
+flake8 preprimer/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+
+# Run tests
+python -m pytest
+```
+
+### Test Coverage Requirements
+
+- **Overall**: ≥95% (currently 96.90%)
+- **Security module**: 100% (achieved)
+- **New features**: Must include tests
+- **Bug fixes**: Must include regression test
+
+### Performance Targets
+
+- Small datasets (<50 amplicons): <1 second
+- Medium datasets (50-500): <5 seconds
+- Large datasets (500+): <30 seconds
+- Validated up to 2,564 amplicons
+
+## Common Development Tasks
+
+### Task: Fix a Parser Bug
+
+1. **Write failing test**:
+```python
+def test_bug_description():
+    parser = VarVAMPParser()
+    # Test case that reproduces bug
+    amplicons = parser.parse("test_file.tsv", prefix="test")
+    assert expected_behavior
+```
+
+2. **Fix the bug** in parser code
+
+3. **Verify fix**:
+```bash
+python -m pytest tests/test_varvamp_parser.py -v
+python -m pytest  # Full suite
+```
+
+4. **Check code quality**:
+```bash
+black preprimer/parsers/varvamp_parser.py
+flake8 preprimer/parsers/varvamp_parser.py
+```
+
+### Task: Add New Output Format
+
+1. **Create writer** in `preprimer/writers/`:
+```python
+class MyFormatWriter(OutputWriter):
+    def format_name(self) -> str:
+        return "myformat"
+
+    def write(self, amplicons, output_path, **kwargs):
+        # Implementation
+        pass
+```
+
+2. **Register** in `preprimer/writers/__init__.py`
+
+3. **Write tests** in `tests/test_myformat_writer.py`
+
+4. **Update documentation** in `docs/user-guide/supported-formats.md`
+
+### Task: Improve Performance
+
+1. **Profile current performance**:
+```python
+import cProfile
+profiler = cProfile.Profile()
+profiler.enable()
+# Run conversion
+profiler.disable()
+profiler.print_stats(sort='cumulative')
+```
+
+2. **Run benchmarks**:
+```bash
+python -m pytest tests/test_benchmarks.py --benchmark-only
+```
+
+3. **Optimize bottlenecks**
+
+4. **Verify no regression**:
+```bash
+python -m pytest tests/test_benchmarks.py --benchmark-compare
+```
+
+## Documentation Structure
+
+```
+docs/
+├── user-guide/          # User-facing documentation
+│   ├── installation.md
+│   ├── quick-start.md
+│   ├── basic-usage.md
+│   ├── cli-reference.md
+│   ├── supported-formats.md
+│   └── configuration.md
+├── developer/           # Developer documentation
+│   ├── architecture.md
+│   ├── adding-parsers.md
+│   ├── contributing.md
+│   └── release-checklist.md
+├── api/                 # API reference
+│   └── python-api.md
+└── technical/           # Technical specifications
+    └── windows-compatibility.md
+```
+
+**Update documentation when:**
+- Adding new formats
+- Changing CLI commands
+- Modifying API
+- Fixing bugs that affect usage
+
+## CI/CD
+
+**GitHub Actions workflows** (simplified):
+
+### `ci.yml` - Runs on every push/PR
+- Tests on Ubuntu + macOS
+- Python 3.11, 3.12, 3.13
+- Code quality checks (black, isort, flake8, mypy)
+- Security scan (bandit)
+- ~3-5 minutes
+
+### `release.yml` - Runs on version tags
+- Run tests
+- Build package (wheel + sdist)
+- Create GitHub release
+- Attach build artifacts
+- ~2-3 minutes
+
+**Trigger release**:
+```bash
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
+```
+
+## Important Files
+
+### Root Directory
+- `README.md` - User-facing overview
+- `CLAUDE.md` - This file (for Claude Code)
+- `CHANGELOG.md` - Version history
+- `SECURITY.md` - Security policy
+- `CITATION.cff` - Citation metadata
+- `LICENSE` - MIT license
+
+### Configuration
+- `pyproject.toml` - Dependencies, build config
+- `MANIFEST.in` - Package distribution files
+
+### Examples
+- `examples/` - 5 runnable examples
+
+## Platform-Specific Notes
+
+### Linux/macOS
+- ✅ Full support
+- ✅ All Unicode characters work
+- ✅ Performance optimized
+
+### Windows
+- ❌ Not supported (Unicode console issues)
+- ✅ WSL2 works perfectly
+- See `docs/technical/windows-compatibility.md` for details
+
+## Security Considerations
+
+**ALL file operations must**:
+1. Validate paths (no path traversal)
+2. Check file sizes
+3. Sanitize input
+4. Use secure temporary files
+
+**Security module has 100% test coverage** - maintain this!
+
+## Release Process
+
+**See full checklist**: `docs/developer/release-checklist.md`
+
+**Quick version**:
+1. Update version in `preprimer/__init__.py`
+2. Update `CHANGELOG.md` with release date
+3. Commit: `git commit -m "chore: Prepare v1.0.0"`
+4. Tag: `git tag -a v1.0.0 -m "Release v1.0.0"`
+5. Push tag: `git push origin v1.0.0`
+6. CI automatically builds and creates release
+
+## Debugging Tips
+
+### Parser Issues
+```python
+# Enable debug logging
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Parse with detailed logs
+parser = VarVAMPParser()
+amplicons = parser.parse("file.tsv", prefix="debug")
+```
+
+### Topology Issues
+```python
+# Check topology detection
+from preprimer.core.topology import TopologyDetector
+detector = TopologyDetector()
+topology = detector.detect_topology(amplicons, reference_length=16569)
+print(f"Detected: {topology.value}")
+```
+
+### Security Issues
+```python
+# Test path validation
+from preprimer.core.security import PathValidator
+safe_path = PathValidator.sanitize_path("../../etc/passwd")  # Should fail
+```
+
+## Performance Benchmarks (Reference)
+
+**Current performance** (as of v1.0.0):
 - Parser creation: ~4.2M ops/sec
-- Format detection: ~45K ops/sec  
+- Format detection: ~45K ops/sec
 - Small dataset parsing: ~3K ops/sec
-- Large dataset processing: ~37 ops/sec (2000+ amplicons)
+- Large dataset (2000+ amplicons): ~37 ops/sec
+- Memory: ~50MB baseline
 
-**Processing Times:**
-- Small datasets (<50 amplicons): ~300μs
-- Medium datasets (50-500): ~2.5ms
-- Large datasets (500+): ~26ms
+**If making changes that affect performance**, run benchmarks and compare.
 
-## Current Priorities and Future Plans
+## Key Design Principles
 
-### Development Focus Areas
+1. **Security First**: All input validated, no path traversal, size limits
+2. **Plugin Architecture**: Easy to add new formats without core changes
+3. **Topology Aware**: Automatic circular genome detection and handling
+4. **Standards Compliant**: Follow primal-page, articbedversion specs
+5. **Well-Tested**: High coverage, comprehensive test suite
+6. **User-Friendly Errors**: Informative messages with suggestions
+7. **Performance**: Sub-second for typical workloads
 
-**Near-term (v0.2.x):**
-- Maintain exceptional test coverage (currently 581 tests with 96.90% coverage)
-- **Completed**: Comprehensive security hardening with 100% security module coverage
-- **Completed**: Main API entry point testing achieving 100% coverage
-- **Completed**: Core infrastructure testing (converter, registry, exceptions) with 95-100% coverage
-- Performance monitoring with large-scale datasets (validated up to 2,500+ amplicons)
-- Documentation maintenance following comprehensive testing improvements
+## When in Doubt
 
-**Medium-term (v0.3.x):**
-- Windows support investigation (Unicode encoding challenges)
-- Additional format support for emerging primer design tools
-- Web API/service implementation for remote conversion
-- Enhanced biological constraint validation (Tm, GC content, primer-dimer analysis)
-- Advanced circular genome coordinate algorithms for complex topologies
+1. **Check existing tests**: Pattern already exists
+2. **Use StandardizedParser**: Base class handles security, validation
+3. **Write tests first**: TDD approach prevents bugs
+4. **Run full suite**: `pytest` before committing
+5. **Check documentation**: Update if behavior changes
 
-**Long-term:**
-- Integration with popular sequencing pipelines (Nextflow, Snakemake)
-- Real-time format validation and conversion services
-- Machine learning-based primer quality assessment
-- Support for multi-reference and pan-genome primer schemes
+---
 
-### Key Implementation Notes
-
-**Essential Principles:**
-- All format conversions preserve data integrity bidirectionally
-- Automatic format detection using content analysis + file extensions
-- Topology-aware processing: automatic detection of linear vs. circular genomes
-- Coordinate system handling: proper conversion between 0-based BED and 1-based systems
-- Standards compliance: follows primal-page specifications and articbedversion standards
-- IUPAC degenerate nucleotide support for variant-aware primer designs
-- Security-first approach: all file operations use validation utilities
-- Plugin architecture enables custom formats without core changes
-- Comprehensive error handling with informative validation messages
-- JSON metadata support: Olivar configurations and primal-page info.json schema
-
-**Test Suite Structure:**
-```
-tests/
-├── test_*_comprehensive.py           # Comprehensive coverage test suites (134 tests)
-│   ├── test_security_comprehensive.py         # Security validation (38 tests, 100% coverage)
-│   ├── test_main_api_comprehensive.py         # Main API entry point (12 tests, 100% coverage)
-│   ├── test_converter_comprehensive_gaps.py   # Core converter edge cases (9 tests, 99.34% coverage)
-│   ├── test_exceptions_comprehensive.py       # Exception system (25 tests, 95.67% coverage)
-│   ├── test_registry_comprehensive.py         # Registry system (16 tests, 96.97% coverage)
-│   ├── test_artic_parser_comprehensive.py     # ARTIC parser edge cases (22 tests, 97.22% coverage)
-│   └── test_sts_writer_comprehensive.py       # STS writer complete coverage (12 tests, 100% coverage)
-├── test_data/                         # Test datasets
-│   ├── datasets/                      # Internal test datasets
-│   │   ├── small/                     # COVID-19: 5 amplicons (fast testing)
-│   │   ├── medium/                    # ASFV: 80 amplicons (performance testing)
-│   │   └── mitochondrial/             # Human mito: 8 amplicons (circular genome testing)
-│   └── external_schemes/              # Real-world validation schemes
-│       ├── yale-tb/                   # Mycobacterium tuberculosis: 2,564 amplicons
-│       ├── yale-west-nile-virus/      # West Nile Virus: 38 amplicons
-│       ├── varvamp-hav/               # Hepatitis A with degenerate primers
-│       ├── nCoV-2019-V532/            # ARTIC SARS-CoV-2 V5.3.2: 96 amplicons
-│       └── olivar-mitochondrial/      # Olivar-generated: 15 amplicons
-└── [other test categories...]         # 447 additional tests across all other categories
-```
-Each dataset includes cross-format consistency with realistic biological data. The mitochondrial datasets specifically test circular genome coordinate wrapping, while external schemes validate real-world compatibility with official primer design tools and repositories.
-
-### Quality Standards
-
-- **Test Coverage**: **Achieved 96.90% across 581 comprehensive tests**
-  - Security Module: 100% coverage with comprehensive edge case testing
-  - Main API: 100% coverage of primary user-facing functions
-  - Core Infrastructure: 95-100% coverage (converter 99.34%, registry 96.97%, exceptions 95.67%)
-  - Parser/Writer System: 95-100% coverage with comprehensive error path testing
-- **Security**: All file operations require security validation (100% security module coverage)
-- **Performance**: Document benchmarks for performance-critical paths
-- **Documentation**: Keep aligned with actual implementation (recently reorganized)
-- **Real-world Validation**: Continuous testing with official schemes from PrimerSchemes Labs repository
-- **Standards Compliance**: Adherence to primal-page specifications and ecosystem compatibility
-
-### External Validation and Real-world Testing
-
-**Validated Schemes:**
-- **Yale TB**: Mycobacterium tuberculosis whole genome (2,564 amplicons, articbedversion v2.0)
-- **Yale WNV**: West Nile Virus complete genome (38 amplicons, articbedversion v3.0) 
-- **VarVAMP HAV**: Hepatitis A with degenerate primers (16 IUPAC primers)
-- **ARTIC nCoV-2019 V5.3.2**: SARS-CoV-2 reference scheme (96 amplicons)
-- **Olivar Mitochondrial**: Human mtDNA circular tiling (15 amplicons, 1200-1500bp)
-
-**Validation Results:**
-- Complete round-trip conversion fidelity across all format combinations
-- Successful parsing of both Olivar-generated CSV and BED formats
-- Proper handling of degenerate nucleotides and complex naming schemes
-- Accurate coordinate system conversion and topology detection
-- Full compatibility with official tool outputs and repository standards
+**Version**: 1.0.0
+**Last Updated**: 2024-10-14
+**Test Coverage**: 96.90% (611 tests)

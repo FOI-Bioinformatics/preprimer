@@ -1,0 +1,41 @@
+# Include documentation
+include README.md
+include LICENSE
+include CHANGELOG.md
+include CLAUDE.md
+
+# Include configuration files
+include pyproject.toml
+include requirements.txt
+
+# Include all documentation
+recursive-include docs *.md
+recursive-include docs *.rst
+
+# Include test data (but not test code in sdist)
+recursive-include tests/test_data *.tsv *.bed *.csv *.fasta *.json
+
+# Exclude compiled Python files
+global-exclude *.py[cod]
+global-exclude __pycache__
+global-exclude *.so
+global-exclude .DS_Store
+
+# Exclude development and CI files
+exclude .gitignore
+exclude .pre-commit-config.yaml
+recursive-exclude .github *
+recursive-exclude .pytest_cache *
+recursive-exclude .hypothesis *
+recursive-exclude htmlcov *
+recursive-exclude .benchmarks *
+
+# Exclude editor files
+global-exclude *.swp
+global-exclude *.swo
+global-exclude *~
+global-exclude .vscode
+global-exclude .idea
+
+# Exclude build artifacts
+global-exclude *.egg-info

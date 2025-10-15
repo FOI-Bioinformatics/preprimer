@@ -1,0 +1,73 @@
+cff-version: 1.2.0
+message: "If you use PrePrimer in your research, please cite it using the metadata from this file."
+type: software
+title: "PrePrimer: Primer Scheme Converter for Tiled Amplicon Sequencing"
+version: 1.0.0
+date-released: "2024-10-14"
+abstract: >-
+  PrePrimer facilitates format conversion between primer schemes used in genomic
+  sequencing workflows, including VarVAMP, ARTIC, Olivar, and STS formats. The
+  software includes topology detection for linear and circular genomes, with
+  coordinate system handling for viral, bacterial, and organellar targets.
+authors:
+  - family-names: "Sjödin"
+    given-names: "Andreas"
+    email: "andreas.sjodin@foi.se"
+    affiliation: "Swedish Defence Research Agency (FOI)"
+    orcid: "https://orcid.org/0000-0000-0000-0000"  # Update with actual ORCID
+repository-code: "https://github.com/FOI-Bioinformatics/preprimer"
+url: "https://github.com/FOI-Bioinformatics/preprimer"
+license: MIT
+keywords:
+  - bioinformatics
+  - primer-design
+  - amplicon-sequencing
+  - tiled-amplicon
+  - format-conversion
+  - genomics
+  - ARTIC
+  - VarVAMP
+  - Olivar
+  - primer-schemes
+  - viral-genomics
+  - bacterial-genomics
+  - mitochondrial-dna
+  - circular-genomes
+  - nanopore-sequencing
+  - illumina-sequencing
+preferred-citation:
+  type: software
+  title: "PrePrimer: Primer Scheme Converter for Tiled Amplicon Sequencing"
+  authors:
+    - family-names: "Sjödin"
+      given-names: "Andreas"
+      email: "andreas.sjodin@foi.se"
+      affiliation: "Swedish Defence Research Agency (FOI)"
+  version: 1.0.0
+  date-released: "2024-10-14"
+  repository-code: "https://github.com/FOI-Bioinformatics/preprimer"
+  license: MIT
+  doi: ""  # Add DOI from Zenodo after first release
+references:
+  - type: software
+    title: "VarVAMP: Variant-aware amplicon design"
+    authors:
+      - family-names: "Fuchs"
+        given-names: "Jonas"
+    repository-code: "https://github.com/jonas-fuchs/varVAMP"
+    notes: "VarVAMP format support"
+  - type: software
+    title: "ARTIC Network: Real-time tracking of pathogen evolution"
+    authors:
+      - name: "ARTIC Network"
+    url: "https://github.com/artic-network"
+    notes: "ARTIC BED format support"
+  - type: software
+    title: "Olivar: Optimal design of tiled amplicons for multiplexed genomic sequencing"
+    authors:
+      - family-names: "Chen"
+        given-names: "Yao-Zhong"
+      - family-names: "Treangen"
+        given-names: "Todd J."
+    repository-code: "https://github.com/treangenlab/Olivar"
+    notes: "Olivar format support"

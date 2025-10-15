@@ -4,7 +4,7 @@ Guide to input and output formats supported by PrePrimer.
 
 ## Input Formats
 
-PrePrimer supports three major primer design tool formats for input.
+PrePrimer supports four major primer design tool formats for input with complete bidirectional conversion support.
 
 ### VarVAMP Format
 
@@ -157,6 +157,66 @@ preprimer convert --input olivar-design.csv --output-formats artic fasta
 
 # Check Olivar file details
 preprimer info olivar_primers.csv
+```
+
+### **STS Format (Sequence Tagged Sites)**
+
+**Description:** Simple tab-separated format for Sequence Tagged Sites (STS) commonly used with in-silico PCR tools like e-PCR and me-pcr for primer validation and amplicon prediction.
+
+**File Extensions:** `.sts.tsv`, `.sts`, `.tsv`
+
+**Format Characteristics:**
+- Minimal 3-column tab-separated format (NAME, FORWARD, REVERSE)
+- Simple primer pair representation without coordinate information
+- Compatible with e-PCR, me-pcr, and other in-silico PCR validation tools
+- IUPAC degenerate nucleotide support in primer sequences
+- Lightweight format ideal for quick primer validation workflows
+- Bidirectional support: can be used as both input and output format
+
+#### **File Structure** (3-column specification)
+```tsv
+NAME	FORWARD	REVERSE
+amp1	ATCGATCGATCGATCGATCG	CGATCGATCGATCGATCGAT
+amp2	GCTAGCTAGCTAGCTAGCTA	TAGCTAGCTAGCTAGCTAGC
+HAV_1	TGGATRTTTCAGGWGTVCAAGC	TGWGGRAAATTMACTTTRGACCA
+```
+
+#### **Required Columns**
+- `NAME` - Unique primer pair/amplicon identifier
+- `FORWARD` - Forward primer sequence (5' to 3') with IUPAC support
+- `REVERSE` - Reverse primer sequence (5' to 3') with IUPAC support
+
+#### **Features**
+- No coordinate information (coordinates assigned during conversion)
+- No pool information (assigned automatically or from metadata)
+- Pure sequence-based format for validation workflows
+- Fast parsing and minimal file size
+- Standard format for STS databases and PCR validation
+
+#### **Limitations**
+- Lacks genomic coordinate information (assigned placeholder values: start=0)
+- No amplicon length information (estimated from sequences)
+- No pool assignment data (defaults to pool 1)
+- No quality metrics or melting temperatures
+- Best suited for validation rather than complete primer design
+
+#### **Use Cases**
+- Quick format for in-silico PCR validation with e-PCR/me-pcr
+- Converting from detailed formats (VarVAMP, ARTIC) to simple validation format
+- Importing existing STS databases into PrePrimer ecosystem
+- Lightweight interchange format for primer sequences
+- Round-trip testing and format validation workflows
+
+#### Example Usage
+```bash
+# Auto-detect STS format and convert
+preprimer convert --input primers.sts.tsv --output-dir schemes/ --output-formats artic
+
+# Parse STS and convert to multiple formats
+preprimer convert --input validation_primers.sts --output-formats artic fasta varvamp
+
+# Check STS file information
+preprimer info primers.sts.tsv
 ```
 
 ## 📤 **Output Formats**
@@ -401,8 +461,9 @@ COVID_amplicon_2,EPI_ISL_402124,2,250,530,GCTAGCTAGCTAGCTAGCTA,TAGCTAGCTAGCTAGCT
 | **VarVAMP** | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **ARTIC** | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Olivar** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **STS** | ✅ | ✅ | ✅ | ✅ | ✅ |
 
-**🎉 All 15 conversion pathways supported!**
+**🎉 All 20 conversion pathways supported with full bidirectional compatibility!**
 
 ### **Conversion Examples**
 
@@ -482,14 +543,14 @@ preprimer info mystery_file.csv
 
 ## 📊 **Format Comparison**
 
-| Feature | VarVAMP | ARTIC | Olivar |
-|---------|---------|--------|--------|
-| **Format** | TSV | BED | CSV |
-| **Coordinates** | 1-based | 0-based | Variable |
-| **Primer Layout** | One per row | One per row | Pair per row |
-| **Pool Info** | Column | Name/separate | Column |
-| **Quality Metrics** | Yes | No | Limited |
-| **Reference** | Optional | Required | Optional |
+| Feature | VarVAMP | ARTIC | Olivar | STS |
+|---------|---------|--------|--------|-----|
+| **Format** | TSV | BED | CSV | TSV |
+| **Coordinates** | 1-based | 0-based | Variable | None |
+| **Primer Layout** | One per row | One per row | Pair per row | Pair per row |
+| **Pool Info** | Column | Name/separate | Column | None |
+| **Quality Metrics** | Yes | No | Limited | No |
+| **Reference** | Optional | Required | Optional | None |
 
 ### **Coordinate System Differences**
 

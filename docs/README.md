@@ -10,7 +10,6 @@ This directory contains the complete documentation for PrePrimer, a comprehensiv
 | **[Technical Documentation](#technical-documentation)** | Security, testing, and compatibility | Technical users |
 | **[Developer Documentation](#developer-documentation)** | Architecture, contributing, and extending | Developers |
 | **[API Reference](api/)** | Programming interfaces | Developers |
-| **[Tutorials](tutorials/)** | Examples and use cases | All users |
 
 ## User Documentation
 
@@ -28,8 +27,9 @@ This directory contains the complete documentation for PrePrimer, a comprehensiv
 
 ### System Specifications
 - **[Security Implementation](technical/security.md)** - Comprehensive security features and validation
-- **[Testing Framework](technical/testing.md)** - Extensive testing methodology (581 tests with 96.90% coverage)
+- **[Testing Framework](technical/testing.md)** - Extensive testing methodology (611 tests with 96.90% coverage)
 - **[Platform Compatibility](technical/compatibility.md)** - Platform support, topology handling, and ecosystem integration
+- **[Windows Compatibility](technical/windows-compatibility.md)** - Technical analysis of Windows limitations and WSL2 workaround
 
 ## Developer Documentation
 
@@ -42,6 +42,26 @@ This directory contains the complete documentation for PrePrimer, a comprehensiv
 - **[Performance Guide](developer/performance.md)** - Performance characteristics and optimization
 - **[CI/CD Pipeline](developer/ci-cd.md)** - Continuous integration and deployment
 
+### Release Management
+- **[Release Checklist](developer/release-checklist.md)** - Comprehensive release procedures and verification
+- **[PyPI Publishing](developer/pypi-publishing.md)** - Package publishing workflows (optional)
+
+## API Reference
+
+### Python API Documentation
+- **[Python API Guide](api/python-api.md)** - Complete API reference with examples for programmatic usage
+
+## Code Examples
+
+The **[examples/](../examples/)** directory contains 5 runnable Python examples:
+- **basic_conversion.py** - Simple format conversion
+- **batch_processing.py** - Multi-file processing with progress tracking
+- **topology_handling.py** - Circular genome handling
+- **quality_filtering.py** - Primer quality control
+- **error_handling.py** - Comprehensive error handling
+
+See **[examples/README.md](../examples/README.md)** for detailed usage instructions.
+
 ## Documentation Standards
 
 This documentation follows scientific writing principles:
@@ -50,17 +70,6 @@ This documentation follows scientific writing principles:
 - **Evidence-Based**: Claims supported by benchmarks, tests, and measurements
 - **Reproducible Instructions**: Sufficient detail for independent reproduction
 - **Structured Content**: Clear organization for users with varying backgrounds
-
-## Examples and Tutorials
-
-### Practical Applications
-- **[Use Cases](tutorials/use-cases.md)** - Real-world research applications
-- **[Format Conversion Examples](tutorials/format-conversion.md)** - Step-by-step conversion procedures
-- **[Pipeline Integration](tutorials/integration.md)** - Integration with bioinformatics workflows
-
-### Code Examples
-- **[API Examples](examples/)** - Programmatic usage examples
-- **[Sample Workflows](examples/)** - Complete workflow implementations
 
 ## Contributing to Documentation
 

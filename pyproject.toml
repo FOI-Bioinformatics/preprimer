@@ -8,18 +8,20 @@ description = "A comprehensive primer format conversion tool"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "PrePrimer Team", email = "preprimer@example.com"}
+    {name = "PrePrimer Development Team", email = "preprimer-dev@googlegroups.com"}
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 requires-python = ">=3.11"
 dependencies = [
@@ -43,10 +45,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/example/preprimer"
-Repository = "https://github.com/example/preprimer.git"
-Issues = "https://github.com/example/preprimer/issues"
-Documentation = "https://preprimer.readthedocs.io"
+Homepage = "https://github.com/FOI-Bioinformatics/preprimer"
+Repository = "https://github.com/FOI-Bioinformatics/preprimer.git"
+Issues = "https://github.com/FOI-Bioinformatics/preprimer/issues"
+Documentation = "https://github.com/FOI-Bioinformatics/preprimer/blob/main/docs/README.md"
 
 [project.scripts]
 preprimer = "preprimer.cli:main"
