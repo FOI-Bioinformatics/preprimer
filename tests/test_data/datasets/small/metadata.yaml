@@ -1,0 +1,16 @@
+amplicon_count: 5
+coverage_bp: 1100
+created_by: generate_unified_testdata.py
+description: Small COVID-19 dataset for unit testing and CI/CD
+formats:
+  artic: 7-field BED with sequences
+  olivar: CSV design + primer BED
+  sts: 4-field amplicon format
+  varvamp: 13-field TSV with quality metrics
+name: COVID-19 Small Dataset
+organism: SARS-CoV-2
+primer_count: 10
+reference_id: EPI_ISL_402124
+source: Generated from olivar_examples/olivar-design.csv
+topology: linear
+genome_length: 29903

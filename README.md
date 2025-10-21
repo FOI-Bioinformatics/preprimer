@@ -1,92 +1,170 @@
-# PrePrimeR
-Prepare primers from different formats, i.e. schemes for tiled sequencing from varvamp to artic format. The script also aligns primers with blast or exonerate and generates (--output primers)amplicons with mepcr.
+# PrePrimer
 
+**Primer scheme converter for tiled amplicon sequencing supporting linear and circular genomes.**
 
+[![CI Status](https://github.com/FOI-Bioinformatics/preprimer/workflows/CI/badge.svg)](https://github.com/FOI-Bioinformatics/preprimer/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Platform: Linux | macOS](https://img.shields.io/badge/platform-Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/FOI-Bioinformatics/preprimer)
 
-## Installation
-```
-#Create a new environment and install dependencies. Make sure to activate the environment.
-conda create -n PrePrimeR exonerate me-pcr blast
-conda activate PrePrimeR
+PrePrimer converts between primer design formats used in genomic sequencing workflows. Supports VarVAMP, ARTIC, Olivar, and STS formats with full bidirectional conversion.
 
+## What's New in v0.2.0
+
+- **Primer-to-Reference Alignment**: Integrated BLAST, Exonerate, merPCR, and me-PCR providers
+- **Enhanced STS Format**: Auto-detection of 3/4-column formats, header/headerless files
+- **Comprehensive Validation**: 23 real-data tests with 100% pass rate, 611 total tests
+- **Improved Documentation**: Reorganized structure with technical validation reports
+
+See [CHANGELOG.md](CHANGELOG.md) for complete details.
+
+## Features
+
+- **🔄 Multi-format Support**: 4 input formats × 5 output formats = 20 conversion pathways
+- **🌍 Topology-Aware**: Automatic detection of circular genomes (mitochondrial, plasmids)
+- **✅ Standards Compliant**: Full primal-page specifications and articbedversion compatibility
+- **🧬 IUPAC Support**: Degenerate nucleotide codes for variant-aware designs
+- **🔒 Security Hardened**: Input validation, path sanitization, secure file operations
+- **⚡ Performance**: Sub-second processing for 500+ amplicons
+- **📊 Well-Tested**: 611 tests with 96.90% coverage
+
+## Quick Start
+
+### Installation
+
+```bash
+# Clone repository
 git clone https://github.com/FOI-Bioinformatics/preprimer.git
 cd preprimer
-pip install .
+
+# Install
+pip install -e .
+
+# Verify
+preprimer --version
 ```
 
-## Usage
-```shell
-preprimer -h
-```
+**Requirements:** Python 3.11+ on Linux or macOS
 
-### Convert
-This part coverts the input format into one or multiple other formats
+### Basic Usage
 
-Currently it supports 
-input primer formats: 
-- varvamp primers.tsv
-- artic *.scheme.bed
-
-varVAMP tiled primer schemes generated with https://github.com/jonas-fuchs/varVAMP 
-
-Output formats
-- artic (outputs *.scheme.bed and reference.fasta)
-- sts (used for insilico pcr with me-pcr)
-- fasta (all primer sequences in a multifasta).  
-
-**Example keeping ambiguous consensus from varvamp as reference.**  
-
-This is the default when `--reference` is NOT given as argument.
 ```bash
-preprimer convert --input-format varvamp --primer-info tests/test_data/ASFV_long/primers.tsv --output-folder schemes --output-format artic --prefix ASFV
+# List supported formats
+preprimer list
+
+# Get file information
+preprimer info primers.tsv
+
+# Convert VarVAMP to ARTIC
+preprimer convert --input primers.tsv --output-dir output/ --output-formats artic
+
+# Convert to multiple formats
+preprimer convert --input primers.tsv --output-dir output/ \
+                  --output-formats artic fasta sts --prefix MyVirus
 ```
 
+### Python API
 
-**Example with new sequence as reference and multiple outputs (artic, fasta, sts)**.  
+```python
+from preprimer.core.converter import Converter
 
-If a reference fasta file is specified with `--reference` the primers will be aligned to this reference and the output will be in relation to the new reference. If a primer gets multiple hits in the new reference it will choose a pair located close to the position of the primer to the old reference. This solutin is chosen since we do not antissipate that the references differs so much. All alignments are saved in folder {output_folder}/alignment/new_reference.  
+# Simple conversion
+converter = Converter()
+amplicons = converter.convert(
+    input_file="primers.tsv",
+    output_dir="output/",
+    output_formats=["artic", "fasta"],
+    prefix="SARS-CoV-2"
+)
 
-```
-preprimer convert --input-format varvamp --primer-info tests/test_data/ASFV_long/primers.tsv --output-folder schemes --output-format artic fasta sts --prefix ASFV --reference tests/test_data/LR722600.1.fasta
-```
-
-
-
-If `--force` no prompts will be displayed and
-- existing folders will be automatically removed with new
-- Amplicons where one or both primers fails to align will be excluded
-
-**Run artic**
-How to run artic minion command using the artic scheme converted from varvamp, with the name **prefix** of the scheme and the **directory** from the PrePrimeR output in the command.
-
-```
-artic minion ASFV guppy_minion_data/ASFV --scheme-directory schemes/artic/ --read-file guppy_data/sample1.fastq --medaka --medaka-model r941_min_high_g360
+print(f"Converted {len(amplicons)} amplicons")
 ```
 
-**Convert artic to sts and fasta**
-artic formats can only be converted into fasta and sts, not varvamp. An sts is needed for the Alignment in next section.
+## Supported Formats
+
+| Format | Input | Output | Description |
+|--------|-------|--------|-------------|
+| **VarVAMP** | ✅ `.tsv` | ✅ | 13-column TSV with IUPAC degenerate support |
+| **ARTIC** | ✅ `.bed` | ✅ | BED format (v2.0/v3.0) with primal-page compliance |
+| **Olivar** | ✅ `.csv` | ✅ | CSV with amplicon metadata and circular genome support |
+| **STS** | ✅ `.sts.tsv` | ✅ | 3/4-column TSV for in-silico PCR (auto-detection) |
+| **FASTA** | ❌ | ✅ | Multi-FASTA sequences with metadata headers |
+
+**Full bidirectional conversion** between all readable formats. See [format details](docs/user-guide/supported-formats.md).
+
+## Common Use Cases
+
+```bash
+# Design with VarVAMP, use with ARTIC pipeline
+preprimer convert --input varvamp_output.tsv --output-formats artic --prefix SARS-CoV-2
+
+# Multi-format output for cross-platform compatibility
+preprimer convert --input primers.bed --output-formats artic fasta sts varvamp --prefix MyVirus
+
+# STS format for in-silico PCR validation
+preprimer convert --input primers.tsv --output-formats sts --prefix validation
 ```
-preprimer convert --input-format artic --primer-info tests/test_data/artic/ASFV/V1/ASFV.scheme.bed --output-format sts fasta  --output-folder schemes --prefix ASFV
+
+## Documentation
+
+📚 **Complete documentation in [`docs/`](docs/)**
+
+**Getting Started**: [Installation](docs/user-guide/installation.md) · [Quick Start](docs/user-guide/quick-start.md) · [Basic Usage](docs/user-guide/basic-usage.md) · [CLI Reference](docs/user-guide/cli-reference.md)
+
+**User Guides**: [Supported Formats](docs/user-guide/supported-formats.md) · [Configuration](docs/user-guide/configuration.md) · [Python API](docs/api/python-api.md)
+
+**Developer**: [Architecture](docs/developer/architecture.md) · [Adding Parsers](docs/developer/adding-parsers.md) · [Contributing](docs/developer/contributing.md)
+
+**Examples**: See [`examples/`](examples/) for 5 runnable examples (basic conversion, batch processing, topology handling, quality filtering, error handling)
+
+## Platform Support
+
+**Supported**: Linux and macOS with Python 3.11+
+**Windows**: Not supported (use WSL2) - [See compatibility details](docs/technical/windows-compatibility.md)
+
+## For Developers
+
+**Technical Documentation**:
+- [Architecture Overview](docs/developer/architecture.md) - Plugin-based design, registry system
+- [Testing Guide](docs/technical/testing.md) - 611 tests, 96.90% coverage
+- [Validation Reports](docs/technical/validation/) - Real data testing, v0.2.0 validation
+- [CLAUDE.md](CLAUDE.md) - Technical guide for Claude Code and AI-assisted development
+
+**Contributing**:
+- [Contributing Guide](docs/developer/contributing.md) - Setup, code style, workflow
+- [Adding Parsers](docs/developer/adding-parsers.md) - Extend with new formats
+- [Security Policy](SECURITY.md) - Security hardening, path validation, best practices
+
+## Citation
+
+If you use PrePrimer in your research, please cite:
+
+```bibtex
+@software{preprimer2024,
+  title = {PrePrimer: Primer Scheme Converter for Tiled Amplicon Sequencing},
+  author = {Sjödin, Andreas},
+  year = {2024},
+  version = {0.2.0},
+  url = {https://github.com/FOI-Bioinformatics/preprimer}
+}
 ```
 
-
-### Align
-Use align to check both the alignment of the primers (blast or exonerate) and the amplicons they produce (mepcr) to a fasta reference of your choice. 
-
-Input:
-- sts (can be genereated with convert command)
-  
-Output:
-- me-pcr
-- primers (blast default)
-
-The output will be saved in {output_folder}/alignment/mepcr and {output_folder}/alignment/primers. The varVAMP primers might contain ambiguous nucleotide characters (not only ATCG) that will be a problem for the me-pcr aligner.  Then, first genereate
-```
-preprimer align --sts-file tests/test_data/ASFV.sts.tsv --output-format me-pcr primers --reference tests/test_data/LR722600.1.fasta --prefix ASFV --output-folder output_alignment --force
-```
-
-## Contributing
-We welcome contributions to PrePrimeR! If you have suggestions or contributions, please open an issue or pull request.
+See [CITATION.cff](CITATION.cff) for complete metadata.
 
 ## License
-PrePrimeR is licensed under the MIT License.
+
+[MIT License](LICENSE) - See LICENSE file for details.
+
+## Acknowledgments
+
+Built with [VarVAMP](https://github.com/jonas-fuchs/varVAMP), [ARTIC Network](https://github.com/artic-network), [Olivar](https://github.com/treangenlab/Olivar), [Primal-page](https://github.com/artic-network/primal-page), and [PrimerSchemes Labs](https://labs.primalscheme.com/) specifications.
+
+## Links
+
+[Repository](https://github.com/FOI-Bioinformatics/preprimer) · [Documentation](docs/) · [Issues](https://github.com/FOI-Bioinformatics/preprimer/issues) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md)
+
+---
+
+**Maintained by:** Swedish Defence Research Agency (FOI) Bioinformatics
+
+**Version:** 0.2.0 | **Python:** 3.11+ | **Platforms:** Linux, macOS

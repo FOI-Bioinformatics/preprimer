@@ -1,0 +1,4 @@
+amplicon_name	amplicon_length	primer_name	pool	start	stop	seq	size	gc_best	temp_best	mean_gc	mean_temp	score
+amplicon_1	300	FW_1	1	100	120	INVALID_SEQUENCE_WITH_X	20	0.5	60.0	0.52	58.5	85.2
+amplicon_1		RW_1	1	380	400	CGATCGATCGATCGATCGAT	20	0.5	60.0	0.52	58.5	85.2
+missing_columns	300	FW_2	1	100

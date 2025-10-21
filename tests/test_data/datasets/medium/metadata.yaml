@@ -1,0 +1,16 @@
+amplicon_count: 80
+coverage_bp: 191000
+created_by: generate_medium_dataset.py
+description: Medium ASFV dataset for integration testing and performance validation
+formats:
+  artic: 7-field BED with sequences
+  olivar: CSV design + primer BED
+  sts: 4-field amplicon format
+  varvamp: 13-field TSV with quality metrics
+name: ASFV Medium Dataset
+organism: African Swine Fever Virus
+primer_count: 160
+reference_id: LR722600.1
+source: Generated from legacy ASFV test data
+topology: linear
+genome_length: 191232

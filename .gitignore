@@ -52,7 +52,56 @@ coverage.xml
 .pytest_cache/
 cover/
 
-#Old version of the script
+# Testing framework artifacts
+.benchmarks/
+benchmark-results.json
+.mutmut-cache/
+mutation_results/
+bandit-report.json
+safety-report.json
+
+# Performance optimization artifacts  
+performance_profiles/
+*.prof
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment and configuration
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Log files
+*.log
+logs/
+
+# Old version of the script (legacy)
 prep_tiled.py
 test_output*
 schemes
+
+# Development utilities
+.pre-commit-config.local.yaml
+logo.png

@@ -1,0 +1,237 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools-scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "preprimer"
+description = "A comprehensive primer format conversion tool"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "PrePrimer Development Team", email = "preprimer-dev@googlegroups.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+    "click>=8.0",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-benchmark>=4.0",
+    "hypothesis>=6.0",
+    "mutmut>=3.0",
+    "black>=23.0",
+    "isort>=5.0",
+    "flake8>=6.0",
+    "mypy>=1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/FOI-Bioinformatics/preprimer"
+Repository = "https://github.com/FOI-Bioinformatics/preprimer.git"
+Issues = "https://github.com/FOI-Bioinformatics/preprimer/issues"
+Documentation = "https://github.com/FOI-Bioinformatics/preprimer/blob/main/docs/README.md"
+
+[project.scripts]
+preprimer = "preprimer.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["preprimer*"]
+exclude = ["tests*"]
+
+[tool.setuptools_scm]
+
+# Testing configuration
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--strict-config",
+    "--tb=short",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "property: marks property-based tests",
+    "benchmark: marks benchmark tests",
+    "unit: marks unit tests",
+    "real_data: comprehensive real data validation tests",
+    "quick: fast tests suitable for CI",
+    "standard: standard validation tests",
+    "stress: heavy/slow stress tests",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["preprimer"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "setup.py",
+    "conftest.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+# Code formatting
+[tool.black]
+line-length = 88
+target-version = ['py311', 'py312', 'py313']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs
+    | \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+)
+'''
+
+# Import sorting
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["preprimer"]
+known_third_party = ["pytest", "hypothesis", "pydantic", "yaml"]
+
+# Type checking
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_decorators = false
+
+# Mutation testing configuration
+[tool.mutmut]
+runner = "python -m pytest"
+tests_dir = "tests/"
+backup = false
+show_mutants = true
+
+[tool.mutmut.exclude]
+# Exclude test files from mutation testing
+paths_to_exclude = [
+    "tests/",
+    "examples/",
+    "docs/",
+    "setup.py",
+    "conftest.py"
+]
+
+# Exclude lines that don't need mutation testing
+lines_to_exclude = [
+    "pragma: no mutate",
+    "pass",
+    "return NotImplemented",
+    "raise NotImplementedError",
+    "if __name__ == '__main__':",
+    "logger\\..*",
+    "print\\(",
+    "def __repr__",
+    "def __str__",
+]
+
+# Benchmark configuration
+[tool.pytest_benchmark]
+only_show_min = true
+sort = "mean"
+disable_gc = true
+warmup = false
+warmup_iterations = 100000
+calibration_precision = 10
+max_time = 1.0
+min_time = 0.000005
+min_rounds = 5
+timer = "perf_counter"
+group_by = "group"
+
+# Hypothesis configuration  
+[tool.hypothesis]
+max_examples = 100
+deadline = 1000
+database_file = ".hypothesis/examples"
+verbosity = "normal"
+print_blob = false
+phases = ["explicit", "reuse", "generate", "target", "shrink"]
+
+[tool.hypothesis.profiles.dev]
+max_examples = 50
+deadline = 500
+
+[tool.hypothesis.profiles.ci] 
+max_examples = 200
+deadline = 2000
+
+[tool.hypothesis.profiles.thorough]
+max_examples = 1000
+deadline = 5000

@@ -1,0 +1,10 @@
+EPI_ISL_402124	100	118	COVID19_400_1_LEFT_1	1	+	cggctgcatgcttagtgc
+EPI_ISL_402124	360	379	COVID19_400_1_RIGHT_1	1	-	gacctcctccacggagtct
+EPI_ISL_402124	289	310	COVID19_400_2_LEFT_1	2	+	caacgagaaaacacacgtcca
+EPI_ISL_402124	538	559	COVID19_400_2_RIGHT_1	2	-	accgtactgaatgccttcgag
+EPI_ISL_402124	511	532	COVID19_400_3_LEFT_1	1	+	cgccgtaaggtccgcgtcgtt
+EPI_ISL_402124	757	777	COVID19_400_3_RIGHT_1	1	-	aaacgcctcacgatcctcct
+EPI_ISL_402124	696	717	COVID19_400_4_LEFT_1	2	+	ggatccggtatgtacccggtg
+EPI_ISL_402124	946	966	COVID19_400_4_RIGHT_1	2	-	cacggtgggataatggtacg
+EPI_ISL_402124	921	942	COVID19_400_5_LEFT_1	1	+	accgtacccggtgggccacct
+EPI_ISL_402124	1171	1191	COVID19_400_5_RIGHT_1	1	-	tctgcatcgacatcacggtc

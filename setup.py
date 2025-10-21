@@ -1,30 +1,66 @@
-# Directory structure:
-# preprimer/
-# ├── setup.py
-# ├── README.md
-# ├── preprimer/
-# │   ├── __init__.py
-# │   ├── __main__.py
-# │   ├── convert.py
-# │   ├── align.py
-# │   ├── utils.py
-# │   └── parsers/
-# │       ├── __init__.py
-# │       ├── varvamp.py
-# │       └── artic.py
+"""
+Setup configuration for preprimer.
+"""
 
 from setuptools import setup, find_packages
+from pathlib import Path
+
+# Read the README file
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="preprimer",
-    version="0.1.0",
+    version="0.2.0",
+    author="PrePrimer Development Team",
+    description="Convert and analyze tiled primer schemes",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/FOI-Bioinformatics/preprimer",
+    
     packages=find_packages(),
+    
     install_requires=[
-        "biopython",
+        "biopython>=1.80",
     ],
+    
+    extras_require={
+        "dev": [
+            "pytest>=6.0",
+            "pytest-cov",
+            "black",
+            "flake8",
+            "mypy",
+        ],
+        "align": [
+            # Optional dependencies for alignment features
+        ],
+    },
+    
     entry_points={
         "console_scripts": [
-            "preprimer=preprimer.main:main",
+            "preprimer=preprimer.cli:main",
         ],
+    },
+    
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: POSIX :: Linux",
+        "Operating System :: MacOS :: MacOS X",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+    ],
+    
+    python_requires=">=3.11",
+    
+    project_urls={
+        "Bug Reports": "https://github.com/FOI-Bioinformatics/preprimer/issues",
+        "Source": "https://github.com/FOI-Bioinformatics/preprimer",
+        "Documentation": "https://github.com/FOI-Bioinformatics/preprimer/blob/main/README.md",
     },
 )
