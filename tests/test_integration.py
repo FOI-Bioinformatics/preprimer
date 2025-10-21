@@ -163,13 +163,19 @@ ATTAAAGGTTTATACCTTCCCAGGTAACAAACCAACCAACTTTCGATCTCTTGTAGATCTGTTCTCTAAACGAACTTTAA
         output_dir = temp_workspace / "output"
 
         # Create enhanced configuration
-        config = EnhancedConfig(
-            validation={"enabled": True, "min_length": 20, "max_length": 30},
-            output={"formats": ["artic", "fasta"], "force_overwrite": True},
-            parser={"default_pool": 1},
+        from preprimer.core.enhanced_config import (
+            OutputSettings,
+            ParserSettings,
+            ValidationSettings,
         )
 
-        converter = PrimerConverter(config.to_legacy_config())
+        config = EnhancedConfig(
+            validation=ValidationSettings(enabled=True, min_length=20, max_length=30),
+            output=OutputSettings(formats=["artic", "fasta"], force_overwrite=True),
+            parser=ParserSettings(default_pool=1),
+        )
+
+        converter = PrimerConverter(config)
 
         # Convert with configuration
         result = converter.convert(
@@ -367,43 +373,3 @@ class TestSystemLimits:
         except Exception:
             # Graceful failure is acceptable for extreme inputs
             pass
-
-
-class TestBackwardCompatibility:
-    """Test backward compatibility with legacy systems."""
-
-    def test_legacy_config_compatibility(self):
-        """Test that legacy configuration still works."""
-        from preprimer.core.config import PrePrimerConfig
-
-        # Create legacy config
-        legacy_config = PrePrimerConfig(
-            aligner="blast",
-            min_primer_length=15,
-            max_primer_length=35,
-            validate_sequences=True,
-        )
-
-        # Should work with converter
-        converter = PrimerConverter(legacy_config)
-        assert converter.config.aligner == "blast"
-        assert converter.config.min_primer_length == 15
-
-    def test_enhanced_to_legacy_conversion(self):
-        """Test conversion from enhanced to legacy config."""
-        enhanced_config = EnhancedConfig(
-            alignment={"aligner": "minimap2", "threads": 8},
-            validation={"min_length": 18, "max_length": 32},
-            output={"formats": ["artic", "fasta"]},
-        )
-
-        legacy_config = enhanced_config.to_legacy_config()
-
-        assert legacy_config.aligner == "minimap2"
-        assert legacy_config.min_primer_length == 18
-        assert legacy_config.max_primer_length == 32
-        assert legacy_config.output_formats == ["artic", "fasta"]
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--tb=short"])

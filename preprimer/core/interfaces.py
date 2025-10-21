@@ -139,31 +139,34 @@ class OutputWriter(ABC):
 
 
 class AlignmentProvider(ABC):
-    """Abstract base class for alignment tools."""
+    """Base class for alignment tool providers (BLAST, Exonerate, me-PCR)."""
 
     @classmethod
     @abstractmethod
     def tool_name(cls) -> str:
-        """Return the alignment tool name."""
+        """Return the name of the alignment tool."""
 
     @abstractmethod
     def is_available(self) -> bool:
-        """Check if the alignment tool is available."""
+        """Check if the alignment tool is available on the system."""
 
     @abstractmethod
     def align_primers(
         self,
-        primers: List[PrimerData],
-        reference_path: Union[str, Path],
+        primer_file: Union[str, Path],
+        reference_file: Union[str, Path],
         output_dir: Union[str, Path],
-    ) -> List[PrimerData]:
-        """Align primers to reference and return updated primer data."""
+        **kwargs,
+    ) -> Path:
+        """
+        Align primers to a reference genome.
 
-    @abstractmethod
-    def create_amplicons(
-        self,
-        primers_file: Union[str, Path],
-        reference_path: Union[str, Path],
-        output_path: Union[str, Path],
-    ) -> Any:
-        """Create in-silico PCR amplicons."""
+        Args:
+            primer_file: Path to primer file (STS format)
+            reference_file: Path to reference genome (FASTA)
+            output_dir: Output directory for alignment results
+            **kwargs: Tool-specific parameters
+
+        Returns:
+            Path to alignment output file
+        """

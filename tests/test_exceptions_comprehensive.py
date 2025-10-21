@@ -10,8 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from preprimer.core.exceptions import (
-    AlignmentError,
+from preprimer.core.exceptions import (  # AlignmentError,  # Removed in v0.2.0 (no alignment providers implemented)
     ConfigError,
     CorruptedDataError,
     ErrorContext,
@@ -26,64 +25,7 @@ from preprimer.core.exceptions import (
     handle_common_exceptions,
 )
 
-
-class TestAlignmentErrorMissedLines:
-    """Test AlignmentError default message and suggestion generation."""
-
-    def test_alignment_error_with_tool_context(self):
-        """Test AlignmentError tool context setting (lines 117->120)."""
-
-        # Test with tool parameter - should set alignment_tool in context
-        error = AlignmentError("Test alignment error", tool="minimap2")
-
-        assert "alignment_tool" in error.context
-        assert error.context["alignment_tool"] == "minimap2"
-
-    def test_alignment_error_default_user_message(self):
-        """Test AlignmentError default user_message generation (lines 120->126)."""
-
-        # Test without user_message - should generate default
-        error = AlignmentError("Test alignment error", tool="minimap2")
-
-        # Should generate default user message with tool name
-        expected_message = "Alignment failed with minimap2. Please check your reference file and primer sequences."
-        assert error.user_message == expected_message
-
-    def test_alignment_error_default_suggestions_with_tool(self):
-        """Test AlignmentError default suggestions with tool (lines 126->142)."""
-
-        # Test without suggestions - should generate defaults with tool
-        error = AlignmentError("Test alignment error", tool="MINIMAP2")
-
-        # Should generate tool-specific suggestions
-        suggestions = error.suggestions
-        assert len(suggestions) > 0
-        assert any("MINIMAP2" in suggestion for suggestion in suggestions)
-        assert any(
-            "properly installed" in suggestion.lower() for suggestion in suggestions
-        )
-        assert any(
-            "reference sequences" in suggestion.lower() for suggestion in suggestions
-        )
-        assert any(
-            "primer sequences" in suggestion.lower() for suggestion in suggestions
-        )
-
-    def test_alignment_error_default_suggestions_without_tool(self):
-        """Test AlignmentError default suggestions without tool (line 136)."""
-
-        # Test without tool parameter - should generate generic suggestions
-        error = AlignmentError("Test alignment error")  # No tool
-
-        # Should generate generic suggestions (line 136-139)
-        suggestions = error.suggestions
-        assert len(suggestions) == 2  # Two generic suggestions
-        assert any(
-            "reference sequences" in suggestion.lower() for suggestion in suggestions
-        )
-        assert any(
-            "primer sequences" in suggestion.lower() for suggestion in suggestions
-        )
+# TestAlignmentErrorMissedLines class commented out - AlignmentError removed in v0.2.0
 
 
 class TestOutputErrorMissedLines:
@@ -262,27 +204,8 @@ class TestInsufficientDataErrorMissedLines:
 class TestExceptionEdgeCaseScenarios:
     """Test edge case scenarios for comprehensive coverage."""
 
-    def test_alignment_error_with_custom_user_message(self):
-        """Test AlignmentError with custom user_message (should not use default)."""
-
-        custom_message = "Custom alignment error message"
-        error = AlignmentError(
-            "Technical error", tool="minimap2", user_message=custom_message
-        )
-
-        # Should use provided user_message, not generate default
-        assert error.user_message == custom_message
-
-    def test_alignment_error_with_custom_suggestions(self):
-        """Test AlignmentError with custom suggestions (should not use default)."""
-
-        custom_suggestions = ["Custom suggestion 1", "Custom suggestion 2"]
-        error = AlignmentError(
-            "Technical error", tool="minimap2", suggestions=custom_suggestions
-        )
-
-        # Should use provided suggestions, not generate defaults
-        assert error.suggestions == custom_suggestions
+    # test_alignment_error_with_custom_user_message - removed (AlignmentError removed in v0.2.0)
+    # test_alignment_error_with_custom_suggestions - removed (AlignmentError removed in v0.2.0)
 
     def test_output_error_without_output_path(self):
         """Test OutputError without output_path (should generate generic message)."""
@@ -328,39 +251,16 @@ class TestExceptionEdgeCaseScenarios:
 class TestExceptionIntegration:
     """Test exception integration scenarios."""
 
-    def test_exception_chaining_with_defaults(self):
-        """Test that exceptions with defaults work in chained scenarios."""
+    # test_exception_chaining_with_defaults - removed (AlignmentError removed in v0.2.0)
 
-        # Create a chain of exceptions using defaults
-        alignment_error = AlignmentError("Alignment failed", tool="minimap2")
-        output_error = OutputError("Output failed", output_path="/tmp/output.txt")
-
-        # Both should have proper default messages and suggestions
-        assert "minimap2" in alignment_error.user_message
-        assert len(alignment_error.suggestions) > 0
-
-        assert "/tmp/output.txt" in output_error.user_message
-        assert len(output_error.suggestions) == 3
-
-    def test_context_preservation_with_defaults(self):
-        """Test that context is preserved when using default messages."""
-
-        error = AlignmentError(
-            "Technical alignment error",
-            tool="blast",
-            context={"additional_info": "test_value"},
-        )
-
-        # Should preserve additional context while setting tool context
-        assert error.context["alignment_tool"] == "blast"
-        assert error.context["additional_info"] == "test_value"
+    # test_context_preservation_with_defaults - removed (AlignmentError removed in v0.2.0)
 
     def test_all_exception_types_instantiation(self):
         """Test all exception types can be instantiated with defaults."""
 
         # Test all exception types with minimal parameters to trigger defaults
         exceptions = [
-            AlignmentError("Alignment failed"),
+            # AlignmentError("Alignment failed"),  # Removed in v0.2.0
             OutputError("Output failed"),
             ConfigError("Config failed"),
             SecurityError("Security failed"),
@@ -377,25 +277,4 @@ class TestExceptionIntegration:
             if hasattr(exc, "suggestions"):
                 assert isinstance(exc.suggestions, list)
 
-    def test_complex_scenario_with_all_defaults(self):
-        """Test complex scenario using all default generation paths."""
-
-        # Create complex error scenario
-        try:
-            # Simulate nested operations that could fail
-            raise AlignmentError("Complex alignment failure", tool="complex_aligner")
-        except AlignmentError as alignment_err:
-            try:
-                # Simulate subsequent output failure
-                raise OutputError(
-                    "Failed to write aligned results",
-                    output_path="/complex/output/path.txt",
-                ) from alignment_err
-            except OutputError as output_err:
-                # Both should have proper default messages
-                assert "complex_aligner" in alignment_err.user_message
-                assert "/complex/output/path.txt" in output_err.user_message
-
-                # Both should have suggestions
-                assert len(alignment_err.suggestions) > 0
-                assert len(output_err.suggestions) == 3
+    # test_complex_scenario_with_all_defaults - removed (AlignmentError removed in v0.2.0)

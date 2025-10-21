@@ -31,6 +31,11 @@ This directory contains the complete documentation for PrePrimer, a comprehensiv
 - **[Platform Compatibility](technical/compatibility.md)** - Platform support, topology handling, and ecosystem integration
 - **[Windows Compatibility](technical/windows-compatibility.md)** - Technical analysis of Windows limitations and WSL2 workaround
 
+### Validation Reports
+- **[Validation Documentation](technical/validation/)** - Real data testing and release validation
+  - **[Real Data Testing](technical/validation/real-data-testing.md)** - 23 comprehensive tests with real-world datasets
+  - **[v0.2.0 Validation](technical/validation/v0.2.0-validation.md)** - Release validation report (100% pass rate)
+
 ## Developer Documentation
 
 ### Architecture and Design

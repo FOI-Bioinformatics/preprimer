@@ -243,6 +243,152 @@ preprimer list --input-only
 preprimer list --json
 ```
 
+### **preprimer align**
+Align primers to a reference genome using external alignment tools.
+
+#### **Syntax**
+```bash
+preprimer align [OPTIONS] --sts-file FILE --reference FILE --output-dir DIR --output-formats FORMAT[,FORMAT...]
+```
+
+#### **Required Arguments**
+- `--sts-file PATH` - Input primer file in STS format (3-column TSV: name, forward, reverse)
+- `--reference PATH` - Reference genome sequence file (FASTA format)
+- `--output-dir PATH, --output-folder PATH` - Output directory for alignment results
+- `--output-formats FORMAT[,FORMAT...]` - Alignment output format(s): `primers` (BLAST/Exonerate alignments), `me-pcr` (legacy in silico PCR), or `merpcr` (modern in silico PCR)
+
+#### **Optional Arguments**
+- `--aligner {blast,exonerate}` - Alignment tool for primers format (default: blast)
+- `--prefix STRING` - Prefix for output files (default: primers)
+- `--force` - Overwrite existing output files
+
+#### **External Tool Requirements**
+- **BLAST**: Required for `--aligner blast` (install via package manager or NCBI)
+- **Exonerate**: Required for `--aligner exonerate` (install via package manager)
+- **me-PCR**: Required for `--output-formats me-pcr` (legacy in silico PCR tool)
+- **merPCR**: Required for `--output-formats merpcr` (modern Python reimplementation: `pip install merpcr`)
+
+Check tool availability:
+```bash
+which blastn    # BLAST
+which exonerate # Exonerate
+which me-PCR    # me-PCR (legacy)
+which merpcr    # merPCR (modern, recommended)
+```
+
+#### **Examples**
+
+**Basic BLAST Alignment:**
+```bash
+# Align primers using BLAST
+preprimer align --sts-file primers.sts.tsv \
+                --reference genome.fasta \
+                --output-dir alignment_output \
+                --output-formats primers
+```
+
+**In Silico PCR with me-PCR (Legacy):**
+```bash
+# Run in silico PCR simulation (legacy tool)
+preprimer align --sts-file primers.sts.tsv \
+                --reference genome.fasta \
+                --output-dir alignment_output \
+                --output-formats me-pcr \
+                --prefix MyVirus
+```
+
+**In Silico PCR with merPCR (Recommended):**
+```bash
+# Run in silico PCR with modern merPCR (2.65x faster, better documented)
+preprimer align --sts-file primers.sts.tsv \
+                --reference genome.fasta \
+                --output-dir alignment_output \
+                --output-formats merpcr \
+                --prefix MyVirus
+```
+
+**Multiple Output Formats:**
+```bash
+# Get both primer alignments and me-PCR results
+preprimer align --sts-file primers.sts.tsv \
+                --reference genome.fasta \
+                --output-dir alignment_output \
+                --output-formats primers me-pcr \
+                --aligner blast
+```
+
+**Using Exonerate:**
+```bash
+# Use Exonerate for primer alignment
+preprimer align --sts-file primers.sts.tsv \
+                --reference genome.fasta \
+                --output-dir alignment_output \
+                --output-formats primers \
+                --aligner exonerate
+```
+
+**With Force Overwrite:**
+```bash
+# Overwrite existing alignment results
+preprimer align --sts-file primers.sts.tsv \
+                --reference genome.fasta \
+                --output-dir alignment_output \
+                --output-formats primers me-pcr \
+                --force
+```
+
+#### **Output Structure**
+
+**Primers Format (BLAST/Exonerate):**
+```
+alignment_output/
+└── alignment/
+    └── primers/
+        ├── AMPLICON_1_fw.aln
+        ├── AMPLICON_1_rw.aln
+        ├── AMPLICON_2_fw.aln
+        └── AMPLICON_2_rw.aln
+```
+
+**me-PCR Format (Legacy):**
+```
+alignment_output/
+└── alignment/
+    └── mepcr/
+        └── PREFIX.mepcr.aln
+```
+
+**merPCR Format (Modern):**
+```
+alignment_output/
+└── alignment/
+    └── merpcr/
+        └── PREFIX.merpcr.aln
+```
+
+#### **STS Format Specification**
+The STS (Sequence Tagged Site) format is a 3-column TSV file:
+
+```tsv
+AMPLICON_1    ATCGATCGATCGATCG    GCTAGCTAGCTAGCTA
+AMPLICON_2    TAGCTAGCTAGCTAG     CGATCGATCGATCGAT
+```
+
+**Columns:**
+1. Amplicon name
+2. Forward primer sequence (5' to 3')
+3. Reverse primer sequence (5' to 3')
+
+**Convert to STS Format:**
+```bash
+# Convert existing primer scheme to STS
+preprimer convert -i primers.bed -o output/ -f sts
+```
+
+#### **Exit Codes**
+- `0` - Success
+- `1` - General error (file not found, tool not available, etc.)
+
 ## ⚙️ **Configuration File Format**
 
 Configuration files use JSON format to specify processing options.

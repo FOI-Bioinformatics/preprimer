@@ -14,7 +14,7 @@ import yaml
 # Import and register all components
 import preprimer.parsers  # noqa: E402, F401
 import preprimer.writers  # noqa: E402, F401
-from preprimer.core.config import PrePrimerConfig
+from preprimer.core.enhanced_config import EnhancedConfig
 from preprimer.core.registry import parser_registry, writer_registry
 
 
@@ -340,11 +340,17 @@ def minimal_data_fixtures(test_fixtures_dir):
 @pytest.fixture
 def test_config():
     """Standard test configuration."""
-    return PrePrimerConfig(
-        validate_sequences=True,
-        force_overwrite=True,
-        min_primer_length=10,
-        max_primer_length=50,
+    from preprimer.core.enhanced_config import OutputSettings, ValidationSettings
+
+    return EnhancedConfig(
+        validation=ValidationSettings(
+            enabled=True,
+            min_length=10,
+            max_length=50,
+        ),
+        output=OutputSettings(
+            force_overwrite=True,
+        ),
     )
 
 

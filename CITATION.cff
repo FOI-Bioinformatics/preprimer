@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use PrePrimer in your research, please cite it using the metadata from this file."
 type: software
 title: "PrePrimer: Primer Scheme Converter for Tiled Amplicon Sequencing"
-version: 1.0.0
-date-released: "2024-10-14"
+version: 0.2.0
+date-released: "2025-10-21"
 abstract: >-
   PrePrimer facilitates format conversion between primer schemes used in genomic
   sequencing workflows, including VarVAMP, ARTIC, Olivar, and STS formats. The
@@ -43,8 +43,8 @@ preferred-citation:
       given-names: "Andreas"
       email: "andreas.sjodin@foi.se"
       affiliation: "Swedish Defence Research Agency (FOI)"
-  version: 1.0.0
-  date-released: "2024-10-14"
+  version: 0.2.0
+  date-released: "2025-10-21"
   repository-code: "https://github.com/FOI-Bioinformatics/preprimer"
   license: MIT
   doi: ""  # Add DOI from Zenodo after first release

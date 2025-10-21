@@ -242,7 +242,7 @@ class TestConfigurationBenchmarks:
                 "min_gc": 0.3,
                 "max_gc": 0.7,
             },
-            "output": {"formats": ["artic", "fasta", "bed"], "force_overwrite": False},
+            "output": {"formats": ["artic", "fasta", "sts"], "force_overwrite": False},
             "plugins": {
                 "enabled": True,
                 "config": {

@@ -2,6 +2,7 @@
 Comprehensive tests for registry module targeting missed coverage lines.
 """
 
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List
 from unittest.mock import MagicMock, Mock, patch
@@ -9,7 +10,9 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 
 from preprimer.core.exceptions import OutputError, ParserError
-from preprimer.core.interfaces import AlignmentProvider, OutputWriter, PrimerParser
+from preprimer.core.interfaces import OutputWriter, PrimerParser
+
+# AlignmentProvider removed in v0.2.0 - creating mock for tests only
 from preprimer.core.registry import (
     AlignmentRegistry,
     ParserRegistry,
@@ -20,6 +23,20 @@ from preprimer.core.registry import (
 )
 
 
+# Mock AlignmentProvider for tests (removed from main code in v0.2.0)
+class AlignmentProvider(ABC):
+    """Mock alignment provider for testing purposes only."""
+
+    @classmethod
+    @abstractmethod
+    def tool_name(cls) -> str:
+        """Return the alignment tool name."""
+
+    @abstractmethod
+    def is_available(self) -> bool:
+        """Check if the alignment tool is available."""
+
+
 class TestParserRegistryEdgeCases:
     """Test error paths and edge cases in ParserRegistry."""
 
@@ -27,9 +44,7 @@ class TestParserRegistryEdgeCases:
         """Test ParserError for nonexistent format (line 36)."""
         registry = ParserRegistry()
 
-        with pytest.raises(
-            ParserError, match="No parser registered for format: nonexistent"
-        ):
+        with pytest.raises(ParserError, match="No parser registered for: nonexistent"):
             registry.get_parser("nonexistent")
 
     def test_detect_format_no_matching_parser(self):
@@ -61,8 +76,8 @@ class TestParserRegistryEdgeCases:
         result = registry.detect_format(test_file)
         assert result is None
 
-    def test_detect_format_optimized_no_match(self):
-        """Test optimized format detection when no format matches (lines 87-92)."""
+    def test_detect_format_no_match_extension(self):
+        """Test format detection when no format matches (lines 87-92)."""
         registry = ParserRegistry()
 
         # Register parsers that fail validation
@@ -103,12 +118,12 @@ class TestParserRegistryEdgeCases:
         test_file = Path("/tmp/test.unknown")
 
         # Should return None when no parser validates
-        result = registry.detect_format_optimized(test_file)
+        result = registry.detect_format(test_file)
         assert result is None
 
         # Test file that matches extension but fails validation
         test_file2 = Path("/tmp/test.fail1")
-        result2 = registry.detect_format_optimized(test_file2)
+        result2 = registry.detect_format(test_file2)
         assert result2 is None
 
 
@@ -119,9 +134,7 @@ class TestWriterRegistryEdgeCases:
         """Test OutputError for nonexistent format (line 125)."""
         registry = WriterRegistry()
 
-        with pytest.raises(
-            OutputError, match="No writer registered for format: nonexistent"
-        ):
+        with pytest.raises(OutputError, match="No writer registered for: nonexistent"):
             registry.get_writer("nonexistent")
 
     def test_get_extension_nonexistent_format(self):
@@ -176,7 +189,7 @@ class TestAlignmentRegistryEdgeCases:
             registry.get_provider("nonexistent")
 
         error_msg = str(exc_info.value)
-        assert "No alignment provider for: nonexistent" in error_msg
+        assert "No alignment provider registered for: nonexistent" in error_msg
         assert "Available:" in error_msg
         assert "mock1" in error_msg
         assert "mock2" in error_msg
@@ -411,9 +424,6 @@ class TestRegistryEdgeCaseScenarios:
         assert empty_parser_registry.list_formats() == []
         assert empty_parser_registry.list_extensions("any") == []
         assert empty_parser_registry.detect_format(Path("/tmp/test.txt")) is None
-        assert (
-            empty_parser_registry.detect_format_optimized(Path("/tmp/test.txt")) is None
-        )
 
         # Test empty writer registry
         empty_writer_registry = WriterRegistry()

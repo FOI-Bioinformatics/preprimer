@@ -45,10 +45,8 @@ class VarVAMPWriter(OutputWriter):
         Returns:
             Path to the created file
         """
-        output_path = Path(output_path)
-
-        # Ensure output directory exists
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        # Validate and prepare output path (creates directory if needed)
+        output_path = self.validate_output_path(output_path)
 
         # Prepare primer data for VarVAMP format
         primer_rows = []

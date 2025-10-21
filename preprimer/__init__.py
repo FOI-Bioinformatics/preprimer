@@ -7,12 +7,15 @@ used in tiled amplicon sequencing.
 
 __version__ = "0.2.0"
 
-# Import parsers and writers to trigger auto-registration
+# Import parsers, writers, and alignment providers to trigger auto-registration
+import preprimer.alignment  # noqa: F401
 import preprimer.parsers  # noqa: F401
 import preprimer.writers  # noqa: F401
 
-from .core.config import DefaultConfig, PrePrimerConfig
 from .core.converter import PrimerConverter
+
+# Import configuration
+from .core.enhanced_config import EnhancedConfig
 from .core.exceptions import OutputError, ParserError, PrePrimerError, ValidationError
 
 # Import core components
@@ -30,6 +33,7 @@ def convert_primers(
     output_formats=None,
     prefix="primers",
     reference_file=None,
+    config=None,
     **kwargs,
 ):
     """
@@ -42,17 +46,21 @@ def convert_primers(
         output_formats: List of output formats (default: ['artic'])
         prefix: Prefix for output files
         reference_file: Reference genome file
+        config: Configuration object (EnhancedConfig). If None, uses default.
         **kwargs: Additional configuration options
 
     Returns:
         Dictionary mapping format names to output file paths
     """
-    config = PrePrimerConfig()
+    # Use provided config or create default
+    if config is None:
+        config = EnhancedConfig()
+    elif not isinstance(config, EnhancedConfig):
+        raise TypeError(f"config must be EnhancedConfig, got {type(config)}")
 
-    # Update config with kwargs
-    for key, value in kwargs.items():
-        if hasattr(config, key):
-            setattr(config, key, value)
+    # Update config with kwargs if needed
+    # Note: EnhancedConfig uses nested structure, so direct attribute setting is limited
+    # Users should create proper EnhancedConfig instances instead
 
     if output_formats is None:
         output_formats = ["artic"]
@@ -72,18 +80,23 @@ def convert_primers(
 
 __all__ = [
     "__version__",
+    # Core components
     "PrimerParser",
     "OutputWriter",
     "PrimerData",
     "AmpliconData",
-    "PrePrimerConfig",
-    "DefaultConfig",
+    # Configuration
+    "EnhancedConfig",
+    # Converter
     "PrimerConverter",
+    # Exceptions
     "PrePrimerError",
     "ParserError",
     "ValidationError",
     "OutputError",
+    # Registries
     "parser_registry",
     "writer_registry",
+    # Convenience functions
     "convert_primers",
 ]

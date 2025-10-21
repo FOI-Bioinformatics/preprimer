@@ -12,8 +12,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from preprimer.core.config import PrePrimerConfig
 from preprimer.core.converter import PrimerConverter
+from preprimer.core.enhanced_config import EnhancedConfig, ValidationSettings
 from preprimer.core.exceptions import OutputError, ValidationError
 from preprimer.core.interfaces import AmpliconData, PrimerData
 
@@ -67,7 +67,7 @@ class TestConverterReferenceFileHandling:
                 mock_writer_reg.get_writer.return_value = mock_writer
 
                 # Disable validation for this test since it's not the focus
-                config = PrePrimerConfig(validate_sequences=False)
+                config = EnhancedConfig(validation=ValidationSettings(enabled=False))
                 converter = PrimerConverter(config)
 
                 with tempfile.TemporaryDirectory() as temp_dir:
@@ -135,7 +135,7 @@ class TestConverterOutputFileAssignment:
                 mock_writer_reg.get_writer.return_value = mock_writer
 
                 # Disable validation for this test since it's not the focus
-                config = PrePrimerConfig(validate_sequences=False)
+                config = EnhancedConfig(validation=ValidationSettings(enabled=False))
                 converter = PrimerConverter(config)
 
                 with tempfile.TemporaryDirectory() as temp_dir:
@@ -203,7 +203,7 @@ class TestConverterContinueOnError:
                 mock_writer_reg.get_writer.return_value = mock_writer
 
                 # Disable validation for this test since it's not the focus
-                config = PrePrimerConfig(validate_sequences=False)
+                config = EnhancedConfig(validation=ValidationSettings(enabled=False))
                 converter = PrimerConverter(config)
 
                 with tempfile.TemporaryDirectory() as temp_dir:
@@ -252,7 +252,7 @@ class TestConverterPrimerValidationEdgeCases:
             )
         ]
 
-        config = PrePrimerConfig(validate_sequences=True)
+        config = EnhancedConfig(validation=ValidationSettings(enabled=True))
         converter = PrimerConverter(config)
 
         with pytest.raises(ValidationError, match="has empty sequence"):
@@ -285,9 +285,10 @@ class TestConverterPrimerValidationEdgeCases:
             )
         ]
 
-        config = PrePrimerConfig(
-            validate_sequences=True,
-            max_primer_length=50,  # Set lower than our test sequence
+        config = EnhancedConfig(
+            validation=ValidationSettings(
+                enabled=True, max_length=50
+            )  # Set lower than our test sequence
         )
         converter = PrimerConverter(config)
 
@@ -319,7 +320,7 @@ class TestConverterPrimerValidationEdgeCases:
             )
         ]
 
-        config = PrePrimerConfig(validate_sequences=True)
+        config = EnhancedConfig(validation=ValidationSettings(enabled=True))
         converter = PrimerConverter(config)
 
         with pytest.raises(ValidationError, match="contains invalid characters"):
@@ -351,7 +352,7 @@ class TestConverterPrimerValidationEdgeCases:
                 )
             )
 
-        config = PrePrimerConfig(validate_sequences=True)
+        config = EnhancedConfig(validation=ValidationSettings(enabled=True))
         converter = PrimerConverter(config)
 
         with pytest.raises(ValidationError) as exc_info:
@@ -428,7 +429,9 @@ class TestConverterComplexScenarios:
             ),
         ]
 
-        config = PrePrimerConfig(validate_sequences=True, max_primer_length=50)
+        config = EnhancedConfig(
+            validation=ValidationSettings(enabled=True, max_length=50)
+        )
         converter = PrimerConverter(config)
 
         with pytest.raises(ValidationError) as exc_info:
@@ -492,8 +495,11 @@ class TestConverterComplexScenarios:
                     mock_parser_reg.get_parser.return_value = mock_parser
                     mock_writer_reg.get_writer.return_value = mock_writer
 
-                    config = PrePrimerConfig(
-                        force_overwrite=False, validate_sequences=False
+                    from preprimer.core.enhanced_config import OutputSettings
+
+                    config = EnhancedConfig(
+                        validation=ValidationSettings(enabled=False),
+                        output=OutputSettings(force_overwrite=False),
                     )
                     converter = PrimerConverter(config)
 

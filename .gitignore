@@ -104,3 +104,4 @@ schemes
 
 # Development utilities
 .pre-commit-config.local.yaml
+logo.png

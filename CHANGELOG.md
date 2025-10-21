@@ -7,27 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- STS parser implementation for bidirectional format conversion
-- Comprehensive STS parser test suite
-- API documentation with code examples
-- Examples directory with practical usage samples
-- PyPI publishing automation via GitHub Actions
-- Release checklist and version management documentation
-- Large-scale stress tests (10,000+ amplicons)
-- Windows incompatibility documentation
+## [0.2.0] - 2025-10-21
 
-### Changed
-- Updated package metadata for accurate OS support declaration
-- Fixed repository URLs in pyproject.toml
-- Improved package distribution configuration
+**BREAKING CHANGES**: This release removes legacy configuration system. See upgrade guide below.
 
 ### Fixed
-- Package classifiers now correctly reflect Linux/macOS-only support
+- **Enhanced STS Parser**: Now supports both 3-column and 4-column formats (with/without product size)
+  - Auto-detects header presence (header/header-less files)
+  - Compatible with me-PCR and merPCR output files
+  - Parses extended format with product size column
+- **Enhanced STS Writer**: Auto-detects and outputs extended 4-column format when amplicon length available
+  - Configurable via `include_size` parameter
+  - Maintains backward compatibility with 3-column format
 
-## [0.2.0] - 2024-10-14
+### Removed
+- **Legacy Configuration System**: `PrePrimerConfig` has been completely removed
+  - All code must use `EnhancedConfig` with nested structure
+  - `config.validate_sequences` → `config.validation.enabled`
+  - `config.force_overwrite` → `config.output.force_overwrite`
+  - `config.min_primer_length` → `config.validation.min_length`
+  - `config.max_primer_length` → `config.validation.max_length`
+  - `config.output_formats` → `config.output.formats`
 
 ### Added
+- **Alignment Functionality**: Complete primer-to-reference alignment system
+  - `align_primers()` high-level API for primer alignment
+  - **BLAST Provider**: NCBI BLAST integration for fast primer alignment
+  - **Exonerate Provider**: Exonerate integration for sensitive alignment
+  - **me-PCR Provider**: Legacy in silico PCR simulation support
+  - **merPCR Provider**: Modern Python reimplementation of me-PCR (recommended)
+    - 100% compatible with me-PCR (identical results)
+    - 2.65x performance improvement through Cython optimization
+    - Modern Python API with comprehensive testing (277 tests, 94% coverage)
+    - Easy installation: `pip install merpcr`
+  - `AlignmentProvider` base class with plugin architecture
+  - `AlignmentRegistry` for managing alignment tools
+  - CLI `align` command with support for multiple output formats
+  - 36 comprehensive alignment tests with 100% pass rate (up from 29)
+  - Full documentation in CLI reference and Python API guide
+- **Generic Registry System**: New `BaseRegistry[T]` generic class for type-safe plugin management
+- **Standardized Parser Refactoring**: ARTICParser now inherits from `StandardizedParser`
 - **Topology-aware Processing**: Automatic detection and handling of circular genome architectures
 - **Circular Genome Support**: Complete coordinate wrapping and topology detection for mitochondrial, plasmid, and viral episomal genomes
 - **Enhanced Security**: Comprehensive path validation with 100% security module test coverage (38 tests)
@@ -39,9 +58,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - VarVAMP HAV with degenerate primers (16 amplicons)
   - ARTIC nCoV-2019 V5.3.2 (96 amplicons)
   - Olivar mitochondrial designs (15 amplicons)
+- **Comprehensive Real Data Validation Framework** (`tests/validation/`)
+  - `validator.py`: Format-specific validators for all 5 output formats (430 lines)
+  - `report_generator.py`: Multi-format report generation (Markdown, JSON, console)
+  - 23 comprehensive real-data tests with 100% pass rate
+  - Real tool integration testing (BLAST, Exonerate, merPCR)
+  - Performance benchmarking and edge case validation
+  - Validation reports in `docs/technical/validation/`
 - **Comprehensive Test Coverage**:
-  - 581 tests with 96.90% coverage
+  - 611 tests with 96.90% coverage, 100% pass rate
+  - Alignment testing (36 tests)
   - Security testing (38 tests, 100% coverage)
+  - Real data validation (23 tests)
   - Main API testing (12 tests, 100% coverage)
   - Core infrastructure (converter, registry, exceptions) with 95-100% coverage
   - Property-based testing with Hypothesis
@@ -92,15 +120,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Upgrading to 0.2.0 from 0.1.0
 
-**Breaking Changes**: None - v0.2.0 is backward compatible with v0.1.0.
+**⚠️ BREAKING CHANGES - Action Required**
+
+#### 1. Configuration System Migration
+
+**Old (v0.1.0)** - PrePrimerConfig:
+```python
+from preprimer import PrePrimerConfig
+
+config = PrePrimerConfig(
+    validate_sequences=True,
+    force_overwrite=False,
+    min_primer_length=15,
+    max_primer_length=35,
+    output_formats=["artic", "fasta"]
+)
+```
+
+**New (v0.2.0)** - EnhancedConfig with nested structure:
+```python
+from preprimer.core.enhanced_config import EnhancedConfig, ValidationSettings, OutputSettings
+
+config = EnhancedConfig(
+    validation=ValidationSettings(
+        enabled=True,
+        min_length=15,
+        max_length=35
+    ),
+    output=OutputSettings(
+        formats=["artic", "fasta"],
+        force_overwrite=False
+    )
+)
+```
+
+#### 2. Configuration Attribute Access
+
+Update all configuration attribute access:
+
+| Old (v0.1.0) | New (v0.2.0) |
+|--------------|--------------|
+| `config.validate_sequences` | `config.validation.enabled` |
+| `config.force_overwrite` | `config.output.force_overwrite` |
+| `config.min_primer_length` | `config.validation.min_length` |
+| `config.max_primer_length` | `config.validation.max_length` |
+| `config.output_formats` | `config.output.formats` |
+| `config.aligner` | `config.alignment.aligner` |
+
+#### 3. Import Path Changes
+
+```python
+# Old (v0.1.0)
+from preprimer.core.config import PrePrimerConfig
+
+# New (v0.2.0)
+from preprimer.core.enhanced_config import EnhancedConfig
+```
+
+#### 4. Removed Components
+
+- `AlignmentProvider` class - removed (never implemented)
+- `AlignmentError` exception - removed
+- `AlignmentRegistry` - removed
+- `PrePrimerConfig.to_legacy_config()` method - removed
+- `PrePrimerConfig.from_legacy_config()` method - removed
+
+**Migration Tool**: None available - codebase is small, manual migration recommended.
+
+**Estimated Migration Time**: 5-15 minutes for typical projects
 
 **New Features to Adopt**:
 1. **Topology Detection**: Circular genomes are now automatically detected. No code changes needed.
 2. **Enhanced Error Messages**: Errors now include suggestions for resolution.
 3. **Olivar Support**: Can now read and write Olivar format files.
 4. **Security**: All file operations now use validated paths automatically.
-
-**Deprecated**: None
 
 **Performance**: Expect 20-30% faster processing on large datasets due to optimizations.
 

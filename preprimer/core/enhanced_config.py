@@ -91,7 +91,7 @@ class OutputSettings(BaseModel):
     @field_validator("formats")
     @classmethod
     def validate_formats(cls, v):
-        valid_formats = {"artic", "fasta", "bed", "tsv", "json", "yaml", "csv"}
+        valid_formats = {"artic", "fasta", "varvamp", "sts", "olivar"}
         invalid_formats = set(v) - valid_formats
         if invalid_formats:
             raise ValueError(f"Invalid output formats: {invalid_formats}")
@@ -396,23 +396,6 @@ class EnhancedConfig(BaseModel):
         if plugin_name not in self.plugins.config:
             self.plugins.config[plugin_name] = {}
         self.plugins.config[plugin_name].update(config)
-
-    def to_legacy_config(self) -> "PrePrimerConfig":
-        """Convert to legacy configuration format for backward compatibility."""
-        from .config import PrePrimerConfig
-
-        return PrePrimerConfig(
-            aligner=self.alignment.aligner,
-            alignment_params=self.alignment.params,
-            output_formats=self.output.formats,
-            force_overwrite=self.output.force_overwrite,
-            default_pool=self.parser.default_pool,
-            primer_naming_scheme=self.parser.naming_scheme,
-            validate_sequences=self.validation.enabled,
-            min_primer_length=self.validation.min_length,
-            max_primer_length=self.validation.max_length,
-            custom_settings=self.custom,
-        )
 
 
 @dataclass

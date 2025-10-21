@@ -10,8 +10,8 @@ from pathlib import Path
 # Add preprimer to path for testing
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from preprimer.core.config import PrePrimerConfig  # noqa: E402
 from preprimer.core.converter import PrimerConverter  # noqa: E402
+from preprimer.core.enhanced_config import EnhancedConfig  # noqa: E402
 from preprimer.core.interfaces import AmpliconData, PrimerData  # noqa: E402
 from preprimer.core.registry import parser_registry, writer_registry  # noqa: E402
 from preprimer.parsers.artic_parser import ARTICParser  # noqa: E402
@@ -102,35 +102,40 @@ class TestConfigSystem:
 
     def test_default_config(self):
         """Test default configuration creation."""
-        config = PrePrimerConfig()
+        config = EnhancedConfig()
 
-        assert config.aligner == "blast"
-        assert config.output_formats == ["artic"]
-        assert config.validate_sequences is True
+        # EnhancedConfig uses nested structure
+        assert config.alignment.aligner == "blast"
+        assert config.output.formats == ["artic"]
+        assert config.validation.enabled is True
 
     def test_config_validation(self):
-        """Test configuration validation."""
-        config = PrePrimerConfig()
-        issues = config.validate()
-        assert len(issues) == 0
+        """Test configuration validation with Pydantic."""
+        # Valid config - should create successfully
+        config = EnhancedConfig()
+        assert config is not None
 
-        # Test invalid configuration
-        config.aligner = "invalid_aligner"
-        issues = config.validate()
-        assert len(issues) > 0
+        # Invalid configuration should raise ValidationError during creation
+        import pytest
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError):
+            from preprimer.core.enhanced_config import AlignmentSettings
+
+            EnhancedConfig(alignment=AlignmentSettings(aligner="invalid_aligner"))
 
     def test_config_from_dict(self):
-        """Test configuration creation from dictionary."""
-        data = {
-            "aligner": "exonerate",
-            "output_formats": ["fasta", "sts"],
-            "force_overwrite": True,
-        }
+        """Test configuration creation from nested dictionary."""
+        from preprimer.core.enhanced_config import AlignmentSettings, OutputSettings
 
-        config = PrePrimerConfig.from_dict(data)
-        assert config.aligner == "exonerate"
-        assert config.output_formats == ["fasta", "sts"]
-        assert config.force_overwrite is True
+        config = EnhancedConfig(
+            alignment=AlignmentSettings(aligner="exonerate"),
+            output=OutputSettings(formats=["fasta", "sts"], force_overwrite=True),
+        )
+
+        assert config.alignment.aligner == "exonerate"
+        assert config.output.formats == ["fasta", "sts"]
+        assert config.output.force_overwrite is True
 
 
 class TestVarVAMPParser:
@@ -213,7 +218,7 @@ class TestConverter:
 
     def test_converter_basic_functionality(self):
         """Test basic converter functionality."""
-        config = PrePrimerConfig()
+        config = EnhancedConfig()
         converter = PrimerConverter(config)
 
         test_file = self.create_simple_varvamp_file()

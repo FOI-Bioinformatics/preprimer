@@ -22,7 +22,7 @@ from preprimer.cli import (
     main,
     setup_logging,
 )
-from preprimer.core.config import PrePrimerConfig
+from preprimer.core.enhanced_config import EnhancedConfig
 from preprimer.core.exceptions import PrePrimerError
 
 
@@ -201,7 +201,7 @@ class TestCmdConvert:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = PrePrimerConfig()
+        self.config = EnhancedConfig()
         self.mock_args = Mock()
         self.mock_args.force = False
         self.mock_args.validate_only = False
@@ -235,7 +235,7 @@ class TestCmdConvert:
         result = cmd_convert(self.mock_args, self.config)
 
         assert result == 0
-        assert self.config.force_overwrite is True
+        assert self.config.output.force_overwrite is True
 
     @patch("preprimer.cli.parser_registry")
     @patch("preprimer.cli.PrimerConverter")
@@ -610,7 +610,7 @@ class TestMain:
                 mock_parser.print_help.assert_called_once()
 
     @patch("preprimer.cli.setup_logging")
-    @patch("preprimer.cli.PrePrimerConfig")
+    @patch("preprimer.cli.EnhancedConfig")
     @patch("preprimer.cli.cmd_convert")
     def test_main_convert_command(
         self, mock_cmd_convert, mock_config_class, mock_setup_logging
@@ -637,7 +637,7 @@ class TestMain:
         mock_cmd_convert.assert_called_once()
 
     @patch("preprimer.cli.setup_logging")
-    @patch("preprimer.cli.PrePrimerConfig")
+    @patch("preprimer.cli.EnhancedConfig")
     @patch("preprimer.cli.cmd_list")
     def test_main_list_command(
         self, mock_cmd_list, mock_config_class, mock_setup_logging
@@ -657,7 +657,7 @@ class TestMain:
         mock_cmd_list.assert_called_once()
 
     @patch("preprimer.cli.setup_logging")
-    @patch("preprimer.cli.PrePrimerConfig")
+    @patch("preprimer.cli.EnhancedConfig")
     @patch("preprimer.cli.cmd_info")
     def test_main_info_command(
         self, mock_cmd_info, mock_config_class, mock_setup_logging
@@ -677,7 +677,7 @@ class TestMain:
         mock_cmd_info.assert_called_once()
 
     @patch("preprimer.cli.setup_logging")
-    @patch("preprimer.cli.PrePrimerConfig")
+    @patch("preprimer.cli.EnhancedConfig")
     def test_main_with_config_file(self, mock_config_class, mock_setup_logging):
         """Test main with custom config file."""
         test_argv = ["preprimer", "--config", "config.json", "list"]
@@ -696,7 +696,7 @@ class TestMain:
         mock_config_class.from_file.assert_called_once_with(Path("config.json"))
 
     @patch("preprimer.cli.setup_logging")
-    @patch("preprimer.cli.PrePrimerConfig")
+    @patch("preprimer.cli.EnhancedConfig")
     def test_main_config_error(self, mock_config_class, mock_setup_logging):
         """Test main with configuration error."""
         test_argv = ["preprimer", "--config", "bad_config.json", "list"]
@@ -711,7 +711,7 @@ class TestMain:
         mock_logger.error.assert_called_with("Configuration error: Bad config")
 
     @patch("preprimer.cli.setup_logging")
-    @patch("preprimer.cli.PrePrimerConfig")
+    @patch("preprimer.cli.EnhancedConfig")
     def test_main_custom_log_level(self, mock_config_class, mock_setup_logging):
         """Test main with custom log level."""
         test_argv = ["preprimer", "--log-level", "DEBUG", "list"]
@@ -738,7 +738,7 @@ class TestMain:
                 mock_create_parser.return_value = mock_parser
 
                 with patch("preprimer.cli.setup_logging"):
-                    with patch("preprimer.cli.PrePrimerConfig"):
+                    with patch("preprimer.cli.EnhancedConfig"):
                         result = main()
 
                 assert result == 0

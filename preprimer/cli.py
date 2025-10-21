@@ -7,10 +7,11 @@ import logging
 import sys
 from pathlib import Path
 
-from .core.config import PrePrimerConfig
+from .align import align_primers
 from .core.converter import PrimerConverter
+from .core.enhanced_config import EnhancedConfig
 from .core.exceptions import PrePrimerError
-from .core.registry import parser_registry, writer_registry
+from .core.registry import alignment_registry, parser_registry, writer_registry
 
 # Import parsers and writers to register them
 
@@ -127,15 +128,74 @@ Examples:
     info_parser = subparsers.add_parser("info", help="Show information about a file")
     info_parser.add_argument("file", type=Path, help="File to analyze")
 
+    # Align command
+    align_parser = subparsers.add_parser(
+        "align",
+        help="Align primers to a reference genome",
+        description=(
+            "Align primers to a reference genome using BLAST, Exonerate, or me-PCR"
+        ),
+    )
+
+    align_parser.add_argument(
+        "--sts-file",
+        type=Path,
+        required=True,
+        help="Input primer file in STS format",
+    )
+
+    align_parser.add_argument(
+        "--reference",
+        type=Path,
+        required=True,
+        help="Reference genome FASTA file",
+    )
+
+    align_parser.add_argument(
+        "--output-dir",
+        "--output-folder",
+        type=Path,
+        required=True,
+        help="Output directory for alignment results",
+    )
+
+    align_parser.add_argument(
+        "--output-formats",
+        "--output-format",
+        choices=["primers", "me-pcr", "merpcr"],
+        nargs="+",
+        required=True,
+        help="Alignment output format(s): 'primers' (BLAST/Exonerate), 'me-pcr', or 'merpcr'",
+    )
+
+    align_parser.add_argument(
+        "--aligner",
+        choices=["blast", "exonerate"],
+        default="blast",
+        help="Alignment tool for primers format (default: blast)",
+    )
+
+    align_parser.add_argument(
+        "--prefix",
+        default="primers",
+        help="Prefix for output files (default: primers)",
+    )
+
+    align_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite existing output files",
+    )
+
     return parser
 
 
-def cmd_convert(args: argparse.Namespace, config: PrePrimerConfig) -> int:
+def cmd_convert(args: argparse.Namespace, config: EnhancedConfig) -> int:
     """Handle convert command."""
     try:
         # Update config with command line args
         if args.force:
-            config.force_overwrite = True
+            config.output.force_overwrite = True
 
         converter = PrimerConverter(config)
 
@@ -259,6 +319,75 @@ def cmd_info(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_align(args: argparse.Namespace) -> int:
+    """Handle align command."""
+    try:
+        # Validate input files exist
+        if not args.sts_file.exists():
+            logger.error(f"STS file not found: {args.sts_file}")
+            return 1
+
+        if not args.reference.exists():
+            logger.error(f"Reference file not found: {args.reference}")
+            return 1
+
+        # Check if required tools are available
+        if "primers" in args.output_formats:
+            aligner = args.aligner
+            provider = alignment_registry.get_provider(aligner)
+            if not provider.is_available():
+                logger.error(
+                    f"{aligner} is not available on this system. "
+                    f"Please install {aligner} and ensure it's in your PATH."
+                )
+                return 1
+
+        if "me-pcr" in args.output_formats:
+            mepcr_provider = alignment_registry.get_provider("me-pcr")
+            if not mepcr_provider.is_available():
+                logger.error(
+                    "me-PCR is not available on this system. "
+                    "Please install me-PCR and ensure it's in your PATH."
+                )
+                return 1
+
+        if "merpcr" in args.output_formats:
+            merpcr_provider = alignment_registry.get_provider("merpcr")
+            if not merpcr_provider.is_available():
+                logger.error(
+                    "merPCR is not available on this system. "
+                    "Please install merPCR (pip install merpcr) and ensure it's in your PATH."
+                )
+                return 1
+
+        # Run alignment
+        logger.info(f"Aligning primers from {args.sts_file.name}...")
+        output_paths = align_primers(
+            sts_file=args.sts_file,
+            reference_file=args.reference,
+            output_dir=args.output_dir,
+            output_formats=args.output_formats,
+            aligner=args.aligner,
+            prefix=args.prefix,
+            force=args.force,
+        )
+
+        # Report success
+        logger.info("🎉 Alignment completed successfully!")
+        for format_name, output_path in output_paths.items():
+            logger.info(f"  {format_name}: {output_path}")
+
+        return 0
+
+    except PrePrimerError as e:
+        logger.error(f"❌ {e}")
+        return 1
+    except Exception as e:
+        logger.error(f"❌ Unexpected error: {e}")
+        logger.debug("Full traceback:", exc_info=True)
+        return 1
+
+
 def main() -> int:
     """Main CLI entry point."""
     parser = create_parser()
@@ -275,10 +404,10 @@ def main() -> int:
     # Load configuration
     try:
         if args.config:
-            config = PrePrimerConfig.from_file(args.config)
+            config = EnhancedConfig.from_file(args.config)
             logger.info(f"Loaded configuration from: {args.config}")
         else:
-            config = PrePrimerConfig()
+            config = EnhancedConfig()
     except Exception as e:
         logger.error(f"Configuration error: {e}")
         return 1
@@ -290,6 +419,8 @@ def main() -> int:
         return cmd_list(args)
     elif args.command == "info":
         return cmd_info(args)
+    elif args.command == "align":
+        return cmd_align(args)
     else:
         parser.print_help()
         return 0

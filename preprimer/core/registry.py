@@ -4,19 +4,124 @@ Parser and writer registry system for preprimer.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Type, Union
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from .exceptions import OutputError, ParserError
-from .interfaces import AlignmentProvider, OutputWriter, PrimerParser
+from .interfaces import OutputWriter, PrimerParser
+
+# Note: AlignmentProvider removed in v0.2.0 (unused functionality)
+# AlignmentRegistry kept with deprecation warning for backward compatibility
 
 logger = logging.getLogger(__name__)
 
+# Type variable for generic registry
+T = TypeVar("T")
 
-class ParserRegistry:
+
+class BaseRegistry(Generic[T]):
+    """
+    Base registry class for managing plugin-style components.
+
+    This generic registry provides common functionality for registering,
+    retrieving, and listing plugin classes (parsers, writers, aligners, etc.).
+
+    Type Parameters:
+        T: The base type of components managed by this registry
+    """
+
+    def __init__(self, component_type_name: str, error_class: Type[Exception]):
+        """
+        Initialize the base registry.
+
+        Args:
+            component_type_name: Human-readable name for component type (e.g., "parser", "writer")
+            error_class: Exception class to raise for errors (e.g., ParserError, OutputError)
+        """
+        self._components: Dict[str, Type[T]] = {}
+        self._component_type_name = component_type_name
+        self._error_class = error_class
+
+    def register(self, component_class: Type[T], key: str) -> None:
+        """
+        Register a component class.
+
+        Args:
+            component_class: The component class to register
+            key: Registry key (usually format name or tool name)
+        """
+        key = key.lower()
+        logger.debug(f"Registering {self._component_type_name}: {key}")
+        self._components[key] = component_class
+
+    def get_component(self, key: str) -> T:
+        """
+        Get component instance for a key.
+
+        Args:
+            key: Registry key to look up
+
+        Returns:
+            Instance of the component
+
+        Raises:
+            Exception: If component not found (uses error_class from __init__)
+        """
+        key = key.lower()
+        if key not in self._components:
+            available = list(self._components.keys())
+            raise self._error_class(
+                f"No {self._component_type_name} registered for: {key}. "
+                f"Available: {available}"
+            )
+        return self._components[key]()
+
+    def list_components(self) -> List[str]:
+        """
+        List all registered component keys.
+
+        Returns:
+            List of registered keys
+        """
+        return list(self._components.keys())
+
+    def is_registered(self, key: str) -> bool:
+        """
+        Check if a component is registered.
+
+        Args:
+            key: Registry key to check
+
+        Returns:
+            True if registered, False otherwise
+        """
+        return key.lower() in self._components
+
+    def get_component_class(self, key: str) -> Type[T]:
+        """
+        Get the component class (not instance) for a key.
+
+        Args:
+            key: Registry key to look up
+
+        Returns:
+            The component class
+
+        Raises:
+            Exception: If component not found
+        """
+        key = key.lower()
+        if key not in self._components:
+            raise self._error_class(
+                f"No {self._component_type_name} registered for: {key}"
+            )
+        return self._components[key]
+
+
+class ParserRegistry(BaseRegistry[PrimerParser]):
     """Registry for primer format parsers."""
 
     def __init__(self):
-        self._parsers: Dict[str, Type[PrimerParser]] = {}
+        super().__init__(component_type_name="parser", error_class=ParserError)
         self._format_extensions: Dict[str, List[str]] = {}
 
     def register(self, parser_class: Type[PrimerParser]) -> None:
@@ -24,18 +129,15 @@ class ParserRegistry:
         # Get format info directly from class (no instance creation)
         format_name = parser_class.format_name().lower()
 
-        logger.debug(f"Registering parser for format: {format_name}")
+        # Register with base class
+        super().register(parser_class, format_name)
 
-        self._parsers[format_name] = parser_class
+        # Cache extensions for format detection
         self._format_extensions[format_name] = parser_class.file_extensions()
 
     def get_parser(self, format_name: str) -> PrimerParser:
         """Get parser instance for a format."""
-        format_name = format_name.lower()
-        if format_name not in self._parsers:
-            raise ParserError(f"No parser registered for format: {format_name}")
-
-        return self._parsers[format_name]()
+        return self.get_component(format_name)
 
     def detect_format(self, file_path: Union[str, Path]) -> Optional[str]:
         """Auto-detect file format based on extension and content."""
@@ -50,41 +152,7 @@ class ParserRegistry:
                     return format_name
 
         # If extension doesn't match, try all parsers
-        for format_name in self._parsers:
-            parser = self.get_parser(format_name)
-            if parser.validate_file(file_path):
-                return format_name
-
-        return None
-
-    def detect_format_optimized(self, file_path: Union[str, Path]) -> Optional[str]:
-        """
-        Optimized format detection that minimizes instance creation.
-
-        This method only creates parser instances when validation is needed,
-        and reuses cached validation results where possible.
-        """
-        file_path = Path(file_path)
-        extension = file_path.suffix.lower()
-
-        # Build a priority list: extension matches first, then others
-        priority_formats = []
-        other_formats = []
-
-        for format_name, extensions in self._format_extensions.items():
-            if extension in extensions:
-                priority_formats.append(format_name)
-            else:
-                other_formats.append(format_name)
-
-        # Try priority formats first (extension matches)
-        for format_name in priority_formats:
-            parser = self.get_parser(format_name)
-            if parser.validate_file(file_path):
-                return format_name
-
-        # Then try other formats
-        for format_name in other_formats:
+        for format_name in self._components:
             parser = self.get_parser(format_name)
             if parser.validate_file(file_path):
                 return format_name
@@ -93,7 +161,7 @@ class ParserRegistry:
 
     def list_formats(self) -> List[str]:
         """List all registered formats."""
-        return list(self._parsers.keys())
+        return self.list_components()
 
     def list_extensions(self, format_name: str) -> List[str]:
         """List extensions for a format."""
@@ -101,11 +169,11 @@ class ParserRegistry:
         return self._format_extensions.get(format_name, [])
 
 
-class WriterRegistry:
+class WriterRegistry(BaseRegistry[OutputWriter]):
     """Registry for output format writers."""
 
     def __init__(self):
-        self._writers: Dict[str, Type[OutputWriter]] = {}
+        super().__init__(component_type_name="writer", error_class=OutputError)
         self._format_extensions: Dict[str, str] = {}
 
     def register(self, writer_class: Type[OutputWriter]) -> None:
@@ -113,22 +181,19 @@ class WriterRegistry:
         # Get format info directly from class (no instance creation)
         format_name = writer_class.format_name().lower()
 
-        logger.debug(f"Registering writer for format: {format_name}")
+        # Register with base class
+        super().register(writer_class, format_name)
 
-        self._writers[format_name] = writer_class
+        # Cache extension for easy lookup
         self._format_extensions[format_name] = writer_class.file_extension()
 
     def get_writer(self, format_name: str) -> OutputWriter:
         """Get writer instance for a format."""
-        format_name = format_name.lower()
-        if format_name not in self._writers:
-            raise OutputError(f"No writer registered for format: {format_name}")
-
-        return self._writers[format_name]()
+        return self.get_component(format_name)
 
     def list_formats(self) -> List[str]:
         """List all registered output formats."""
-        return list(self._writers.keys())
+        return self.list_components()
 
     def get_extension(self, format_name: str) -> str:
         """Get file extension for a format."""
@@ -136,42 +201,65 @@ class WriterRegistry:
         return self._format_extensions.get(format_name, "")
 
 
-class AlignmentRegistry:
-    """Registry for alignment providers."""
+class AlignmentRegistry(BaseRegistry["AlignmentProvider"]):  # noqa: F821
+    """Registry for alignment providers (BLAST, Exonerate, me-PCR)."""
 
     def __init__(self):
-        self._providers: Dict[str, Type[AlignmentProvider]] = {}
+        # Import here to avoid circular import
+        from preprimer.core.exceptions import ParserError as AlignmentError
 
-    def register(self, provider_class: Type[AlignmentProvider]) -> None:
-        """Register an alignment provider class."""
+        super().__init__(
+            component_type_name="alignment provider", error_class=AlignmentError
+        )
+
+    def register(self, provider_class: Type["AlignmentProvider"]) -> None:  # noqa: F821
+        """
+        Register an alignment provider class.
+
+        Args:
+            provider_class: AlignmentProvider subclass to register
+        """
         # Get tool info directly from class (no instance creation)
         tool_name = provider_class.tool_name().lower()
 
-        logger.debug(f"Registering alignment provider: {tool_name}")
+        # Register with base class
+        super().register(provider_class, tool_name)
 
-        self._providers[tool_name] = provider_class
+    def get_provider(self, tool_name: str) -> "AlignmentProvider":  # noqa: F821
+        """
+        Get alignment provider instance.
 
-    def get_provider(self, tool_name: str) -> AlignmentProvider:
-        """Get alignment provider instance."""
-        tool_name = tool_name.lower()
-        if tool_name not in self._providers:
-            available = list(self._providers.keys())
-            raise ParserError(
-                f"No alignment provider for: {tool_name}. Available: {available}"
-            )
+        Args:
+            tool_name: Name of the alignment tool (blast, exonerate, me-pcr)
 
-        return self._providers[tool_name]()
+        Returns:
+            AlignmentProvider instance
+
+        Raises:
+            ParserError: If provider not found
+        """
+        return self.get_component(tool_name)
 
     def list_providers(self) -> List[str]:
-        """List all registered alignment providers."""
-        return list(self._providers.keys())
+        """
+        List all registered alignment providers.
+
+        Returns:
+            List of provider names
+        """
+        return self.list_components()
 
     def list_available_providers(self) -> List[str]:
-        """List alignment providers that are actually available on the system."""
+        """
+        List alignment providers that are actually available on the system.
+
+        .. deprecated:: 0.2.0
+            Always returns empty list as no providers exist.
+        """
         available = []
-        for tool_name, provider_class in self._providers.items():
-            provider = provider_class()
-            if provider.is_available():
+        for tool_name in self.list_providers():
+            provider = self.get_provider(tool_name)
+            if hasattr(provider, "is_available") and provider.is_available():
                 available.append(tool_name)
         return available
 

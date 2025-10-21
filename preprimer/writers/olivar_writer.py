@@ -45,10 +45,8 @@ class OlivarWriter(OutputWriter):
         Returns:
             Path to the created file
         """
-        output_path = Path(output_path)
-
-        # Ensure output directory exists
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        # Validate and prepare output path (creates directory if needed)
+        output_path = self.validate_output_path(output_path)
 
         # Get reference chromosome name from kwargs or use default
         chrom_name = kwargs.get("chrom_name", kwargs.get("reference_name", "ref"))
@@ -186,10 +184,8 @@ class OlivarWriter(OutputWriter):
         Returns:
             Path to the created file
         """
-        output_path = Path(output_path)
-
-        # Ensure output directory exists
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        # Validate and prepare output path (creates directory if needed)
+        output_path = self.validate_output_path(output_path)
 
         # Get reference chromosome name from metadata or use default
         chrom_name = "ref"

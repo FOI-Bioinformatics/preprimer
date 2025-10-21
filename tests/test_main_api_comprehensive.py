@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from preprimer import PrePrimerConfig, PrimerConverter, convert_primers
+from preprimer import EnhancedConfig, PrimerConverter, convert_primers
 from preprimer.core.exceptions import PrePrimerError
 
 
@@ -200,7 +200,7 @@ class TestConvertPrimersMainAPI:
                 # Verify converter was created with config
                 MockConverter.assert_called_once()
                 config_arg = MockConverter.call_args[0][0]
-                assert isinstance(config_arg, PrePrimerConfig)
+                assert isinstance(config_arg, EnhancedConfig)
 
                 # Verify converter.convert was called with correct parameters
                 mock_converter.convert.assert_called_once_with(
@@ -268,11 +268,11 @@ class TestMainAPIEdgeCases:
         """Test comprehensive config attribute setting scenarios."""
 
         # Mock the config and converter to verify attribute setting
-        mock_config = MagicMock(spec=PrePrimerConfig)
+        mock_config = MagicMock(spec=EnhancedConfig)
         mock_converter = MagicMock()
         mock_converter.convert.return_value = {"fasta": Path("/fake/output.fasta")}
 
-        with patch("preprimer.PrePrimerConfig") as MockConfig:
+        with patch("preprimer.EnhancedConfig") as MockConfig:
             with patch("preprimer.PrimerConverter") as MockConverter:
                 MockConfig.return_value = mock_config
                 MockConverter.return_value = mock_converter

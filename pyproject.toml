@@ -78,6 +78,10 @@ markers = [
     "property: marks property-based tests",
     "benchmark: marks benchmark tests",
     "unit: marks unit tests",
+    "real_data: comprehensive real data validation tests",
+    "quick: fast tests suitable for CI",
+    "standard: standard validation tests",
+    "stress: heavy/slow stress tests",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",

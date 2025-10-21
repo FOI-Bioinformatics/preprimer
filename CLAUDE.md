@@ -2,13 +2,15 @@
 
 Technical guidance for Claude Code when working with the PrePrimer codebase.
 
-## Current State (v1.0.0 Ready)
+## Current State (v0.2.0)
 
-**Status:** Production-ready for v1.0.0 release
+**Status:** Production-ready for v0.2.0 release
+
+**Release Date:** 2025-10-21
 
 **Codebase Metrics:**
 - **Code**: ~20,000 lines of Python across 59 files
-- **Tests**: 611 tests with 96.90% coverage
+- **Tests**: 611 tests with 96.90% coverage, 100% pass rate
 - **Architecture**: Plugin-based with security focus
 - **Documentation**: Complete, organized in docs/
 
@@ -16,9 +18,21 @@ Technical guidance for Claude Code when working with the PrePrimer codebase.
 - 4 input formats: VarVAMP, ARTIC, Olivar, STS
 - 5 output formats: ARTIC, VarVAMP, Olivar, FASTA, STS
 - 20 bidirectional conversion pathways
+- **Primer-to-reference alignment**: BLAST, Exonerate, merPCR, me-PCR providers
 - Circular genome topology detection and handling
 - IUPAC degenerate nucleotide support
 - Security hardening with 100% security module coverage
+
+**What's New in v0.2.0:**
+- ✨ **Alignment Functionality**: Integrated 4 alignment providers (BLAST, Exonerate, merPCR, me-PCR)
+  - `align_primers()` high-level API
+  - CLI `align` command with multiple output formats
+  - 36 comprehensive alignment tests
+- ✨ **Enhanced STS Format**: Auto-detection of 3/4-column formats, header/headerless files
+- ✨ **Comprehensive Validation**: 23 real-data tests with 100% pass rate, validation framework
+- ✨ **Improved Documentation**: Reorganized structure with validation reports in docs/technical/validation/
+- ⚠️ **Breaking**: Removed legacy `PrePrimerConfig` - Use `EnhancedConfig` with nested structure
+- See [CHANGELOG.md](CHANGELOG.md) for complete details
 
 ## Quick Commands
 
@@ -48,7 +62,7 @@ bandit -r preprimer/ -ll
 
 ```bash
 # Security tests (38 tests, 100% coverage)
-python -m pytest tests/test_security_comprehensive.py -v
+python -m pytest tests/test_security.py -v
 
 # Core tests
 python -m pytest tests/test_core_interfaces.py -v
@@ -59,6 +73,12 @@ python -m pytest tests/test_*_parser*.py -v
 
 # Writer tests
 python -m pytest tests/test_*_writer*.py -v
+
+# Alignment tests (36 tests)
+python -m pytest tests/test_alignment.py -v
+
+# Real data validation (23 tests)
+python -m pytest tests/test_real_data_comprehensive.py -m real_data -v
 
 # Topology tests (circular genomes)
 python -m pytest tests/test_topology.py -v
@@ -86,6 +106,10 @@ preprimer convert --input primers.tsv --output-dir output/ --output-formats arti
 # Multiple formats
 preprimer convert --input primers.tsv --output-dir output/ \
                   --output-formats artic fasta sts varvamp olivar --prefix MyVirus
+
+# Align primers to reference (NEW in v0.2.0)
+preprimer align --primers primers.bed --reference genome.fasta --aligner merpcr
+preprimer align --primers primers.tsv --reference genome.fasta --aligner blast --output alignment.tsv
 ```
 
 ## Architecture
@@ -100,17 +124,22 @@ preprimer/
 │   ├── security.py                # Input validation (100% coverage)
 │   ├── standardized_parser.py     # Base parser class
 │   └── primerscheme_info.py       # Primal-page info.json schema
+├── alignment/                     # Alignment providers (NEW in v0.2.0)
+│   ├── blast_provider.py          # NCBI BLAST integration
+│   ├── exonerate_provider.py      # Exonerate integration
+│   ├── merpcr_provider.py         # merPCR (modern Python, recommended)
+│   └── mepcr_provider.py          # me-PCR (legacy C tool)
 ├── parsers/                       # Input format handlers
 │   ├── varvamp_parser.py          # VarVAMP TSV (13-column, IUPAC)
 │   ├── artic_parser.py            # ARTIC BED (v2.0/v3.0)
 │   ├── olivar_parser.py           # Olivar CSV (circular genome support)
-│   └── sts_parser.py              # STS TSV (3-column, minimal)
+│   └── sts_parser.py              # STS TSV (3/4-column, auto-detect)
 └── writers/                       # Output format generators
     ├── artic_writer.py            # ARTIC primerscheme structure
     ├── varvamp_writer.py          # VarVAMP TSV output
     ├── olivar_writer.py           # Olivar CSV output
     ├── fasta_writer.py            # Multi-FASTA with metadata
-    └── sts_writer.py              # STS TSV output
+    └── sts_writer.py              # STS TSV output (3/4-column)
 ```
 
 ## Key Implementation Patterns
@@ -332,7 +361,13 @@ docs/
 ├── api/                 # API reference
 │   └── python-api.md
 └── technical/           # Technical specifications
-    └── windows-compatibility.md
+    ├── testing.md
+    ├── security.md
+    ├── windows-compatibility.md
+    └── validation/      # Validation reports (NEW in v0.2.0)
+        ├── README.md
+        ├── real-data-testing.md
+        └── v0.2.0-validation.md
 ```
 
 **Update documentation when:**
@@ -476,6 +511,6 @@ safe_path = PathValidator.sanitize_path("../../etc/passwd")  # Should fail
 
 ---
 
-**Version**: 1.0.0
-**Last Updated**: 2024-10-14
-**Test Coverage**: 96.90% (611 tests)
+**Version**: 0.2.0
+**Last Updated**: 2025-10-21
+**Test Coverage**: 96.90% (611 tests, 100% pass rate)

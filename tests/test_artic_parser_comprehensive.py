@@ -9,7 +9,7 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from preprimer.core.exceptions import ParserError
+from preprimer.core.exceptions import InvalidFormatError, ParserError
 from preprimer.core.interfaces import AmpliconData, PrimerData
 from preprimer.parsers.artic_parser import ARTICParser
 
@@ -143,7 +143,7 @@ class TestARTICParserParsingEdgeCases:
             temp_path = f.name
 
         try:
-            with pytest.raises(ParserError, match="is not a valid ARTIC format"):
+            with pytest.raises(InvalidFormatError, match="Invalid format"):
                 parser.parse(temp_path)
         finally:
             os.unlink(temp_path)

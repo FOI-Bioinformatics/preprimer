@@ -120,44 +120,6 @@ class ValidationError(PrePrimerError):
         super().__init__(message, **kwargs)
 
 
-class AlignmentError(PrePrimerError):
-    """Raised when alignment operations fail."""
-
-    def __init__(self, message: str, *, tool: Optional[str] = None, **kwargs):
-        context = kwargs.get("context", {})
-        if tool:
-            context["alignment_tool"] = tool
-
-        if "user_message" not in kwargs:
-            kwargs["user_message"] = (
-                f"Alignment failed{f' with {tool}' if tool else ''}. "
-                f"Please check your reference file and primer sequences."
-            )
-
-        if "suggestions" not in kwargs:
-            suggestions = []
-            if tool:
-                tool_upper = tool.upper()
-                suggestions.extend(
-                    [
-                        f"Verify {tool_upper} is properly installed and accessible",
-                        "Check that reference sequences are in correct format",
-                        "Ensure primer sequences are valid",
-                    ]
-                )
-            else:
-                suggestions.extend(
-                    [
-                        "Check that reference sequences are in correct format",
-                        "Ensure primer sequences are valid",
-                    ]
-                )
-            kwargs["suggestions"] = suggestions
-
-        kwargs["context"] = context
-        super().__init__(message, **kwargs)
-
-
 class OutputError(PrePrimerError):
     """Raised when output writing fails."""
 

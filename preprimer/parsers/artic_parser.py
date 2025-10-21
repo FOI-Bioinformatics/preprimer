@@ -4,15 +4,16 @@ ARTIC primer format parser.
 
 import logging
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from ..core.exceptions import ParserError
-from ..core.interfaces import AmpliconData, PrimerData, PrimerParser
+from ..core.interfaces import AmpliconData, PrimerData
+from ..core.standardized_parser import StandardizedParser
 
 logger = logging.getLogger(__name__)
 
 
-class ARTICParser(PrimerParser):
+class ARTICParser(StandardizedParser):
     """Parser for ARTIC primer format (BED format)."""
 
     @classmethod
@@ -65,18 +66,20 @@ class ARTICParser(PrimerParser):
             logger.debug(f"ARTIC validation failed for {file_path}: {e}")
             return False
 
-    def parse(
-        self, file_path: Union[str, Path], prefix: str = ""
-    ) -> List[AmpliconData]:
-        """Parse ARTIC primer file."""
-        file_path = Path(file_path)
+    def _parse_file_content(
+        self, file_path: Path, prefix: str
+    ) -> Dict[str, AmpliconData]:
+        """
+        Parse ARTIC primer file content.
 
-        if not self.validate_file(file_path):
-            raise ParserError(f"File {file_path} is not a valid ARTIC format")
+        Args:
+            file_path: Validated file path
+            prefix: Validated prefix
 
-        logger.info(f"Parsing ARTIC file: {file_path}")
-
-        amplicons = {}
+        Returns:
+            Dictionary mapping amplicon IDs to AmpliconData objects
+        """
+        amplicons: Dict[str, AmpliconData] = {}
 
         try:
             with open(file_path, "r") as f:
@@ -165,13 +168,7 @@ class ARTICParser(PrimerParser):
                 stops = [p.stop for p in amplicon.primers]
                 amplicon.length = max(stops) - min(starts)
 
-        amplicon_list = list(amplicons.values())
-        logger.info(
-            f"Parsed {len(amplicon_list)} amplicons with "
-            f"{sum(len(a.primers) for a in amplicon_list)} primers"
-        )
-
-        return amplicon_list
+        return amplicons
 
     def get_reference_file(self, file_path: Union[str, Path]) -> Optional[Path]:
         """Get associated reference file."""

@@ -92,9 +92,9 @@ class TestPydanticValidation:
 
     def test_output_format_validation(self):
         """Test output format validation."""
-        # Valid formats
-        settings = OutputSettings(formats=["artic", "fasta", "bed"])
-        assert settings.formats == ["artic", "fasta", "bed"]
+        # Valid formats (artic, fasta, varvamp, sts, olivar)
+        settings = OutputSettings(formats=["artic", "fasta", "sts"])
+        assert settings.formats == ["artic", "fasta", "sts"]
 
         # Invalid format
         with pytest.raises(ValueError, match="Invalid output formats"):
@@ -154,7 +154,7 @@ class TestEnvironmentVariables:
             "PREPRIMER_ALIGNER": "minimap2",
             "PREPRIMER_ALIGNMENT_THREADS": "8",
             "PREPRIMER_VALIDATE_SEQUENCES": "false",
-            "PREPRIMER_OUTPUT_FORMATS": "artic,fasta,bed",
+            "PREPRIMER_OUTPUT_FORMATS": "artic,fasta,sts",
             "PREPRIMER_DEBUG_MODE": "true",
             "PREPRIMER_LOG_LEVEL": "DEBUG",
         }
@@ -165,7 +165,7 @@ class TestEnvironmentVariables:
             assert config.alignment.aligner == "minimap2"
             assert config.alignment.threads == 8
             assert config.validation.enabled == False
-            assert config.output.formats == ["artic", "fasta", "bed"]
+            assert config.output.formats == ["artic", "fasta", "sts"]
             assert config.debug_mode == True
             assert config.logging.level == "DEBUG"
 
@@ -207,7 +207,7 @@ class TestFileConfiguration:
         config_data = {
             "alignment": {"aligner": "exonerate", "threads": 6},
             "validation": {"min_length": 20, "max_length": 30},
-            "output": {"formats": ["fasta", "bed"], "force_overwrite": True},
+            "output": {"formats": ["fasta", "sts"], "force_overwrite": True},
             "debug_mode": True,
         }
 
@@ -222,7 +222,7 @@ class TestFileConfiguration:
             assert config.alignment.threads == 6
             assert config.validation.min_length == 20
             assert config.validation.max_length == 30
-            assert config.output.formats == ["fasta", "bed"]
+            assert config.output.formats == ["fasta", "sts"]
             assert config.output.force_overwrite == True
             assert config.debug_mode == True
 
@@ -496,31 +496,6 @@ class TestRuntimeReconfiguration:
         final_config = get_config()
         assert final_config.debug_mode == False
         assert final_config.alignment.threads == 12
-
-
-class TestLegacyCompatibility:
-    """Test backward compatibility with legacy configuration."""
-
-    def test_to_legacy_config(self):
-        """Test conversion to legacy configuration format."""
-        enhanced_config = EnhancedConfig(
-            alignment=AlignmentSettings(aligner="exonerate"),
-            validation=ValidationSettings(min_length=18, max_length=32),
-            output=OutputSettings(formats=["artic", "fasta"], force_overwrite=True),
-            parser=ParserSettings(default_pool=2, naming_scheme="custom"),
-            custom={"custom_option": "custom_value"},
-        )
-
-        legacy_config = enhanced_config.to_legacy_config()
-
-        assert legacy_config.aligner == "exonerate"
-        assert legacy_config.min_primer_length == 18
-        assert legacy_config.max_primer_length == 32
-        assert legacy_config.output_formats == ["artic", "fasta"]
-        assert legacy_config.force_overwrite == True
-        assert legacy_config.default_pool == 2
-        assert legacy_config.primer_naming_scheme == "custom"
-        assert legacy_config.custom_settings == {"custom_option": "custom_value"}
 
 
 class TestSecuritySettings:

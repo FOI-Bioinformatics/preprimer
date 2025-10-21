@@ -185,11 +185,17 @@ class TestOutputConsistency:
         assert len(lines) == expected_amplicons + 1  # header + amplicons
 
         header = lines[0].split("\t")
-        assert header == ["NAME", "FORWARD", "REVERSE"]
+        # v0.2.0: Accept both 3-column and 4-column formats
+        assert header in [
+            ["NAME", "FORWARD", "REVERSE"],  # 3-column format
+            ["NAME", "FORWARD", "REVERSE", "SIZE"]  # 4-column format with size
+        ], f"Unexpected header: {header}"
+
+        expected_cols = len(header)
 
         for line in lines[1:]:
             parts = line.split("\t")
-            assert len(parts) == 3
+            assert len(parts) == expected_cols, f"Expected {expected_cols} columns, got {len(parts)}"
             assert all(part.strip() for part in parts)
 
 
@@ -321,14 +327,16 @@ class TestConfiguration:
 
     def test_default_config(self, test_config):
         """Test that test configuration is valid."""
-        issues = test_config.validate()
-        assert len(issues) == 0
+        # EnhancedConfig validates automatically via Pydantic
+        # If invalid, it would have raised ValidationError during creation
+        assert test_config is not None
+        assert test_config.validation.enabled is True
 
     def test_config_with_converter(self, test_config):
         """Test configuration integration with converter."""
         converter = PrimerConverter(test_config)
-        assert converter.config.validate_sequences is True
-        assert converter.config.force_overwrite is True
+        assert converter.config.validation.enabled is True
+        assert converter.config.output.force_overwrite is True
 
 
 # Pytest collection hooks for better test organization

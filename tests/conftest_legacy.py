@@ -13,7 +13,7 @@ import pytest
 # Import and register all components
 import preprimer.parsers  # noqa: E402, F401
 import preprimer.writers  # noqa: E402, F401
-from preprimer.core.config import PrePrimerConfig
+from preprimer.core.enhanced_config import EnhancedConfig
 from preprimer.core.registry import parser_registry, writer_registry
 
 
@@ -56,7 +56,7 @@ def olivar_reference_file(test_data_dir):
 @pytest.fixture
 def test_config():
     """Standard test configuration."""
-    return PrePrimerConfig(
+    return EnhancedConfig(
         validate_sequences=True,
         force_overwrite=True,
         min_primer_length=10,

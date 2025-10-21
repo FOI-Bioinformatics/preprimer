@@ -9,6 +9,15 @@
 
 PrePrimer converts between primer design formats used in genomic sequencing workflows. Supports VarVAMP, ARTIC, Olivar, and STS formats with full bidirectional conversion.
 
+## What's New in v0.2.0
+
+- **Primer-to-Reference Alignment**: Integrated BLAST, Exonerate, merPCR, and me-PCR providers
+- **Enhanced STS Format**: Auto-detection of 3/4-column formats, header/headerless files
+- **Comprehensive Validation**: 23 real-data tests with 100% pass rate, 611 total tests
+- **Improved Documentation**: Reorganized structure with technical validation reports
+
+See [CHANGELOG.md](CHANGELOG.md) for complete details.
+
 ## Features
 
 - **🔄 Multi-format Support**: 4 input formats × 5 output formats = 20 conversion pathways
@@ -73,150 +82,58 @@ print(f"Converted {len(amplicons)} amplicons")
 
 ## Supported Formats
 
-### Input Formats (Parsers)
+| Format | Input | Output | Description |
+|--------|-------|--------|-------------|
+| **VarVAMP** | ✅ `.tsv` | ✅ | 13-column TSV with IUPAC degenerate support |
+| **ARTIC** | ✅ `.bed` | ✅ | BED format (v2.0/v3.0) with primal-page compliance |
+| **Olivar** | ✅ `.csv` | ✅ | CSV with amplicon metadata and circular genome support |
+| **STS** | ✅ `.sts.tsv` | ✅ | 3/4-column TSV for in-silico PCR (auto-detection) |
+| **FASTA** | ❌ | ✅ | Multi-FASTA sequences with metadata headers |
 
-| Format | Extension | Description |
-|--------|-----------|-------------|
-| **VarVAMP** | `.tsv` | 13-column TSV with IUPAC degenerate support |
-| **ARTIC** | `.bed` | BED format (v2.0/v3.0) with primal-page compliance |
-| **Olivar** | `.csv` | CSV with amplicon metadata and circular genome support |
-| **STS** | `.sts.tsv` | Simple 3-column TSV for in-silico PCR |
+**Full bidirectional conversion** between all readable formats. See [format details](docs/user-guide/supported-formats.md).
 
-### Output Formats (Writers)
-
-| Format | Description |
-|--------|-------------|
-| **ARTIC** | Official primerscheme structure (primer.bed + reference.fasta + info.json) |
-| **VarVAMP** | 13-column TSV compatible with VarVAMP SADDLE algorithm |
-| **Olivar** | CSV format with amplicon pairs |
-| **FASTA** | Multi-FASTA sequences with metadata headers |
-| **STS** | Simple TSV for e-PCR/me-pcr validation |
-
-**Full bidirectional conversion supported between all formats.**
-
-## Use Cases
-
-### Viral Sequencing Workflows
+## Common Use Cases
 
 ```bash
 # Design with VarVAMP, use with ARTIC pipeline
 preprimer convert --input varvamp_output.tsv --output-formats artic --prefix SARS-CoV-2
-artic minion SARS-CoV-2 nanopore_data/ --scheme-directory output/artic/
-```
 
-### Cross-Platform Compatibility
+# Multi-format output for cross-platform compatibility
+preprimer convert --input primers.bed --output-formats artic fasta sts varvamp --prefix MyVirus
 
-```bash
-# Convert Olivar design to all formats
-preprimer convert --input olivar-design.csv \
-                  --output-dir multi_format/ \
-                  --output-formats artic fasta sts varvamp olivar \
-                  --prefix MultiVirus
-```
-
-### Primer Validation
-
-```bash
-# Convert to STS for in-silico PCR validation
+# STS format for in-silico PCR validation
 preprimer convert --input primers.tsv --output-formats sts --prefix validation
-e-PCR -S reference.fasta -N output/sts/validation.sts.tsv
 ```
 
 ## Documentation
 
 📚 **Complete documentation in [`docs/`](docs/)**
 
-### Getting Started
-- [Installation Guide](docs/user-guide/installation.md)
-- [Quick Start](docs/user-guide/quick-start.md)
-- [Basic Usage](docs/user-guide/basic-usage.md)
-- [CLI Reference](docs/user-guide/cli-reference.md)
+**Getting Started**: [Installation](docs/user-guide/installation.md) · [Quick Start](docs/user-guide/quick-start.md) · [Basic Usage](docs/user-guide/basic-usage.md) · [CLI Reference](docs/user-guide/cli-reference.md)
 
-### User Guides
-- [Supported Formats](docs/user-guide/supported-formats.md) - Detailed format specifications
-- [Configuration Guide](docs/user-guide/configuration.md)
-- [Security Guide](docs/SECURITY.md)
+**User Guides**: [Supported Formats](docs/user-guide/supported-formats.md) · [Configuration](docs/user-guide/configuration.md) · [Python API](docs/api/python-api.md)
 
-### Developer Documentation
-- [Python API Guide](docs/api/python-api.md) - Complete API reference
-- [Architecture Overview](docs/developer/architecture.md)
-- [Adding Parsers](docs/developer/adding-parsers.md)
-- [Contributing Guide](docs/developer/contributing.md)
-- [Release Checklist](docs/developer/release-checklist.md)
+**Developer**: [Architecture](docs/developer/architecture.md) · [Adding Parsers](docs/developer/adding-parsers.md) · [Contributing](docs/developer/contributing.md)
 
-### Examples
-- [Examples Directory](examples/) - 5 runnable code examples
-- [Basic Conversion](examples/basic_conversion.py)
-- [Batch Processing](examples/batch_processing.py)
-- [Topology Handling](examples/topology_handling.py)
-- [Quality Filtering](examples/quality_filtering.py)
-- [Error Handling](examples/error_handling.py)
-
-## Architecture
-
-```
-preprimer/
-├── core/           # Framework (converter, registry, topology, security)
-├── parsers/        # Input format handlers (VarVAMP, ARTIC, Olivar, STS)
-└── writers/        # Output format generators (ARTIC, VarVAMP, Olivar, FASTA, STS)
-```
-
-**Plugin-based architecture** enables easy extension with custom formats.
+**Examples**: See [`examples/`](examples/) for 5 runnable examples (basic conversion, batch processing, topology handling, quality filtering, error handling)
 
 ## Platform Support
 
-| Platform | Status | Notes |
-|----------|--------|-------|
-| **Linux** | ✅ Supported | All distributions with Python 3.11+ |
-| **macOS** | ✅ Supported | macOS 10.14+ with Python 3.11+ |
-| **Windows** | ❌ Not Supported | Use WSL2 - [See details](docs/technical/windows-compatibility.md) |
+**Supported**: Linux and macOS with Python 3.11+
+**Windows**: Not supported (use WSL2) - [See compatibility details](docs/technical/windows-compatibility.md)
 
-**Why not Windows?** Unicode console limitations. [Technical explanation →](docs/technical/windows-compatibility.md)
+## For Developers
 
-**Windows users:** Use WSL2 for full compatibility.
+**Technical Documentation**:
+- [Architecture Overview](docs/developer/architecture.md) - Plugin-based design, registry system
+- [Testing Guide](docs/technical/testing.md) - 611 tests, 96.90% coverage
+- [Validation Reports](docs/technical/validation/) - Real data testing, v0.2.0 validation
+- [CLAUDE.md](CLAUDE.md) - Technical guide for Claude Code and AI-assisted development
 
-## Testing
-
-```bash
-# Run full test suite (611 tests)
-python -m pytest
-
-# Run with coverage
-python -m pytest --cov=preprimer --cov-report=html
-
-# Run specific test categories
-python -m pytest tests/test_security.py -v
-python -m pytest tests/test_topology.py -v
-```
-
-**Test Coverage:** 96.90% with comprehensive validation
-
-## Performance
-
-- **Processing Speed**: Sub-second for 500+ amplicons
-- **Validated Scale**: Up to 2,564 amplicons (Yale TB whole genome)
-- **Memory**: ~50MB baseline
-- **Computational Complexity**: O(n) linear scaling
-
-## Security
-
-PrePrimer implements security best practices:
-- Path traversal prevention
-- Input sanitization with file size limits
-- Secure temporary file handling
-- Security event logging
-
-[Read the security policy →](SECURITY.md)
-
-## Contributing
-
-Contributions welcome! PrePrimer uses:
-- **Testing**: pytest with 96.90% coverage
-- **Code Style**: black, isort, flake8
-- **Type Checking**: mypy
-- **CI/CD**: GitHub Actions
-
-[Read the contributing guide →](docs/developer/contributing.md)
+**Contributing**:
+- [Contributing Guide](docs/developer/contributing.md) - Setup, code style, workflow
+- [Adding Parsers](docs/developer/adding-parsers.md) - Extend with new formats
+- [Security Policy](SECURITY.md) - Security hardening, path validation, best practices
 
 ## Citation
 
@@ -227,7 +144,7 @@ If you use PrePrimer in your research, please cite:
   title = {PrePrimer: Primer Scheme Converter for Tiled Amplicon Sequencing},
   author = {Sjödin, Andreas},
   year = {2024},
-  version = {1.0.0},
+  version = {0.2.0},
   url = {https://github.com/FOI-Bioinformatics/preprimer}
 }
 ```
@@ -240,22 +157,14 @@ See [CITATION.cff](CITATION.cff) for complete metadata.
 
 ## Acknowledgments
 
-- [VarVAMP](https://github.com/jonas-fuchs/varVAMP) - SADDLE algorithm for variant-aware primer design
-- [ARTIC Network](https://github.com/artic-network) - Tiled amplicon sequencing protocols
-- [Olivar](https://github.com/treangenlab/Olivar) - Advanced variant-aware primer design
-- [Primal-page](https://github.com/artic-network/primal-page) - Primer scheme metadata standards
-- [PrimerSchemes Labs](https://labs.primalscheme.com/) - Official primer scheme repository
+Built with [VarVAMP](https://github.com/jonas-fuchs/varVAMP), [ARTIC Network](https://github.com/artic-network), [Olivar](https://github.com/treangenlab/Olivar), [Primal-page](https://github.com/artic-network/primal-page), and [PrimerSchemes Labs](https://labs.primalscheme.com/) specifications.
 
 ## Links
 
-- **Repository**: https://github.com/FOI-Bioinformatics/preprimer
-- **Documentation**: [docs/](docs/)
-- **Issues**: https://github.com/FOI-Bioinformatics/preprimer/issues
-- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
-- **Security**: [SECURITY.md](SECURITY.md)
+[Repository](https://github.com/FOI-Bioinformatics/preprimer) · [Documentation](docs/) · [Issues](https://github.com/FOI-Bioinformatics/preprimer/issues) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md)
 
 ---
 
 **Maintained by:** Swedish Defence Research Agency (FOI) Bioinformatics
 
-**Version:** 1.0.0 | **Python:** 3.11+ | **Platforms:** Linux, macOS
+**Version:** 0.2.0 | **Python:** 3.11+ | **Platforms:** Linux, macOS

@@ -128,7 +128,7 @@ class TestRegistryPerformance:
 
         def mock_get_parser(format_name):
             instance_count["count"] += 1
-            return registry._parsers[format_name]()
+            return registry._components[format_name]()
 
         # Test format detection
         with patch.object(registry, "get_parser", side_effect=mock_get_parser):
@@ -197,7 +197,7 @@ class TestRegistryPerformance:
         registry.register(OlivarParser)
 
         # Registry should only store class references, not instances
-        for format_name, parser_class in registry._parsers.items():
+        for format_name, parser_class in registry._components.items():
             # Should be a class, not an instance
             assert isinstance(parser_class, type)
             assert issubclass(parser_class, PrimerParser)
@@ -206,43 +206,6 @@ class TestRegistryPerformance:
             instance = parser_class()
             assert isinstance(instance, PrimerParser)
             assert instance.format_name() == format_name
-
-    def test_optimized_vs_regular_detect_format(self):
-        """Test that optimized format detection performs better."""
-
-        registry = ParserRegistry()
-        registry.register(VarVAMPParser)
-        registry.register(ARTICParser)
-        registry.register(OlivarParser)
-
-        # Create test file that matches first parser by extension
-        test_file = Path("/tmp/test.tsv")  # VarVAMP extension
-
-        # Mock validation to return True for VarVAMP
-        with patch.object(VarVAMPParser, "validate_file", return_value=True):
-
-            # Test regular detection
-            start_time = time.time()
-            for _ in range(100):
-                result = registry.detect_format(test_file)
-                assert result == "varvamp"
-            regular_time = time.time() - start_time
-
-            # Test optimized detection
-            start_time = time.time()
-            for _ in range(100):
-                result = registry.detect_format_optimized(test_file)
-                assert result == "varvamp"
-            optimized_time = time.time() - start_time
-
-        # Both should find the same result
-        # Performance difference might not be significant in this test since
-        # we're mocking validation, but structure is more organized
-        assert regular_time > 0  # Sanity check
-        assert optimized_time > 0  # Sanity check
-
-        print(f"Regular detection: {regular_time:.3f}s")
-        print(f"Optimized detection: {optimized_time:.3f}s")
 
 
 class TestRegistryMemoryEfficiency:

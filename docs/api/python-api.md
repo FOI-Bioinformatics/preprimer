@@ -1080,6 +1080,306 @@ stats.sort_stats('cumulative')
 stats.print_stats(20)
 ```
 
+## Alignment
+
+PrePrimer provides alignment functionality through integration with external tools (BLAST, Exonerate, me-PCR).
+
+### High-Level Alignment API
+
+Use the `align_primers()` function for primer-to-reference alignment:
+
+```python
+from preprimer.align import align_primers
+from pathlib import Path
+
+# Align primers using BLAST
+output_paths = align_primers(
+    sts_file="primers.sts.tsv",
+    reference_file="genome.fasta",
+    output_dir="alignment_output",
+    output_formats=["primers"],  # BLAST/Exonerate alignments
+    aligner="blast",
+    prefix="MyVirus"
+)
+
+print(f"Alignment results: {output_paths['primers']}")
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sts_file` | Path/str | Input primer file in STS format (3-column TSV) |
+| `reference_file` | Path/str | Reference genome FASTA file |
+| `output_dir` | Path/str | Output directory for alignment results |
+| `output_formats` | List[str] | Output format(s): 'primers' or 'me-pcr' |
+| `aligner` | str | Alignment tool: 'blast' or 'exonerate' (default: 'blast') |
+| `prefix` | str | Prefix for output files (default: 'primers') |
+| `force` | bool | Overwrite existing output (default: False) |
+
+**Returns:** Dictionary mapping output format to output path
+
+### In Silico PCR with me-PCR (Legacy)
+
+```python
+from preprimer.align import align_primers
+
+# Run in silico PCR simulation (legacy tool)
+output_paths = align_primers(
+    sts_file="primers.sts.tsv",
+    reference_file="genome.fasta",
+    output_dir="alignment_output",
+    output_formats=["me-pcr"],
+    prefix="MyVirus"
+)
+
+mepcr_output = output_paths["me-pcr"]
+print(f"me-PCR results: {mepcr_output}")
+```
+
+### In Silico PCR with merPCR (Recommended)
+
+```python
+from preprimer.align import align_primers
+
+# Run in silico PCR with modern merPCR (2.65x faster)
+output_paths = align_primers(
+    sts_file="primers.sts.tsv",
+    reference_file="genome.fasta",
+    output_dir="alignment_output",
+    output_formats=["merpcr"],
+    prefix="MyVirus"
+)
+
+merpcr_output = output_paths["merpcr"]
+print(f"merPCR results: {merpcr_output}")
+```
+
+### Multiple Alignment Formats
+
+```python
+# Get both primer alignments and me-PCR results
+output_paths = align_primers(
+    sts_file="primers.sts.tsv",
+    reference_file="genome.fasta",
+    output_dir="alignment_output",
+    output_formats=["primers", "me-pcr"],
+    aligner="blast",
+    prefix="MyVirus"
+)
+
+print(f"Primer alignments: {output_paths['primers']}")
+print(f"me-PCR results: {output_paths['me-pcr']}")
+```
+
+### Alignment Providers
+
+For low-level control, use alignment providers directly:
+
+#### BLAST Provider
+
+```python
+from preprimer.alignment.blast_provider import BlastProvider
+from pathlib import Path
+
+provider = BlastProvider()
+
+# Check tool availability
+if provider.is_available():
+    # Align primers using BLAST
+    output_dir = provider.align_primers(
+        primer_file="primers.sts.tsv",
+        reference_file="genome.fasta",
+        output_dir="blast_output"
+    )
+
+    print(f"BLAST alignments saved to: {output_dir}")
+else:
+    print("BLAST not installed")
+```
+
+**BLAST Provider Methods:**
+
+- `tool_name()` - Returns "blast"
+- `is_available()` - Check if BLAST is installed
+- `align_primers(primer_file, reference_file, output_dir, **kwargs)` - Run BLAST alignment
+
+#### Exonerate Provider
+
+```python
+from preprimer.alignment.exonerate_provider import ExonerateProvider
+
+provider = ExonerateProvider()
+
+if provider.is_available():
+    output_dir = provider.align_primers(
+        primer_file="primers.sts.tsv",
+        reference_file="genome.fasta",
+        output_dir="exonerate_output"
+    )
+
+    # Parse Exonerate output
+    alignments = provider.parse_exonerate_output(
+        output_dir / "AMPLICON_1_fw.aln"
+    )
+
+    for aln in alignments:
+        print(f"Primer: {aln['primer_name']}")
+        print(f"  Reference: {aln['reference_id']}")
+        print(f"  Position: {aln['start']}-{aln['stop']}")
+        print(f"  Score: {aln['score']}")
+```
+
+**Exonerate Provider Methods:**
+
+- `tool_name()` - Returns "exonerate"
+- `is_available()` - Check if Exonerate is installed
+- `align_primers(primer_file, reference_file, output_dir, **kwargs)` - Run Exonerate alignment
+- `parse_exonerate_output(output_file)` - Parse Exonerate results into structured data
+
+#### me-PCR Provider
+
+```python
+from preprimer.alignment.mepcr_provider import MePCRProvider
+
+provider = MePCRProvider()
+
+if provider.is_available():
+    # Run in silico PCR
+    output_file = provider.run_mepcr(
+        primer_file="primers.sts.tsv",
+        reference="genome.fasta",
+        output_file=Path("output/primers.mepcr.aln"),
+        max_product_size=1000
+    )
+
+    print(f"me-PCR results: {output_file}")
+```
+
+**me-PCR Provider Methods:**
+
+- `tool_name()` - Returns "me-pcr"
+- `is_available()` - Check if me-PCR is installed
+- `run_mepcr(primer_file, reference, output_file, max_product_size)` - Run in silico PCR
+
+#### merPCR Provider (Recommended)
+
+```python
+from preprimer.alignment.merpcr_provider import MerPCRProvider
+
+provider = MerPCRProvider()
+
+if provider.is_available():
+    # Run in silico PCR with modern merPCR (2.65x faster)
+    output_file = provider.run_merpcr(
+        primer_file="primers.sts.tsv",
+        reference="genome.fasta",
+        output_file=Path("output/primers.merpcr.aln"),
+        max_product_size=1000,
+        margin=50,           # Search margin in base pairs
+        mismatches=0,        # Allowed mismatches
+        wordsize=11          # Hash word size
+    )
+
+    print(f"merPCR results: {output_file}")
+```
+
+**merPCR Provider Methods:**
+
+- `tool_name()` - Returns "merpcr"
+- `is_available()` - Check if merPCR is installed
+- `run_merpcr(primer_file, reference, output_file, max_product_size, margin, mismatches, wordsize)` - Run in silico PCR with modern Python implementation
+
+**merPCR Advantages:**
+- 100% compatible with me-PCR (identical results)
+- 2.65x performance improvement through Cython optimization
+- Modern Python API for programmatic use
+- Comprehensive testing (277 tests, 94% coverage)
+- Better error handling and documentation
+- Easy installation: `pip install merpcr`
+
+### Alignment Registry
+
+Access alignment providers through the registry:
+
+```python
+from preprimer.core.registry import alignment_registry
+
+# List all registered providers
+providers = alignment_registry.list_providers()
+print(f"Available providers: {providers}")  # ['blast', 'exonerate', 'me-pcr']
+
+# Get specific provider
+blast_provider = alignment_registry.get_provider("blast")
+
+# List providers that are actually available on the system
+available = alignment_registry.list_available_providers()
+print(f"Installed tools: {available}")
+```
+
+### STS Format for Alignment
+
+The STS (Sequence Tagged Site) format is required for alignment:
+
+```python
+# Convert existing primer scheme to STS format first
+from preprimer.core.converter import PrimerConverter
+
+converter = PrimerConverter()
+sts_output = converter.convert(
+    input_file="primers.bed",
+    output_dir="output",
+    output_formats=["sts"],
+    prefix="MyVirus"
+)
+
+# Then use for alignment
+from preprimer.align import align_primers
+
+output_paths = align_primers(
+    sts_file=sts_output["sts"],
+    reference_file="genome.fasta",
+    output_dir="alignment_output",
+    output_formats=["primers"],
+    aligner="blast"
+)
+```
+
+**STS File Format:**
+```tsv
+AMPLICON_1    ATCGATCGATCGATCG    GCTAGCTAGCTAGCTA
+AMPLICON_2    TAGCTAGCTAGCTAG     CGATCGATCGATCGAT
+```
+
+Three tab-separated columns:
+1. Amplicon name
+2. Forward primer sequence (5' to 3')
+3. Reverse primer sequence (5' to 3')
+
+### Error Handling
+
+```python
+from preprimer.align import align_primers
+from preprimer.core.exceptions import PrePrimerError
+
+try:
+    output_paths = align_primers(
+        sts_file="primers.sts.tsv",
+        reference_file="genome.fasta",
+        output_dir="alignment_output",
+        output_formats=["primers"],
+        aligner="blast"
+    )
+except FileNotFoundError as e:
+    print(f"File not found: {e}")
+except RuntimeError as e:
+    print(f"Tool not available: {e}")
+except ValueError as e:
+    print(f"Invalid parameter: {e}")
+except PrePrimerError as e:
+    print(f"Alignment error: {e}")
+```
+
 ## Complete Examples
 
 See the `examples/` directory for complete, runnable examples:
@@ -1099,9 +1399,9 @@ See the `examples/` directory for complete, runnable examples:
 | Module | Description |
 |--------|-------------|
 | `preprimer.core.converter` | High-level conversion interface |
-| `preprimer.core.interfaces` | Data models (PrimerData, AmpliconData) |
-| `preprimer.core.config` | Configuration management |
-| `preprimer.core.registry` | Parser/Writer registration |
+| `preprimer.core.interfaces` | Data models (PrimerData, AmpliconData, AlignmentProvider) |
+| `preprimer.core.enhanced_config` | Configuration management |
+| `preprimer.core.registry` | Parser/Writer/Alignment registration |
 | `preprimer.core.topology` | Genome topology detection |
 | `preprimer.core.exceptions` | Exception hierarchy |
 
@@ -1124,6 +1424,16 @@ See the `examples/` directory for complete, runnable examples:
 | `preprimer.writers.fasta_writer` | FASTA | Multi-FASTA sequences |
 | `preprimer.writers.sts_writer` | STS | Simple TSV output |
 
+### Alignment Modules
+
+| Module | Tool | Description |
+|--------|------|-------------|
+| `preprimer.align` | High-level API | align_primers() function for primer alignment |
+| `preprimer.alignment.blast_provider` | BLAST | NCBI BLAST alignment provider |
+| `preprimer.alignment.exonerate_provider` | Exonerate | Exonerate alignment provider |
+| `preprimer.alignment.mepcr_provider` | me-PCR | In silico PCR simulation (legacy) |
+| `preprimer.alignment.merpcr_provider` | merPCR | Modern in silico PCR (recommended, 2.65x faster) |
+
 ## Support and Contributing
 
 - **Documentation**: https://github.com/FOI-Bioinformatics/preprimer/tree/main/docs
@@ -1132,6 +1442,6 @@ See the `examples/` directory for complete, runnable examples:
 
 ---
 
-**Version**: 1.0.0
-**Last Updated**: 2024-10-14
+**Version**: 0.2.0
+**Last Updated**: 2025-10-21
 **License**: MIT

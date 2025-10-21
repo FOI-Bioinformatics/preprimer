@@ -2,16 +2,14 @@
 Core preprimer modules with abstract base classes and interfaces.
 """
 
-from .config import DefaultConfig, PrePrimerConfig
+from .enhanced_config import EnhancedConfig
 from .exceptions import (
-    AlignmentError,
     OutputError,
     ParserError,
     PrePrimerError,
     ValidationError,
 )
 from .interfaces import (
-    AlignmentProvider,
     AmpliconData,
     OutputWriter,
     PrimerData,
@@ -23,12 +21,9 @@ __all__ = [
     "PrimerData",
     "AmpliconData",
     "OutputWriter",
-    "AlignmentProvider",
     "PrePrimerError",
     "ParserError",
     "ValidationError",
-    "AlignmentError",
     "OutputError",
-    "PrePrimerConfig",
-    "DefaultConfig",
+    "EnhancedConfig",
 ]

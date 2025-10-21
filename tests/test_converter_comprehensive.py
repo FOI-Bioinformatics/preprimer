@@ -11,8 +11,8 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from preprimer.core.config import PrePrimerConfig
 from preprimer.core.converter import PrimerConverter
+from preprimer.core.enhanced_config import EnhancedConfig
 from preprimer.core.exceptions import (
     InvalidFormatError,
     OutputError,
@@ -27,7 +27,7 @@ class TestPrimerConverterErrorHandling:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = PrePrimerConfig()
+        self.config = EnhancedConfig()
         self.converter = PrimerConverter(self.config)
 
         # Create test data with both forward and reverse primers
@@ -235,7 +235,7 @@ class TestPrimerConverterErrorHandling:
                 mock_writer_reg.get_writer.return_value = mock_writer
 
                 # Setup config to not force overwrite
-                self.config.force_overwrite = False
+                self.config.output.force_overwrite = False
 
                 # Mock writer to use the existing output path structure
                 mock_writer.file_extension.return_value = ".bed"
@@ -258,7 +258,7 @@ class TestPrimerConverterErrorHandling:
     def test_convert_file_exists_force_override_config(
         self, mock_writer_reg, mock_registry
     ):
-        """Test that force parameter overrides config.force_overwrite=False."""
+        """Test that force parameter overrides config.output.force_overwrite=False."""
         with tempfile.NamedTemporaryFile(suffix=".bed") as input_file:
             with tempfile.TemporaryDirectory() as output_dir:
                 # Create existing output file with ARTIC format structure
@@ -269,7 +269,7 @@ class TestPrimerConverterErrorHandling:
                 existing_output.write_text("existing content")
 
                 # Set config to not force overwrite
-                self.config.force_overwrite = False
+                self.config.output.force_overwrite = False
 
                 # Setup mocks
                 mock_parser = Mock()
@@ -426,7 +426,7 @@ class TestPrimerConverterErrorHandling:
     def test_validate_amplicons_invalid_sequence_validation_disabled(self):
         """Test that invalid sequences are ignored when validation is disabled."""
         # Disable sequence validation in config
-        self.config.validate_sequences = False
+        self.config.validation.enabled = False
 
         # Create primer with invalid sequence
         invalid_primer = PrimerData(
@@ -507,7 +507,7 @@ class TestPrimerConverterEdgeCases:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = PrePrimerConfig()
+        self.config = EnhancedConfig()
         self.converter = PrimerConverter(self.config)
 
         # Create valid amplicon with both forward and reverse primers

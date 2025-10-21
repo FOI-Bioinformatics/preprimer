@@ -9,7 +9,6 @@ from unittest.mock import Mock, patch
 import pytest
 
 from preprimer.core.exceptions import (
-    AlignmentError,
     ConfigError,
     CorruptedDataError,
     ErrorContext,
@@ -188,13 +187,7 @@ class TestSpecificErrorTypes:
         assert error.context["actual_count"] == 3
         assert "Not enough primers" in error.user_message
 
-    def test_alignment_error_with_tool(self):
-        """Test AlignmentError with tool context."""
-        error = AlignmentError("BLAST failed", tool="blast")
-
-        assert error.context["alignment_tool"] == "blast"
-        assert "Alignment failed with blast" in error.user_message
-        assert any("BLAST" in suggestion for suggestion in error.suggestions)
+    # test_alignment_error_with_tool removed - AlignmentError removed in v0.2.0 (no alignment providers implemented)
 
     def test_output_error_with_path(self):
         """Test OutputError with output path."""
@@ -300,8 +293,8 @@ class TestErrorHandlingIntegration:
 
     def test_parser_error_chain(self):
         """Test error chaining from parser to converter."""
-        from preprimer.core.config import PrePrimerConfig
         from preprimer.core.converter import PrimerConverter
+        from preprimer.core.enhanced_config import EnhancedConfig
 
         converter = PrimerConverter()
 

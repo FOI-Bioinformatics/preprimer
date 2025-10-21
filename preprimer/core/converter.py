@@ -6,7 +6,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from .config import PrePrimerConfig
+from .enhanced_config import EnhancedConfig
 from .exceptions import (
     ErrorContext,
     FileNotFoundError,
@@ -25,8 +25,8 @@ logger = logging.getLogger(__name__)
 class PrimerConverter:
     """Main converter class for primer format conversion."""
 
-    def __init__(self, config: Optional[PrePrimerConfig] = None):
-        self.config = config or PrePrimerConfig()
+    def __init__(self, config: Optional[EnhancedConfig] = None):
+        self.config = config or EnhancedConfig()
 
     def convert(
         self,
@@ -118,7 +118,7 @@ class PrimerConverter:
 
         # Use output formats from config if not specified
         if output_formats is None:
-            output_formats = self.config.output_formats
+            output_formats = self.config.output.formats
 
         # Convert to output formats
         output_files = {}
@@ -168,7 +168,7 @@ class PrimerConverter:
             output_path = output_dir / output_format / f"{prefix}{extension}"
 
         # Check if file exists and force flag
-        if output_path.exists() and not self.config.force_overwrite:
+        if output_path.exists() and not self.config.output.force_overwrite:
             if not kwargs.get("force", False):
                 raise OutputError(
                     f"Output file exists: {output_path}. Use --force to overwrite."
@@ -207,19 +207,19 @@ class PrimerConverter:
                 issues.append(f"Amplicon {amplicon.amplicon_id} has no reverse primers")
 
             # Validate primer sequences if enabled
-            if self.config.validate_sequences:
+            if self.config.validation.enabled:
                 for primer in amplicon.primers:
                     if not primer.sequence:
                         issues.append(f"Primer {primer.name} has empty sequence")
                         continue
 
                     # Check sequence length
-                    if len(primer.sequence) < self.config.min_primer_length:
+                    if len(primer.sequence) < self.config.validation.min_length:
                         issues.append(
                             f"Primer {primer.name} is too short "
                             f"({len(primer.sequence)} bp)"
                         )
-                    if len(primer.sequence) > self.config.max_primer_length:
+                    if len(primer.sequence) > self.config.validation.max_length:
                         issues.append(
                             f"Primer {primer.name} is too long "
                             f"({len(primer.sequence)} bp)"
