@@ -27,14 +27,11 @@ from preprimer.core.enhanced_config import EnhancedConfig
 from preprimer.core.registry import alignment_registry, parser_registry
 
 # Import validation framework
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
-from validation.report_generator import ReportGenerator
-from validation.validator import ValidationResult, validate_conversion
+from .report_generator import ReportGenerator
+from .validator import ValidationResult, validate_conversion
 
 # Test data paths
-TEST_DATA_DIR = Path(__file__).parent / "test_data" / "datasets"
+TEST_DATA_DIR = Path(__file__).parent.parent / "test_data" / "datasets"
 SMALL_DATASET = TEST_DATA_DIR / "small"
 MEDIUM_DATASET = TEST_DATA_DIR / "medium"
 MITOCHONDRIAL_DATASET = TEST_DATA_DIR / "mitochondrial"

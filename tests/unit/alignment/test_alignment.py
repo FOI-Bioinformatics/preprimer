@@ -21,7 +21,7 @@ from preprimer.core.registry import alignment_registry
 @pytest.fixture
 def test_data_dir():
     """Get path to test data directory."""
-    return Path(__file__).parent / "test_data" / "datasets" / "small"
+    return Path(__file__).parent.parent.parent / "test_data" / "datasets" / "small"
 
 
 @pytest.fixture
