@@ -86,6 +86,7 @@ markers = [
     "property: Property-based tests using Hypothesis",
     "contract: API contract tests (interface validation)",
     "real_data: Real-world data validation tests",
+    "standard: Standard validation tests",
 
     # Speed markers (for CI optimization)
     "quick: Fast tests suitable for rapid feedback (<100ms)",
