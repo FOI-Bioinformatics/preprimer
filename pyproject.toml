@@ -36,6 +36,8 @@ dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "pytest-benchmark>=4.0",
+    "pytest-timeout>=2.1",
+    "pytest-rerunfailures>=12.0",
     "hypothesis>=6.0",
     "mutmut>=3.0",
     "black>=23.0",
@@ -71,22 +73,43 @@ addopts = [
     "--strict-markers",
     "--strict-config",
     "--tb=short",
+    "--timeout=300",  # Default 5-minute timeout for all tests
 ]
 markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests",
-    "property: marks property-based tests",
-    "benchmark: marks benchmark tests",
-    "unit: marks unit tests",
-    "real_data: comprehensive real data validation tests",
-    "quick: fast tests suitable for CI",
-    "standard: standard validation tests",
-    "stress: heavy/slow stress tests",
+    # Test layers (mutually exclusive, organized by speed & scope)
+    "unit: Fast, isolated unit tests (<50ms, no I/O)",
+    "integration: Component interaction tests (<500ms, file I/O OK)",
+    "e2e: End-to-end system tests (>500ms, full workflows)",
+    "performance: Performance & benchmark tests",
+
+    # Test categories (can combine with layers)
+    "property: Property-based tests using Hypothesis",
+    "contract: API contract tests (interface validation)",
+    "real_data: Real-world data validation tests",
+
+    # Speed markers (for CI optimization)
+    "quick: Fast tests suitable for rapid feedback (<100ms)",
+    "slow: Slow tests that can be deferred (>5s)",
+    "stress: Heavy stress tests (>30s, large datasets)",
+
+    # Domain markers (for selective testing)
+    "parser: Parser-specific tests",
+    "writer: Writer-specific tests",
+    "alignment: Alignment provider tests",
+    "config: Configuration tests",
+    "security: Security validation tests",
+    "topology: Topology & circular genome tests",
+
+    # Special markers
+    "flaky: Tests known to be flaky (will be retried)",
+    "benchmark: Benchmark tests (requires --benchmark-only)",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
 ]
+timeout = 300  # Global timeout of 5 minutes
+timeout_method = "thread"  # Use thread-based timeout
 
 # Coverage configuration
 [tool.coverage.run]

@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-10-22
+
+### Added
+- **BaseWriterTest Pattern**: Comprehensive test infrastructure for all output writers
+  - Abstract base class providing 12 inherited tests for automatic coverage
+  - Contract enforcement tests for `OutputWriter` interface compliance
+  - Basic write functionality tests (single/multiple/empty amplicons)
+  - Output directory creation and validation tests
+  - Performance benchmarking for regression detection
+  - Helper methods for test data creation
+- **Comprehensive Writer Test Coverage**: All 5 output writers now fully tested
+  - **VarVAMP Writer**: 27 tests (100% pass rate) - 69.2µs mean write time
+  - **Olivar Writer**: 27 tests (100% pass rate) - 55.5µs mean write time
+  - **STS Writer**: 20 tests (100% pass rate) - 62.9µs mean write time
+  - **ARTIC Writer**: 19 tests (100% pass rate) - 591µs mean write time
+  - **FASTA Writer**: 20 tests (100% pass rate) - 51.3µs mean write time
+  - Total: 113 writer tests with 110 passing (97.3%), 3 intentionally skipped
+- **Performance Baselines**: Established benchmarks for all 5 writers
+  - FASTA: 51.3µs (19.5K ops/sec) - fastest simple writer
+  - Olivar: 55.5µs (18.0K ops/sec)
+  - STS: 62.9µs (15.9K ops/sec)
+  - VarVAMP: 69.2µs (14.4K ops/sec)
+  - ARTIC: 591µs (1.7K ops/sec) - slower due to multi-file complexity
+- **Test Organization**: Structured writer tests in `tests/unit/writers/`
+  - Systematic file organization following best practices
+  - Clear separation of base tests, writer-specific tests, and integration tests
+  - Format-specific validation logic for each writer
+
+### Changed
+- **Writer Testing Architecture**: Migrated from standalone tests to pattern-based inheritance
+  - Eliminated ~67% code duplication across writer tests
+  - Guaranteed contract compliance for all writers
+  - Consistent test structure and coverage
+- **Code Quality**: 2,941 lines of new test infrastructure (347 base + 2,594 specific)
+  - 65% code reduction for new writer tests
+  - Automatic contract enforcement prevents interface violations
+  - Performance regression detection for all writers
+
+### Fixed
+- **ARTIC Writer Tests**: Resolved all test failures
+  - Fixed PrimerData reference_id field requirements
+  - Corrected metadata key casing (schemeversion vs schemeVersion)
+  - Updated version format validation (v5.3.2 semantic versioning)
+  - Fixed BED file format parsing and validation
+
+### Documentation
+- **WRITER_MIGRATION_FINAL.md**: Complete migration results and analysis
+  - Comprehensive metrics and benchmarks
+  - Pattern benefits and usage examples
+  - Time investment vs savings analysis
+  - Comparison with parser pattern implementation
+
 ## [0.2.0] - 2025-10-21
 
 **BREAKING CHANGES**: This release removes legacy configuration system. See upgrade guide below.
