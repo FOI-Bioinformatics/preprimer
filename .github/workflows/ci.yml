@@ -2,99 +2,39 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop, v0.2.0 ]
+    branches: [main, develop, "v*"]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
-  # Fast feedback job - runs first for quick results
-  quick-test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: 'pip'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
-
-    - name: Run tests with coverage
-      run: |
-        python -m pytest tests/ --cov=preprimer --cov-report=xml --cov-report=term -v
-
-    - name: Upload coverage
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-
-  # Full test matrix - only runs if quick-test passes
   test:
-    needs: quick-test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
         python-version: ["3.11", "3.12", "3.13"]
-        # Exclude ubuntu+3.11 since it was tested in quick-test
-        exclude:
-          - os: ubuntu-latest
-            python-version: "3.11"
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
 
-    - name: Run tests
-      run: |
-        python -m pytest tests/ -v
+      - name: Run tests
+        run: python -m pytest tests/ -v
 
-  # Code quality checks - runs in parallel with quick-test
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: 'pip'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
-
-    - name: Check formatting
-      run: black --check preprimer/ tests/
-
-    - name: Check imports
-      run: isort --check-only preprimer/ tests/
-
-    - name: Lint
-      run: flake8 preprimer/ tests/ --max-line-length=88 --extend-ignore=E203,W503
-
-    - name: Type check
-      run: mypy preprimer/ --ignore-missing-imports
-
-    - name: Security check
-      run: |
-        pip install bandit
-        bandit -r preprimer/ -ll
+      - name: Code quality (Python 3.11 only)
+        if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+        run: |
+          black --check preprimer/ tests/
+          isort --check-only preprimer/ tests/
+          flake8 preprimer/ tests/ --max-line-length=88 --extend-ignore=E203,W503

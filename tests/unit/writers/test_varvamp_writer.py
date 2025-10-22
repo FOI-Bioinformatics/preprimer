@@ -1,30 +1,45 @@
 """
-Comprehensive tests for the VarVAMPWriter class.
+VarVAMP writer tests using BaseWriterTest framework.
 
-Tests all functionality of the VarVAMP TSV format writer including
-basic writing, validation, GC content calculation, and edge cases.
+VarVAMP format is a 13-column TSV format with GC content and Tm calculations.
+Supports degenerate primers and optional pool assignments.
 """
 
 import csv
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock
 
 import pytest
 
 from preprimer.core.interfaces import AmpliconData, PrimerData
 from preprimer.writers.varvamp_writer import VarVAMPWriter
 
+from .test_base_writer import BaseWriterTest
 
-class TestVarVAMPWriter:
-    """Test the VarVAMPWriter class."""
 
-    def setup_method(self):
-        """Set up test fixtures."""
-        self.writer = VarVAMPWriter()
+class TestVarVAMPWriter(BaseWriterTest):
+    """VarVAMP writer tests - inherits contract tests from BaseWriterTest."""
 
+    # =========================================================================
+    # Configuration - Required by BaseWriterTest
+    # =========================================================================
+
+    @property
+    def writer_class(self):
+        return VarVAMPWriter
+
+    @property
+    def expected_format_name(self):
+        return "varvamp"
+
+    @property
+    def expected_file_extension(self):
+        return ".tsv"
+
+    def get_test_amplicons(self):
+        """Return test amplicons for VarVAMP tests."""
         # Create realistic test data
-        self.forward_primer = PrimerData(
+        forward_primer = PrimerData(
             name="test_1_LEFT",
             sequence="ATCGATCGATCGATCG",  # 50% GC content
             start=100,
@@ -38,7 +53,7 @@ class TestVarVAMPWriter:
             score=95.2,
         )
 
-        self.reverse_primer = PrimerData(
+        reverse_primer = PrimerData(
             name="test_1_RIGHT",
             sequence="GGCCGGCCGGCCGGCC",  # 100% GC content
             start=200,
@@ -52,87 +67,115 @@ class TestVarVAMPWriter:
             score=88.7,
         )
 
-        self.amplicon = AmpliconData(
+        amplicon = AmpliconData(
             amplicon_id="amplicon_1",
-            primers=[self.forward_primer, self.reverse_primer],
+            primers=[forward_primer, reverse_primer],
             length=116,
             reference_id="test_ref",
         )
 
-        # Create amplicon with missing length for default testing
-        self.amplicon_no_length = AmpliconData(
+        # Create second amplicon for multi-amplicon tests
+        forward_primer2 = PrimerData(
+            name="test_2_LEFT",
+            sequence="GGCCGGCCGGCCGGCC",
+            start=300,
+            stop=316,
+            strand="+",
+            direction="forward",
+            pool=2,
             amplicon_id="amplicon_2",
-            primers=[self.forward_primer, self.reverse_primer],
-            length=None,
+        )
+
+        reverse_primer2 = PrimerData(
+            name="test_2_RIGHT",
+            sequence="TTAATTAATTAATTAA",
+            start=400,
+            stop=416,
+            strand="-",
+            direction="reverse",
+            pool=2,
+            amplicon_id="amplicon_2",
+        )
+
+        amplicon2 = AmpliconData(
+            amplicon_id="amplicon_2",
+            primers=[forward_primer2, reverse_primer2],
+            length=116,
             reference_id="test_ref",
         )
 
-    def test_format_name(self):
-        """Test format_name class method."""
-        assert VarVAMPWriter.format_name() == "varvamp"
+        return [amplicon, amplicon2]
 
-    def test_file_extension(self):
-        """Test file_extension class method."""
-        assert VarVAMPWriter.file_extension() == ".tsv"
+    def verify_output_content(self, output_path: Path, amplicons: list):
+        """Verify VarVAMP TSV output content."""
+        with open(output_path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f, delimiter="\t")
+            rows = list(reader)
 
-    def test_description_property(self):
-        """Test description property."""
-        description = self.writer.description
-        assert isinstance(description, str)
-        assert "VarVAMP" in description
-        assert "tab-separated" in description
+        # Count expected primers
+        expected_primers = sum(len(amp.primers) for amp in amplicons)
+        assert len(rows) == expected_primers, f"Expected {expected_primers} primers, got {len(rows)}"
 
-    def test_write_single_amplicon(self):
-        """Test writing a single amplicon with multiple primers."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False) as f:
-            output_path = Path(f.name)
+        # Check required columns exist
+        required_columns = [
+            "amplicon_name",
+            "amplicon_length",
+            "primer_name",
+            "pool",
+            "start",
+            "stop",
+            "seq",
+            "size",
+            "gc_best",
+            "temp_best",
+            "mean_gc",
+            "mean_temp",
+            "score",
+        ]
 
-        try:
-            result_path = self.writer.write([self.amplicon], output_path)
+        for row in rows:
+            for col in required_columns:
+                assert col in row, f"Missing required column: {col}"
+                assert row[col], f"Column {col} should not be empty"
 
-            assert result_path == output_path
-            assert output_path.exists()
+    # =========================================================================
+    # VarVAMP-Specific Tests
+    # =========================================================================
 
-            # Verify TSV content
-            with open(output_path, "r", encoding="utf-8") as f:
-                reader = csv.DictReader(f, delimiter="\t")
-                rows = list(reader)
-
-                assert len(rows) == 2  # Two primers
-
-                # Check forward primer row
-                forward_row = rows[0]
-                assert forward_row["amplicon_name"] == "amplicon_1"
-                assert forward_row["amplicon_length"] == "116"
-                assert forward_row["primer_name"] == "test_1_LEFT"
-                assert forward_row["pool"] == "1"
-                assert forward_row["start"] == "100"
-                assert forward_row["stop"] == "116"
-                assert forward_row["seq"] == "ATCGATCGATCGATCG"
-                assert forward_row["size"] == "16"
-                assert float(forward_row["gc_best"]) == 50.0  # 50% GC
-                assert float(forward_row["temp_best"]) == 58.5
-                assert float(forward_row["mean_gc"]) == 50.0
-                assert float(forward_row["mean_temp"]) == 58.5
-                assert float(forward_row["score"]) == 95.2
-
-                # Check reverse primer row
-                reverse_row = rows[1]
-                assert reverse_row["amplicon_name"] == "amplicon_1"
-                assert reverse_row["seq"] == "GGCCGGCCGGCCGGCC"
-                assert float(reverse_row["gc_best"]) == 100.0  # 100% GC
-
-        finally:
-            if output_path.exists():
-                output_path.unlink()
-
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_write_amplicon_with_no_length(self):
-        """Test writing amplicon where length is None (uses default)."""
+        """VarVAMP writer must handle amplicons with None length (uses default 400)."""
+        writer = VarVAMPWriter()
+
+        # Create amplicon with no length
+        forward_primer = self.create_test_primer(
+            name="test_primer",
+            sequence="ATCGATCGATCGATCG",
+            start=100,
+            stop=116,
+        )
+
+        reverse_primer = self.create_test_primer(
+            name="test_primer_R",
+            sequence="GGCCGGCCGGCCGGCC",
+            start=200,
+            stop=216,
+            direction="reverse",
+        )
+
+        amplicon_no_length = AmpliconData(
+            amplicon_id="test_amplicon",
+            primers=[forward_primer, reverse_primer],
+            length=None,  # No length
+            reference_id="test_ref",
+        )
+
         with tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False) as f:
             output_path = Path(f.name)
 
         try:
-            result_path = self.writer.write([self.amplicon_no_length], output_path)
+            writer.write([amplicon_no_length], output_path)
 
             # Verify default amplicon length is used
             with open(output_path, "r", encoding="utf-8") as f:
@@ -140,16 +183,20 @@ class TestVarVAMPWriter:
                 rows = list(reader)
 
                 assert len(rows) == 2
-                assert rows[0]["amplicon_length"] == "400"  # default
-                assert rows[1]["amplicon_length"] == "400"  # default
+                assert rows[0]["amplicon_length"] == "400", "Should use default length 400"
+                assert rows[1]["amplicon_length"] == "400", "Should use default length 400"
 
         finally:
             if output_path.exists():
                 output_path.unlink()
 
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_write_primers_with_no_pool(self):
-        """Test writing primers where pool is None (uses default)."""
-        # Create primers with None pools
+        """VarVAMP writer must handle primers with None pool (uses default 1)."""
+        writer = VarVAMPWriter()
+
+        # Create primer with None pool
         primer_no_pool = PrimerData(
             name="test_no_pool",
             sequence="ATCGATCGATCGATCG",
@@ -157,11 +204,11 @@ class TestVarVAMPWriter:
             stop=116,
             strand="+",
             direction="forward",
-            pool=None,
+            pool=None,  # No pool
             amplicon_id="test_amplicon",
         )
 
-        amplicon_no_pool = AmpliconData(
+        amplicon = AmpliconData(
             amplicon_id="test_amplicon",
             primers=[primer_no_pool],
             length=116,
@@ -172,7 +219,7 @@ class TestVarVAMPWriter:
             output_path = Path(f.name)
 
         try:
-            result_path = self.writer.write([amplicon_no_pool], output_path)
+            writer.write([amplicon], output_path)
 
             # Verify default pool is used
             with open(output_path, "r", encoding="utf-8") as f:
@@ -180,14 +227,18 @@ class TestVarVAMPWriter:
                 rows = list(reader)
 
                 assert len(rows) == 1
-                assert rows[0]["pool"] == "1"  # default pool
+                assert rows[0]["pool"] == "1", "Should use default pool 1"
 
         finally:
             if output_path.exists():
                 output_path.unlink()
 
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_write_primers_with_missing_optional_attributes(self):
-        """Test writing primers that lack tm and score attributes."""
+        """VarVAMP writer must handle primers lacking tm and score (uses defaults)."""
+        writer = VarVAMPWriter()
+
         # Create primer without optional attributes
         basic_primer = PrimerData(
             name="basic_primer",
@@ -198,9 +249,10 @@ class TestVarVAMPWriter:
             direction="forward",
             pool=1,
             amplicon_id="test_amplicon",
+            # No tm, no score
         )
 
-        amplicon_basic = AmpliconData(
+        amplicon = AmpliconData(
             amplicon_id="test_amplicon",
             primers=[basic_primer],
             length=116,
@@ -211,138 +263,129 @@ class TestVarVAMPWriter:
             output_path = Path(f.name)
 
         try:
-            result_path = self.writer.write([amplicon_basic], output_path)
+            writer.write([amplicon], output_path)
 
-            # Verify default values are used for missing attributes
+            # Verify default values are used
             with open(output_path, "r", encoding="utf-8") as f:
                 reader = csv.DictReader(f, delimiter="\t")
                 rows = list(reader)
 
                 assert len(rows) == 1
                 row = rows[0]
-                assert float(row["temp_best"]) == 60.0  # default tm
+                assert float(row["temp_best"]) == 60.0, "Should use default tm 60.0"
                 assert float(row["mean_temp"]) == 60.0
-                assert float(row["score"]) == 90.0  # default score
+                assert float(row["score"]) == 90.0, "Should use default score 90.0"
 
         finally:
             if output_path.exists():
                 output_path.unlink()
 
-    def test_write_creates_output_directory(self):
-        """Test that write creates output directory if it doesn't exist."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            output_path = Path(temp_dir) / "subdir" / "output.tsv"
-
-            # Directory shouldn't exist initially
-            assert not output_path.parent.exists()
-
-            result_path = self.writer.write([self.amplicon], output_path)
-
-            # Directory should be created
-            assert output_path.parent.exists()
-            assert output_path.exists()
-
-    def test_write_empty_amplicons_list(self):
-        """Test writing empty amplicons list."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False) as f:
-            output_path = Path(f.name)
-
-        try:
-            result_path = self.writer.write([], output_path)
-
-            assert result_path == output_path
-            assert output_path.exists()
-
-            # File should exist but be empty (no header or rows)
-            with open(output_path, "r", encoding="utf-8") as f:
-                content = f.read()
-                assert content == ""
-
-        finally:
-            if output_path.exists():
-                output_path.unlink()
-
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_calculate_gc_content_normal_sequence(self):
-        """Test GC content calculation with normal sequences."""
+        """VarVAMP GC content calculation must work for normal sequences."""
+        writer = VarVAMPWriter()
+
         # Test 50% GC content
-        gc_content = self.writer._calculate_gc_content("ATCGATCGATCGATCG")
+        gc_content = writer._calculate_gc_content("ATCGATCGATCGATCG")
         assert gc_content == 0.5
 
         # Test 100% GC content
-        gc_content = self.writer._calculate_gc_content("GGCCGGCCGGCCGGCC")
+        gc_content = writer._calculate_gc_content("GGCCGGCCGGCCGGCC")
         assert gc_content == 1.0
 
         # Test 0% GC content
-        gc_content = self.writer._calculate_gc_content("ATATATATATATATAT")
+        gc_content = writer._calculate_gc_content("ATATATATATATATAT")
         assert gc_content == 0.0
 
         # Test mixed case
-        gc_content = self.writer._calculate_gc_content("atcgATCG")
+        gc_content = writer._calculate_gc_content("atcgATCG")
         assert gc_content == 0.5
 
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_calculate_gc_content_empty_sequence(self):
-        """Test GC content calculation with empty sequence."""
-        gc_content = self.writer._calculate_gc_content("")
+        """VarVAMP GC content calculation must handle empty sequences."""
+        writer = VarVAMPWriter()
+        gc_content = writer._calculate_gc_content("")
         assert gc_content == 0.0
 
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_calculate_gc_content_precision(self):
-        """Test GC content calculation precision."""
+        """VarVAMP GC content must be rounded to 3 decimal places."""
+        writer = VarVAMPWriter()
+
         # Test rounding to 3 decimal places
-        gc_content = self.writer._calculate_gc_content("ATCGATCG")  # 4/8 = 0.5
+        gc_content = writer._calculate_gc_content("ATCGATCG")  # 4/8 = 0.5
         assert gc_content == 0.5
 
-        # Test with longer sequence that would need rounding
-        gc_content = self.writer._calculate_gc_content(
-            "ATCGATCGATC"
-        )  # 5/11 = 0.45454...
-        assert gc_content == 0.455  # rounded to 3 decimal places
+        # Test with longer sequence that needs rounding
+        gc_content = writer._calculate_gc_content("ATCGATCGATC")  # 5/11 = 0.45454...
+        assert gc_content == 0.455, "Should round to 3 decimal places"
 
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_validate_output_valid_file(self):
-        """Test validate_output with valid VarVAMP file."""
+        """validate_output() must return True for valid VarVAMP file."""
+        writer = VarVAMPWriter()
+        amplicons = self.get_test_amplicons()[:1]
+
         with tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False) as f:
             output_path = Path(f.name)
 
         try:
-            # First create a valid file
-            self.writer.write([self.amplicon], output_path)
+            # Create valid file
+            writer.write(amplicons, output_path)
 
-            # Then validate it
-            is_valid = self.writer.validate_output(output_path)
+            # Validate it
+            is_valid = writer.validate_output(output_path)
             assert is_valid is True
 
         finally:
             if output_path.exists():
                 output_path.unlink()
 
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_validate_output_missing_file(self):
-        """Test validate_output with non-existent file."""
+        """validate_output() must return False for non-existent file."""
+        writer = VarVAMPWriter()
         non_existent_path = Path("/non/existent/file.tsv")
-        is_valid = self.writer.validate_output(non_existent_path)
+        is_valid = writer.validate_output(non_existent_path)
         assert is_valid is False
 
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_validate_output_missing_required_columns(self):
-        """Test validate_output with missing required columns."""
+        """validate_output() must return False for files missing required columns."""
+        writer = VarVAMPWriter()
+
         with tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False) as f:
             output_path = Path(f.name)
 
         try:
             # Create TSV with missing required columns
             with open(output_path, "w", newline="", encoding="utf-8") as tsvfile:
-                writer = csv.DictWriter(
+                csv_writer = csv.DictWriter(
                     tsvfile, fieldnames=["start", "stop"], delimiter="\t"
                 )
-                writer.writeheader()
-                writer.writerow({"start": "100", "stop": "200"})
+                csv_writer.writeheader()
+                csv_writer.writerow({"start": "100", "stop": "200"})
 
-            is_valid = self.writer.validate_output(output_path)
+            is_valid = writer.validate_output(output_path)
             assert is_valid is False
 
         finally:
             if output_path.exists():
                 output_path.unlink()
 
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_validate_output_empty_file(self):
-        """Test validate_output with empty file."""
+        """validate_output() must return False for empty files."""
+        writer = VarVAMPWriter()
+
         with tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False) as f:
             output_path = Path(f.name)
 
@@ -351,15 +394,19 @@ class TestVarVAMPWriter:
             with open(output_path, "w", encoding="utf-8") as f:
                 pass  # Empty file
 
-            is_valid = self.writer.validate_output(output_path)
+            is_valid = writer.validate_output(output_path)
             assert is_valid is False
 
         finally:
             if output_path.exists():
                 output_path.unlink()
 
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_validate_output_no_data_rows(self):
-        """Test validate_output with file that has headers but no data rows."""
+        """validate_output() must return False for files with headers but no data."""
+        writer = VarVAMPWriter()
+
         with tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False) as f:
             output_path = Path(f.name)
 
@@ -381,19 +428,23 @@ class TestVarVAMPWriter:
                 "score",
             ]
             with open(output_path, "w", newline="", encoding="utf-8") as tsvfile:
-                writer = csv.DictWriter(tsvfile, fieldnames=fieldnames, delimiter="\t")
-                writer.writeheader()
+                csv_writer = csv.DictWriter(tsvfile, fieldnames=fieldnames, delimiter="\t")
+                csv_writer.writeheader()
                 # No data rows
 
-            is_valid = self.writer.validate_output(output_path)
+            is_valid = writer.validate_output(output_path)
             assert is_valid is False
 
         finally:
             if output_path.exists():
                 output_path.unlink()
 
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_validate_output_malformed_tsv(self):
-        """Test validate_output with malformed TSV file."""
+        """validate_output() must return False for malformed TSV files."""
+        writer = VarVAMPWriter()
+
         with tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False) as f:
             output_path = Path(f.name)
 
@@ -402,16 +453,19 @@ class TestVarVAMPWriter:
             with open(output_path, "w", encoding="utf-8") as f:
                 f.write("this is not a valid TSV file\nwith random content")
 
-            is_valid = self.writer.validate_output(output_path)
+            is_valid = writer.validate_output(output_path)
             assert is_valid is False
 
         finally:
             if output_path.exists():
                 output_path.unlink()
 
+    @pytest.mark.unit
+    @pytest.mark.writer
     def test_get_output_info(self):
-        """Test get_output_info method."""
-        info = self.writer.get_output_info()
+        """get_output_info() must return comprehensive format information."""
+        writer = VarVAMPWriter()
+        info = writer.get_output_info()
 
         assert isinstance(info, dict)
         assert "format" in info
@@ -430,11 +484,18 @@ class TestVarVAMPWriter:
         assert "seq" in info["columns"]
 
 
+# =============================================================================
+# Integration Tests
+# =============================================================================
+
+
+@pytest.mark.unit
+@pytest.mark.writer
 class TestVarVAMPWriterIntegration:
-    """Integration tests for VarVAMPWriter with complex scenarios."""
+    """VarVAMP writer integration tests for complex scenarios."""
 
     def test_write_multiple_amplicons_multiple_primers(self):
-        """Test writing multiple amplicons with multiple primers each."""
+        """VarVAMP writer must handle multiple amplicons with multiple primers each."""
         writer = VarVAMPWriter()
 
         # Create complex test data
@@ -509,7 +570,7 @@ class TestVarVAMPWriterIntegration:
                 output_path.unlink()
 
     def test_round_trip_data_integrity(self):
-        """Test that all data is preserved correctly in output."""
+        """VarVAMP writer must preserve all data correctly."""
         writer = VarVAMPWriter()
 
         # Create test data with specific values to verify
@@ -562,7 +623,7 @@ class TestVarVAMPWriterIntegration:
 
         try:
             # Write data
-            result_path = writer.write([amplicon], output_path)
+            writer.write([amplicon], output_path)
 
             # Verify all values are preserved correctly
             with open(output_path, "r", encoding="utf-8") as f:

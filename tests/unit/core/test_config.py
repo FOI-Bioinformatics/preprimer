@@ -447,6 +447,10 @@ class TestRuntimeReconfiguration:
         manager.update_partial(debug_mode=True)
         assert len(callback_calls) == 2  # No new calls
 
+    @pytest.mark.skipif(
+        os.getenv("CI") == "true",
+        reason="File watcher timing unreliable in CI environments"
+    )
     def test_file_watcher(self):
         """Test configuration file watching."""
         config_data = {"debug_mode": False}

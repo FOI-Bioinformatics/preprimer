@@ -23,7 +23,7 @@ class TestConvertPrimersMainAPI:
 
         # Create test data
         test_input_file = (
-            Path(__file__).parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
+            Path(__file__).parent.parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -49,7 +49,7 @@ class TestConvertPrimersMainAPI:
         """Test kwargs that don't exist on config are ignored (lines 54-55 else branch)."""
 
         test_input_file = (
-            Path(__file__).parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
+            Path(__file__).parent.parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -75,7 +75,7 @@ class TestConvertPrimersMainAPI:
         """Test default output_formats assignment (line 58)."""
 
         test_input_file = (
-            Path(__file__).parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
+            Path(__file__).parent.parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -98,7 +98,7 @@ class TestConvertPrimersMainAPI:
         """Test explicit None output_formats triggers default (line 58)."""
 
         test_input_file = (
-            Path(__file__).parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
+            Path(__file__).parent.parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -121,7 +121,7 @@ class TestConvertPrimersMainAPI:
         """Test all parameters of convert_primers function."""
 
         test_input_file = (
-            Path(__file__).parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
+            Path(__file__).parent.parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
         )
         test_reference = (
             Path(__file__).parent
@@ -174,7 +174,7 @@ class TestConvertPrimersMainAPI:
         """Test convert_primers interactions with PrimerConverter."""
 
         test_input_file = (
-            Path(__file__).parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
+            Path(__file__).parent.parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -223,7 +223,7 @@ class TestMainAPIEdgeCases:
         """Test convert_primers accepts Path objects."""
 
         test_input_file = (
-            Path(__file__).parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
+            Path(__file__).parent.parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -245,7 +245,7 @@ class TestMainAPIEdgeCases:
         """Test convert_primers with no additional kwargs."""
 
         test_input_file = (
-            Path(__file__).parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
+            Path(__file__).parent.parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -307,7 +307,7 @@ class TestMainAPIIntegration:
         """Test converting to multiple output formats."""
 
         test_input_file = (
-            Path(__file__).parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
+            Path(__file__).parent.parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -340,7 +340,7 @@ class TestMainAPIIntegration:
 
         # Use the small test dataset
         test_input_file = (
-            Path(__file__).parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
+            Path(__file__).parent.parent / "test_data" / "datasets" / "small" / "varvamp.tsv"
         )
         if not test_input_file.exists():
             pytest.skip(f"Test data file not found: {test_input_file}")

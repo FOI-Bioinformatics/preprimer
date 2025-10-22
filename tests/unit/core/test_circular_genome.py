@@ -33,7 +33,7 @@ class TestCircularGenome:
     @pytest.fixture
     def mitochondrial_dataset_path(self):
         """Path to mitochondrial test dataset."""
-        return Path(__file__).parent / "test_data" / "datasets" / "mitochondrial"
+        return Path(__file__).parent.parent.parent / "test_data" / "datasets" / "mitochondrial"
 
     def test_mitochondrial_dataset_exists(self, mitochondrial_dataset_path):
         """Test that mitochondrial dataset files exist."""
@@ -272,7 +272,7 @@ class TestCircularCoordinateEdgeCases:
     @pytest.fixture
     def mitochondrial_dataset_path(self):
         """Path to mitochondrial test dataset."""
-        return Path(__file__).parent / "test_data" / "datasets" / "mitochondrial"
+        return Path(__file__).parent.parent.parent / "test_data" / "datasets" / "mitochondrial"
 
     def test_coordinate_normalization(self):
         """Test coordinate normalization for circular genomes."""
