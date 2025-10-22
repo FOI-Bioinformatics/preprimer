@@ -1,38 +1,34 @@
-# CLAUDE.md - PrePrimer Technical Guide
+# CLAUDE.md - PrePrimer Technical Reference
 
-Technical guidance for Claude Code when working with the PrePrimer codebase.
+Technical reference for AI assistants working with the PrePrimer codebase.
 
-## Current State (v0.2.0)
+## Current State (v0.3.0)
 
-**Status:** Production-ready for v0.2.0 release
-
-**Release Date:** 2025-10-21
+**Status:** Production-ready
 
 **Codebase Metrics:**
-- **Code**: ~20,000 lines of Python across 59 files
-- **Tests**: 611 tests with 96.90% coverage, 100% pass rate
-- **Architecture**: Plugin-based with security focus
-- **Documentation**: Complete, organized in docs/
+- **Source Code**: ~6,900 lines of Python across 59 modules
+- **Test Suite**: ~22,300 lines implementing 998 tests
+- **Test Coverage**: 96.90% with 100% pass rate
+- **Architecture**: Plugin-based with security-focused validation
+- **Documentation**: Organized in docs/ directory
 
-**Key Capabilities:**
-- 4 input formats: VarVAMP, ARTIC, Olivar, STS
-- 5 output formats: ARTIC, VarVAMP, Olivar, FASTA, STS
+**Supported Capabilities:**
+- 4 input format parsers: VarVAMP, ARTIC, Olivar, STS
+- 5 output format writers: ARTIC, VarVAMP, Olivar, FASTA, STS
 - 20 bidirectional conversion pathways
-- **Primer-to-reference alignment**: BLAST, Exonerate, merPCR, me-PCR providers
+- Primer-to-reference alignment: BLAST, Exonerate, merPCR, me-PCR providers
 - Circular genome topology detection and handling
 - IUPAC degenerate nucleotide support
-- Security hardening with 100% security module coverage
+- Security validation with 100% security module coverage
 
-**What's New in v0.2.0:**
-- ✨ **Alignment Functionality**: Integrated 4 alignment providers (BLAST, Exonerate, merPCR, me-PCR)
-  - `align_primers()` high-level API
-  - CLI `align` command with multiple output formats
-  - 36 comprehensive alignment tests
-- ✨ **Enhanced STS Format**: Auto-detection of 3/4-column formats, header/headerless files
-- ✨ **Comprehensive Validation**: 23 real-data tests with 100% pass rate, validation framework
-- ✨ **Improved Documentation**: Reorganized structure with validation reports in docs/technical/validation/
-- ⚠️ **Breaking**: Removed legacy `PrePrimerConfig` - Use `EnhancedConfig` with nested structure
-- See [CHANGELOG.md](CHANGELOG.md) for complete details
+**Recent Changes (v0.3.0):**
+- Comprehensive writer test coverage (110/113 tests, 97.3%)
+- BaseWriterTest pattern for reusable test infrastructure
+- Performance baselines established for all writers (51-591µs)
+- Enhanced pytest configuration with test layer markers
+
+See [CHANGELOG.md](CHANGELOG.md) for complete release history
 
 ## Quick Commands
 
@@ -480,37 +476,61 @@ from preprimer.core.security import PathValidator
 safe_path = PathValidator.sanitize_path("../../etc/passwd")  # Should fail
 ```
 
-## Performance Benchmarks (Reference)
+## Performance Benchmarks
 
-**Current performance** (as of v1.0.0):
+Current performance (v0.3.0):
 - Parser creation: ~4.2M ops/sec
 - Format detection: ~45K ops/sec
 - Small dataset parsing: ~3K ops/sec
 - Large dataset (2000+ amplicons): ~37 ops/sec
-- Memory: ~50MB baseline
+- Memory baseline: ~50MB
 
-**If making changes that affect performance**, run benchmarks and compare.
+Writer performance:
+- FASTA: 51.3µs (19.5K ops/sec)
+- Olivar: 55.5µs (18.0K ops/sec)
+- STS: 62.9µs (15.9K ops/sec)
+- VarVAMP: 69.2µs (14.4K ops/sec)
+- ARTIC: 591µs (1.7K ops/sec)
 
-## Key Design Principles
+## Design Principles
 
-1. **Security First**: All input validated, no path traversal, size limits
-2. **Plugin Architecture**: Easy to add new formats without core changes
-3. **Topology Aware**: Automatic circular genome detection and handling
-4. **Standards Compliant**: Follow primal-page, articbedversion specs
+1. **Security First**: All input validated, no path traversal, size limits enforced
+2. **Plugin Architecture**: New formats added without core changes
+3. **Topology Aware**: Automatic circular genome detection
+4. **Standards Compliant**: Follow primal-page, articbedversion specifications
 5. **Well-Tested**: High coverage, comprehensive test suite
-6. **User-Friendly Errors**: Informative messages with suggestions
+6. **Clear Errors**: Informative messages with actionable suggestions
 7. **Performance**: Sub-second for typical workloads
+
+## Test Patterns
+
+### BaseParserTest Pattern
+- Abstract base class: `tests/unit/parsers/test_base_parser.py`
+- 16 inherited tests per parser
+- Contract enforcement, security validation, performance benchmarking
+- 4 parsers migrated: VarVAMP, ARTIC, Olivar, STS
+- 99/99 tests passing (100%)
+
+### BaseWriterTest Pattern
+- Abstract base class: `tests/unit/writers/test_base_writer.py`
+- 12 inherited tests per writer
+- Contract enforcement, validation, performance benchmarking
+- 5 writers migrated: VarVAMP, Olivar, STS, ARTIC, FASTA
+- 110/113 tests passing (97.3%)
+
+See `docs/development/patterns/` for detailed documentation.
 
 ## When in Doubt
 
-1. **Check existing tests**: Pattern already exists
-2. **Use StandardizedParser**: Base class handles security, validation
-3. **Write tests first**: TDD approach prevents bugs
-4. **Run full suite**: `pytest` before committing
-5. **Check documentation**: Update if behavior changes
+1. **Check existing tests** - Patterns already exist
+2. **Use StandardizedParser** - Base class handles security and validation
+3. **Write tests first** - TDD approach prevents bugs
+4. **Run full suite** - `pytest` before committing
+5. **Update documentation** - Keep docs synchronized with code changes
 
 ---
 
-**Version**: 0.2.0
-**Last Updated**: 2025-10-21
-**Test Coverage**: 96.90% (611 tests, 100% pass rate)
+**Version**: 0.3.0
+**Last Updated**: 2025-10-22
+**Test Coverage**: 96.90% (998 tests, 100% pass rate)
+**Codebase**: ~6,900 lines source + ~22,300 lines tests

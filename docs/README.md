@@ -27,7 +27,7 @@ This directory contains the complete documentation for PrePrimer, a comprehensiv
 
 ### System Specifications
 - **[Security Implementation](technical/security.md)** - Comprehensive security features and validation
-- **[Testing Framework](technical/testing.md)** - Extensive testing methodology (611 tests with 96.90% coverage)
+- **[Testing Framework](technical/testing.md)** - Extensive testing methodology (998 tests with 96.90% coverage)
 - **[Platform Compatibility](technical/compatibility.md)** - Platform support, topology handling, and ecosystem integration
 - **[Windows Compatibility](technical/windows-compatibility.md)** - Technical analysis of Windows limitations and WSL2 workaround
 
@@ -55,6 +55,16 @@ This directory contains the complete documentation for PrePrimer, a comprehensiv
 
 ### Python API Documentation
 - **[Python API Guide](api/python-api.md)** - Complete API reference with examples for programmatic usage
+
+## Development Documentation
+
+### Test Patterns
+- **[BaseParserTest Pattern](development/patterns/BASEPARSERTEST_PATTERN.md)** - Reusable parser test infrastructure (16 inherited tests, 99/99 passing)
+- **[BaseWriterTest Pattern](development/patterns/BASEWRITERTEST_PATTERN.md)** - Reusable writer test infrastructure (12 inherited tests, 110/113 passing)
+
+### Migration History
+- **[Parser Migration](development/migrations/PARSER_MIGRATION_COMPLETE.md)** - BaseParserTest pattern implementation and parser test migration
+- **[Writer Migration](development/migrations/WRITER_MIGRATION_FINAL.md)** - BaseWriterTest pattern implementation and writer test migration (v0.3.0)
 
 ## Code Examples
 
