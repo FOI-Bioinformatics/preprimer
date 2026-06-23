@@ -58,9 +58,20 @@ def convert_primers(
     elif not isinstance(config, EnhancedConfig):
         raise TypeError(f"config must be EnhancedConfig, got {type(config)}")
 
-    # Update config with kwargs if needed
-    # Note: EnhancedConfig uses nested structure, so direct attribute setting is limited
-    # Users should create proper EnhancedConfig instances instead
+    # Honor recognized config-shorthand kwargs by applying them to the nested
+    # config (instead of silently dropping them). Unrecognized kwargs are
+    # forwarded to the converter/writers (e.g. ARTIC scheme metadata).
+    # Maps flat kwarg -> (config section, field).
+    known_config_kwargs = {
+        "force_overwrite": ("output", "force_overwrite"),
+        "validate_sequences": ("validation", "enabled"),
+        "aligner": ("alignment", "aligner"),
+        "min_length": ("validation", "min_length"),
+        "max_length": ("validation", "max_length"),
+    }
+    for key, (section, field) in known_config_kwargs.items():
+        if key in kwargs:
+            setattr(getattr(config, section), field, kwargs.pop(key))
 
     if output_formats is None:
         output_formats = ["artic"]

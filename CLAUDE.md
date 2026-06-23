@@ -4,12 +4,15 @@ Technical reference for AI assistants working with the PrePrimer codebase.
 
 ## Current State (v0.3.0)
 
-**Status:** Production-ready
+**Status:** Beta (active hardening; see CHANGELOG). Matches the
+`Development Status :: 4 - Beta` classifier in `pyproject.toml`.
 
-**Codebase Metrics:**
-- **Source Code**: ~6,900 lines of Python across 59 modules
-- **Test Suite**: ~22,300 lines implementing 998 tests
-- **Test Coverage**: 96.90% with 100% pass rate
+**Codebase Metrics** (measured; keep in sync when they change):
+- **Source Code**: ~7,300 lines of Python across 30 modules
+- **Test Suite**: 631 tests (623 passing, 8 skipped; 100% of non-skipped pass)
+- **Test Coverage**: ~86% branch coverage (`pytest --cov`, `branch=true`).
+  Lowest-covered area is the alignment providers' output parsers, which
+  require external tools (BLAST/Exonerate) and are not exercised in CI.
 - **Architecture**: Plugin-based with security-focused validation
 - **Documentation**: Organized in docs/ directory
 
@@ -256,7 +259,7 @@ python -m pytest
 
 ### Test Coverage Requirements
 
-- **Overall**: ≥95% (currently 96.90%)
+- **Overall**: ~86% branch coverage (target: do not regress; raise where practical)
 - **Security module**: 100% (achieved)
 - **New features**: Must include tests
 - **Bug fixes**: Must include regression test
@@ -383,14 +386,13 @@ docs/
 - Security scan (bandit)
 - ~3-5 minutes
 
-### `release.yml` - Runs on version tags
-- Run tests
-- Build package (wheel + sdist)
-- Create GitHub release
-- Attach build artifacts
-- ~2-3 minutes
+### `release.yml` - Planned (not yet present)
+A tag-triggered release workflow (run tests, build wheel + sdist, create the
+GitHub release, attach artifacts) is documented here as the intended process but
+is **not yet committed** under `.github/workflows/`. Only `ci.yml` exists today.
+Add `release.yml` before relying on the tag-push flow below.
 
-**Trigger release**:
+**Intended release trigger** (once `release.yml` exists):
 ```bash
 git tag -a v1.0.0 -m "Release v1.0.0"
 git push origin v1.0.0
@@ -531,6 +533,6 @@ See `docs/development/patterns/` for detailed documentation.
 ---
 
 **Version**: 0.3.0
-**Last Updated**: 2025-10-22
-**Test Coverage**: 96.90% (998 tests, 100% pass rate)
-**Codebase**: ~6,900 lines source + ~22,300 lines tests
+**Last Updated**: 2026-06-23
+**Test Coverage**: ~86% branch coverage (631 tests: 623 passing, 8 skipped)
+**Codebase**: ~7,300 lines source across 30 modules

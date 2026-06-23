@@ -172,6 +172,8 @@ class OlivarParser(StandardizedParser):
                             reference_id = row.get("chrom", prefix or "olivar_target")
                             start_pos = None
                             end_pos = None
+                            # Track whether coordinates were provided or estimated.
+                            synthetic_coords = not (row.get("start") and row.get("end"))
 
                             if row.get("start") and row.get("end"):
                                 start_pos = self._validate_numeric_field(
@@ -208,6 +210,7 @@ class OlivarParser(StandardizedParser):
                                         base in fwd_seq for base in "RYSWKMBDHVN"
                                     ),
                                     "source_row": row_num,
+                                    "synthetic_coordinates": synthetic_coords,
                                     "original_data": {
                                         k: v for k, v in row.items() if v
                                     },
@@ -231,6 +234,7 @@ class OlivarParser(StandardizedParser):
                                         base in rev_seq for base in "RYSWKMBDHVN"
                                     ),
                                     "source_row": row_num,
+                                    "synthetic_coordinates": synthetic_coords,
                                     "original_data": {
                                         k: v for k, v in row.items() if v
                                     },

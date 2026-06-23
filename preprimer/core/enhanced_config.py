@@ -37,9 +37,16 @@ class AlignmentSettings(BaseModel):
     @field_validator("aligner")
     @classmethod
     def validate_aligner(cls, v):
-        valid_aligners = {"blast", "exonerate", "minimap2", "bwa"}
+        # Derive valid aligners from the registry (single source of truth)
+        # rather than a hardcoded list that can drift from reality.
+        from preprimer.core.registry import alignment_registry
+
+        valid_aligners = set(alignment_registry.list_providers())
+        if not valid_aligners:
+            # Providers not registered yet; defer validation to runtime use.
+            return v
         if v not in valid_aligners:
-            raise ValueError(f"Aligner must be one of: {valid_aligners}")
+            raise ValueError(f"Aligner must be one of: {sorted(valid_aligners)}")
         return v
 
 

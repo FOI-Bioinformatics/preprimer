@@ -151,7 +151,7 @@ class TestEnvironmentVariables:
     def test_from_env_basic(self):
         """Test loading configuration from environment variables."""
         env_vars = {
-            "PREPRIMER_ALIGNER": "minimap2",
+            "PREPRIMER_ALIGNER": "merpcr",
             "PREPRIMER_ALIGNMENT_THREADS": "8",
             "PREPRIMER_VALIDATE_SEQUENCES": "false",
             "PREPRIMER_OUTPUT_FORMATS": "artic,fasta,sts",
@@ -162,7 +162,7 @@ class TestEnvironmentVariables:
         with patch.dict(os.environ, env_vars):
             config = EnhancedConfig.from_env()
 
-            assert config.alignment.aligner == "minimap2"
+            assert config.alignment.aligner == "merpcr"
             assert config.alignment.threads == 8
             assert config.validation.enabled == False
             assert config.output.formats == ["artic", "fasta", "sts"]
@@ -232,7 +232,11 @@ class TestFileConfiguration:
     def test_yaml_configuration(self):
         """Test loading configuration from YAML file."""
         config_data = {
-            "alignment": {"aligner": "bwa", "threads": 8, "params": {"preset": "sr"}},
+            "alignment": {
+                "aligner": "exonerate",
+                "threads": 8,
+                "params": {"preset": "sr"},
+            },
             "plugins": {
                 "enabled": True,
                 "config": {"my_plugin": {"option1": "value1", "option2": 42}},
@@ -246,7 +250,7 @@ class TestFileConfiguration:
         try:
             config = EnhancedConfig.from_file(config_path, merge_env=False)
 
-            assert config.alignment.aligner == "bwa"
+            assert config.alignment.aligner == "exonerate"
             assert config.alignment.threads == 8
             assert config.alignment.params == {"preset": "sr"}
             assert config.plugins.enabled == True
@@ -264,7 +268,7 @@ class TestFileConfiguration:
         }
 
         env_vars = {
-            "PREPRIMER_ALIGNER": "minimap2",  # Should override file
+            "PREPRIMER_ALIGNER": "merpcr",  # Should override file
             "PREPRIMER_VALIDATE_SEQUENCES": "false",  # Should add to config
         }
 
@@ -449,7 +453,7 @@ class TestRuntimeReconfiguration:
 
     @pytest.mark.skipif(
         os.getenv("CI") == "true",
-        reason="File watcher timing unreliable in CI environments"
+        reason="File watcher timing unreliable in CI environments",
     )
     def test_file_watcher(self):
         """Test configuration file watching."""

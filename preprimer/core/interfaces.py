@@ -37,16 +37,24 @@ class PrimerData:
         """Return primer length."""
         return len(self.sequence)
 
-    @property
-    def artic_name(self) -> str:
-        """Generate ARTIC-compatible primer name."""
+    def artic_name_with_alt(self, alt: int = 0) -> str:
+        """Generate an ARTIC-compatible primer name with an alt index.
+
+        The trailing index distinguishes alternate primers that share the same
+        amplicon and direction, preventing duplicate names in the output scheme.
+        """
         amplicon_num = (
             self.amplicon_id.split("_")[-1]
             if "_" in self.amplicon_id
             else self.amplicon_id
         )
         side = "LEFT" if self.direction == "forward" else "RIGHT"
-        return f"{self.reference_id}_{amplicon_num}_{side}_0"
+        return f"{self.reference_id}_{amplicon_num}_{side}_{alt}"
+
+    @property
+    def artic_name(self) -> str:
+        """Generate ARTIC-compatible primer name (alt index 0)."""
+        return self.artic_name_with_alt(0)
 
 
 @dataclass

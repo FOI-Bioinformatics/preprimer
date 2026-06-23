@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from preprimer.core.interfaces import AlignmentProvider
 
@@ -30,7 +30,7 @@ class BlastProvider(AlignmentProvider):
         primer_file: Union[str, Path],
         reference_file: Union[str, Path],
         output_dir: Union[str, Path],
-        output_format: str = "0",
+        output_format: str = "6",
         **kwargs,
     ) -> Path:
         """
@@ -40,7 +40,8 @@ class BlastProvider(AlignmentProvider):
             primer_file: Path to primer file (STS format)
             reference_file: Path to reference genome (FASTA)
             output_dir: Output directory for alignment results
-            output_format: BLAST output format (default: "0" for pairwise)
+            output_format: BLAST output format (default: "6" tabular, which is
+                what parse_blast_output() consumes)
             **kwargs: Additional BLAST parameters
 
         Returns:
@@ -87,7 +88,7 @@ class BlastProvider(AlignmentProvider):
         output_dir: Path,
         sequence: str,
         reference: Path,
-        output_format: str = "0",
+        output_format: str = "6",
     ) -> Path:
         """
         Run BLAST for a single primer sequence.
@@ -128,8 +129,14 @@ class BlastProvider(AlignmentProvider):
                 "blastn-short",  # Optimized for short sequences like primers
             ]
 
-            # Run BLAST
-            subprocess.run(blast_command, check=True, capture_output=True, text=True)
+            # Run BLAST (timeout guards against a hung external process)
+            subprocess.run(
+                blast_command,
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=300,
+            )
 
             return output_file
 
@@ -137,7 +144,7 @@ class BlastProvider(AlignmentProvider):
             # Clean up temporary file
             seq_file_path.unlink(missing_ok=True)
 
-    def parse_blast_output(self, output_file: Path) -> List[Dict[str, any]]:
+    def parse_blast_output(self, output_file: Path) -> List[Dict[str, Any]]:
         """
         Parse BLAST output in tabular format (outfmt 6).
 

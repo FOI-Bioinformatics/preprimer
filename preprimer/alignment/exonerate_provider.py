@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from preprimer.core.interfaces import AlignmentProvider
 
@@ -138,6 +138,7 @@ class ExonerateProvider(AlignmentProvider):
                     stderr=subprocess.PIPE,
                     text=True,
                     check=True,
+                    timeout=300,
                 )
 
             return output_file
@@ -146,7 +147,7 @@ class ExonerateProvider(AlignmentProvider):
             # Clean up temporary file
             seq_file_path.unlink(missing_ok=True)
 
-    def parse_exonerate_output(self, output_file: Path) -> List[Dict[str, any]]:
+    def parse_exonerate_output(self, output_file: Path) -> List[Dict[str, Any]]:
         """
         Parse Exonerate output file.
 

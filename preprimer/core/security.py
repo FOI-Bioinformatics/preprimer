@@ -184,8 +184,11 @@ class PathValidator:
         # Convert to string for analysis
         path_str = str(path)
 
-        # Check for obvious path traversal attempts before processing
-        if ".." in path_str:
+        # Block parent-directory traversal: ".." only when it stands as a full
+        # path segment (adjacent to a separator or standing alone), covering
+        # both POSIX "../" and Windows "..\" forms. Filenames that merely
+        # contain a ".." substring (e.g. "sars..cov2.tsv") are allowed.
+        if re.search(r"(^|[/\\])\.\.([/\\]|$)", path_str):
             raise SecurityError(f"Path traversal attempt detected: {path}")
 
         # Check for absolute paths to dangerous system directories when no base_dir is specified
@@ -287,6 +290,65 @@ class PathValidator:
 
         except SecurityError:
             return False
+
+    # Default 100 MB cap, mirrors SecuritySettings.max_file_size.
+    DEFAULT_MAX_FILE_SIZE: int = 100 * 1024 * 1024
+
+    @classmethod
+    def validate_file_size(
+        cls, path: Union[str, Path], max_bytes: Optional[int] = None
+    ) -> None:
+        """
+        Ensure a file does not exceed the maximum allowed size.
+
+        Args:
+            path: Path to the file to check.
+            max_bytes: Maximum allowed size in bytes (defaults to
+                ``DEFAULT_MAX_FILE_SIZE``).
+
+        Raises:
+            SecurityError: If the file is missing or exceeds the size limit.
+        """
+        if max_bytes is None:
+            max_bytes = cls.DEFAULT_MAX_FILE_SIZE
+
+        file_path = Path(path)
+        try:
+            size = file_path.stat().st_size
+        except OSError as e:
+            raise SecurityError(f"Cannot stat file '{file_path}': {e}") from e
+
+        if size > max_bytes:
+            raise SecurityError(
+                f"File too large: {size} bytes exceeds limit of {max_bytes} bytes"
+            )
+
+    @classmethod
+    def validate_output_directory(
+        cls, directory: Union[str, Path], base_dir: Optional[Path] = None
+    ) -> Path:
+        """
+        Validate (and sanitize) a directory intended for writing output.
+
+        Args:
+            directory: Directory path to validate.
+            base_dir: Optional base directory to restrict operations to.
+
+        Returns:
+            The sanitized directory path.
+
+        Raises:
+            SecurityError: If the path is unsafe or points at an existing
+                non-directory.
+        """
+        dir_path = cls.sanitize_path(directory, base_dir)
+
+        if dir_path.exists() and not dir_path.is_dir():
+            raise SecurityError(
+                f"Output path exists and is not a directory: {dir_path}"
+            )
+
+        return dir_path
 
 
 class SecureFileOperations:

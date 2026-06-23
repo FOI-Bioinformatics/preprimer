@@ -126,17 +126,32 @@ class ARTICWriter(OutputWriter):
         """Write primer.bed file in official 0-based BED format."""
         with open(bed_file, "w") as f:
             for amplicon in amplicons:
+                # Track alt indices per direction so alternate primers within an
+                # amplicon get unique names (e.g. _LEFT_0, _LEFT_1).
+                alt_counts = {"forward": 0, "reverse": 0}
                 for primer in amplicon.primers:
                     # Official primalscheme BED format with sequence (extended format):
                     # chrom start(0-based) end(0-based-exclusive) name pool strand sequence
                     # Note: Standard BED is 6 columns, but ARTIC workflows expect sequence as 7th column
 
-                    # Convert 1-based primer coordinates to 0-based BED
-                    bed_start = primer.start - 1  # Convert to 0-based
+                    # Convert 1-based primer coordinates to 0-based BED.
+                    # Clamp at 0: some source formats lack coordinates and yield
+                    # start==0, which would otherwise produce an invalid BED
+                    # start of -1.
+                    bed_start = max(0, primer.start - 1)
+                    if primer.start - 1 < 0:
+                        logger.warning(
+                            f"Primer {primer.name} has start={primer.start}; "
+                            f"clamping BED start to 0 (coordinates may be synthetic)"
+                        )
                     bed_end = primer.stop  # BED end is exclusive, so this is correct
 
-                    # Use official ARTIC naming convention for compatibility
-                    artic_name = primer.artic_name
+                    # Use official ARTIC naming convention for compatibility,
+                    # with a per-direction alt index to keep names unique.
+                    alt = alt_counts.get(primer.direction, 0)
+                    artic_name = primer.artic_name_with_alt(alt)
+                    if primer.direction in alt_counts:
+                        alt_counts[primer.direction] += 1
 
                     # Write 7-column extended BED format (ARTIC standard)
                     bed_line = (
