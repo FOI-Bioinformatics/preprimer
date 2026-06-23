@@ -62,6 +62,22 @@ def test_sts_conversion_flags_synthetic_coordinates(tmp_path):
     assert any("synthetic" in w for w in summary["warnings"])
 
 
+def test_convert_existing_output_without_force_raises(tmp_path):
+    from preprimer.core.exceptions import OutputError
+
+    converter = PrimerConverter()
+    kwargs = dict(
+        input_file=DATA / "varvamp.tsv",
+        output_dir=tmp_path,
+        output_formats=["fasta"],
+        prefix="dup",
+    )
+    converter.convert(**kwargs)
+    # Second run without force must refuse to overwrite.
+    with pytest.raises(OutputError):
+        converter.convert(**kwargs)
+
+
 def test_strict_mode_rejects_synthetic_coordinates(tmp_path):
     converter = PrimerConverter()
     with pytest.raises(ValidationError):
@@ -294,6 +310,42 @@ def test_cmd_align_missing_tool_json(tmp_path, capsys):
     assert payload["status"] == "error"
 
 
+def test_cmd_align_mepcr_unavailable(tmp_path):
+    from preprimer.cli import EXIT_MISSING_TOOL, cmd_align
+
+    args = _align_args(tmp_path, fmt="me-pcr")
+    mock_provider = Mock()
+    mock_provider.is_available.return_value = False
+    with patch(
+        "preprimer.cli.alignment_registry.get_provider", return_value=mock_provider
+    ):
+        assert cmd_align(args) == EXIT_MISSING_TOOL
+
+
+def test_cmd_convert_validate_only_json(tmp_path, capsys):
+    from preprimer.cli import EXIT_OK, cmd_convert
+    from preprimer.core.enhanced_config import EnhancedConfig
+
+    args = Mock()
+    args.force = False
+    args.validate_only = True
+    args.input_format = None
+    args.input = DATA / "varvamp.tsv"
+    args.prefix = "v"
+    args.output_dir = tmp_path
+    args.output_formats = ["fasta"]
+    args.reference = None
+    args.lenient = False
+    args.strict = False
+    args.json = True
+
+    result = cmd_convert(args, EnhancedConfig())
+    assert result == EXIT_OK
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["validated"] is True
+    assert payload["amplicons"] > 0
+
+
 def test_cmd_align_missing_input_file(tmp_path):
     from unittest.mock import Mock
 
@@ -336,3 +388,72 @@ def test_convert_lenient_flag_forwarded(tmp_path):
         cmd_convert(args, EnhancedConfig())
 
     assert conv.convert.call_args.kwargs["lenient"] is True
+
+
+def _align_success_args(tmp_path, as_json=False):
+    args = Mock()
+    sts = tmp_path / "p.sts.tsv"
+    sts.write_text("a\tACGTACGTAC\tTGCATGCATG\n")
+    ref = tmp_path / "ref.fasta"
+    ref.write_text(">ref\nACGT\n")
+    args.sts_file = sts
+    args.reference = ref
+    args.output_dir = tmp_path / "out"
+    args.output_formats = ["merpcr"]
+    args.aligner = "blast"
+    args.prefix = "p"
+    args.force = False
+    args.json = as_json
+    return args
+
+
+def test_cmd_align_success_text(tmp_path, capsys):
+    from preprimer.cli import EXIT_OK, cmd_align
+
+    args = _align_success_args(tmp_path)
+    available = Mock()
+    available.is_available.return_value = True
+    with (
+        patch("preprimer.cli.alignment_registry.get_provider", return_value=available),
+        patch(
+            "preprimer.cli.align_primers",
+            return_value={"merpcr": tmp_path / "out" / "p.merpcr.aln"},
+        ),
+    ):
+        result = cmd_align(args)
+    assert result == EXIT_OK
+    assert "Alignment completed" in capsys.readouterr().out
+
+
+def test_cmd_align_success_json(tmp_path, capsys):
+    from preprimer.cli import EXIT_OK, cmd_align
+
+    args = _align_success_args(tmp_path, as_json=True)
+    available = Mock()
+    available.is_available.return_value = True
+    with (
+        patch("preprimer.cli.alignment_registry.get_provider", return_value=available),
+        patch(
+            "preprimer.cli.align_primers",
+            return_value={"merpcr": tmp_path / "out" / "p.merpcr.aln"},
+        ),
+    ):
+        result = cmd_align(args)
+    assert result == EXIT_OK
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"] == "ok"
+    assert "merpcr" in payload["output_files"]
+
+
+def test_cmd_align_handles_preprimer_error(tmp_path):
+    from preprimer.cli import EXIT_USER_ERROR, cmd_align
+    from preprimer.core.exceptions import PrePrimerError
+
+    args = _align_success_args(tmp_path)
+    available = Mock()
+    available.is_available.return_value = True
+    with (
+        patch("preprimer.cli.alignment_registry.get_provider", return_value=available),
+        patch("preprimer.cli.align_primers", side_effect=PrePrimerError("boom")),
+    ):
+        assert cmd_align(args) == EXIT_USER_ERROR

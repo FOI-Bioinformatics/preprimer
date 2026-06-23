@@ -9,10 +9,10 @@ Technical reference for AI assistants working with the PrePrimer codebase.
 
 **Codebase Metrics** (measured; keep in sync when they change):
 - **Source Code**: ~7,300 lines of Python across 30 modules
-- **Test Suite**: 631 tests (623 passing, 8 skipped; 100% of non-skipped pass)
-- **Test Coverage**: ~86% branch coverage (`pytest --cov`, `branch=true`).
-  Lowest-covered area is the alignment providers' output parsers, which
-  require external tools (BLAST/Exonerate) and are not exercised in CI.
+- **Test Suite**: 708 tests (700 passing, 8 skipped; 100% of non-skipped pass)
+- **Test Coverage**: ~94% line / ~92% branch (`pytest --cov`, `branch=true`).
+  The remaining gap is defensive error branches (e.g. permission/timeout
+  handlers) and the external-tool alignment success paths not run in CI.
 - **Architecture**: Plugin-based with security-focused validation
 - **Documentation**: Organized in docs/ directory
 
@@ -259,7 +259,7 @@ python -m pytest
 
 ### Test Coverage Requirements
 
-- **Overall**: ~86% branch coverage (target: do not regress; raise where practical)
+- **Overall**: ~94% line / ~92% branch coverage (target: do not regress)
 - **Security module**: 100% (achieved)
 - **New features**: Must include tests
 - **Bug fixes**: Must include regression test
@@ -534,5 +534,5 @@ See `docs/development/patterns/` for detailed documentation.
 
 **Version**: 0.3.0
 **Last Updated**: 2026-06-23
-**Test Coverage**: ~86% branch coverage (631 tests: 623 passing, 8 skipped)
+**Test Coverage**: ~94% line / ~92% branch (708 tests: 700 passing, 8 skipped)
 **Codebase**: ~7,300 lines source across 30 modules
