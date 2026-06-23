@@ -12,7 +12,7 @@ import pytest
 import yaml
 
 from preprimer.core.converter import PrimerConverter
-from preprimer.core.enhanced_config import ConfigManager, EnhancedConfig
+from preprimer.core.enhanced_config import EnhancedConfig
 from preprimer.core.exceptions import ParserError, PrePrimerError, ValidationError
 from preprimer.core.registry import ParserRegistry, WriterRegistry
 from preprimer.parsers.artic_parser import ARTICParser

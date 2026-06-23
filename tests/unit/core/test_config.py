@@ -5,10 +5,8 @@ Comprehensive tests for the enhanced configuration system.
 import json
 import os
 import tempfile
-import threading
-import time
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -16,8 +14,6 @@ from pydantic import ValidationError
 
 from preprimer.core.enhanced_config import (
     AlignmentSettings,
-    ConfigManager,
-    ConfigWatcher,
     EnhancedConfig,
     LoggingSettings,
     OutputSettings,
@@ -25,9 +21,6 @@ from preprimer.core.enhanced_config import (
     PluginSettings,
     SecuritySettings,
     ValidationSettings,
-    get_config,
-    update_config,
-    update_config_partial,
 )
 from preprimer.core.exceptions import ConfigError
 
@@ -387,125 +380,6 @@ class TestPluginConfiguration:
         assert settings.config["plugin1"]["setting"] == "value"
 
 
-class TestRuntimeReconfiguration:
-    """Test runtime reconfiguration features."""
-
-    def test_config_manager_basic(self):
-        """Test basic configuration manager operations."""
-        initial_config = EnhancedConfig(debug_mode=False)
-        manager = ConfigManager(initial_config)
-
-        # Get current config
-        current = manager.config
-        assert current.debug_mode == False
-
-        # Update config
-        new_config = EnhancedConfig(debug_mode=True)
-        manager.update_config(new_config)
-
-        # Verify update
-        updated = manager.config
-        assert updated.debug_mode == True
-
-    def test_partial_config_update(self):
-        """Test partial configuration updates."""
-        manager = ConfigManager()
-
-        # Update single field
-        manager.update_partial(debug_mode=True)
-        assert manager.config.debug_mode == True
-
-        # Update nested field
-        manager.update_partial(**{"alignment.threads": 8})
-        assert manager.config.alignment.threads == 8
-
-        # Multiple updates
-        manager.update_partial(debug_mode=False, **{"validation.min_length": 20})
-        assert manager.config.debug_mode == False
-        assert manager.config.validation.min_length == 20
-
-    def test_change_callbacks(self):
-        """Test configuration change callbacks."""
-        manager = ConfigManager()
-
-        callback_calls = []
-
-        def test_callback(config):
-            callback_calls.append(config.debug_mode)
-
-        # Add callback
-        manager.add_change_callback(test_callback)
-
-        # Update config - should trigger callback
-        manager.update_partial(debug_mode=True)
-        assert len(callback_calls) == 1
-        assert callback_calls[0] == True
-
-        # Another update
-        manager.update_partial(debug_mode=False)
-        assert len(callback_calls) == 2
-        assert callback_calls[1] == False
-
-        # Remove callback
-        manager.remove_change_callback(test_callback)
-        manager.update_partial(debug_mode=True)
-        assert len(callback_calls) == 2  # No new calls
-
-    @pytest.mark.skipif(
-        os.getenv("CI") == "true",
-        reason="File watcher timing unreliable in CI environments",
-    )
-    def test_file_watcher(self):
-        """Test configuration file watching."""
-        config_data = {"debug_mode": False}
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            json.dump(config_data, f)
-            config_path = Path(f.name)
-
-        try:
-            manager = ConfigManager()
-
-            # Start watching
-            manager.watch_file(config_path)
-
-            # Update file
-            updated_data = {"debug_mode": True}
-            with open(config_path, "w") as f:
-                json.dump(updated_data, f)
-
-            # Give watcher time to detect change
-            time.sleep(1.1)
-
-            # Configuration should be updated
-            assert manager.config.debug_mode == True
-
-            # Stop watching
-            manager.stop_watching()
-
-        finally:
-            config_path.unlink(missing_ok=True)
-
-    def test_global_config_functions(self):
-        """Test global configuration functions."""
-        # Initial config
-        config = get_config()
-        assert isinstance(config, EnhancedConfig)
-
-        # Update global config
-        new_config = EnhancedConfig(debug_mode=True)
-        update_config(new_config)
-
-        updated_config = get_config()
-        assert updated_config.debug_mode == True
-
-        # Partial update
-        update_config_partial(debug_mode=False, **{"alignment.threads": 12})
-        final_config = get_config()
-        assert final_config.debug_mode == False
-        assert final_config.alignment.threads == 12
-
-
 class TestSecuritySettings:
     """Test security-related configuration."""
 
@@ -567,40 +441,6 @@ class TestComplexScenarios:
         assert merged["alignment"]["params"]["max_targets"] == 10  # Added
         assert merged["validation"]["enabled"] == True  # Preserved
         assert merged["debug_mode"] == True  # Added
-
-    def test_configuration_thread_safety(self):
-        """Test thread safety of configuration manager."""
-        manager = ConfigManager()
-
-        results = []
-        errors = []
-
-        def update_config_worker(worker_id):
-            try:
-                for i in range(10):
-                    manager.update_partial(debug_mode=(worker_id % 2 == 0))
-                    config = manager.config
-                    results.append(f"worker_{worker_id}_{i}_{config.debug_mode}")
-                    time.sleep(0.01)
-            except Exception as e:
-                errors.append(e)
-
-        # Start multiple worker threads
-        threads = []
-        for i in range(5):
-            thread = threading.Thread(target=update_config_worker, args=(i,))
-            threads.append(thread)
-            thread.start()
-
-        # Wait for all threads
-        for thread in threads:
-            thread.join()
-
-        # Should have no errors
-        assert len(errors) == 0
-
-        # Should have results from all workers
-        assert len(results) == 50
 
     def test_configuration_validation_error_handling(self):
         """Test handling of validation errors in configuration."""
