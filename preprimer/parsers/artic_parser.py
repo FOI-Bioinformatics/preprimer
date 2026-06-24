@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Union
 
 from ..core.exceptions import ParserError
 from ..core.interfaces import AmpliconData, PrimerData
+from ..core.primerscheme_info import PrimerschemeInfo
 from ..core.standardized_parser import StandardizedParser
 
 logger = logging.getLogger(__name__)
@@ -172,7 +173,26 @@ class ARTICParser(StandardizedParser):
                 stops = [p.stop for p in amplicon.primers]
                 amplicon.length = max(stops) - min(starts)
 
+        # Import scheme metadata from a sibling info.json (primal-page) so it
+        # survives conversion instead of being regenerated as placeholders.
+        scheme_info = self._load_scheme_info(file_path)
+        if scheme_info is not None:
+            for amplicon in amplicons.values():
+                amplicon.metadata["scheme_info"] = scheme_info
+
         return amplicons
+
+    @staticmethod
+    def _load_scheme_info(file_path: Path) -> Optional[Dict]:
+        """Load a sibling info.json (primal-page schema) if present."""
+        info_path = file_path.parent / "info.json"
+        if not info_path.exists():
+            return None
+        try:
+            return PrimerschemeInfo.from_file(info_path).to_dict()
+        except Exception as e:  # malformed info.json must not break parsing
+            logger.warning(f"Could not read scheme info.json at {info_path}: {e}")
+            return None
 
     def get_reference_file(self, file_path: Union[str, Path]) -> Optional[Path]:
         """Get associated reference file."""
