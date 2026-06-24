@@ -6,15 +6,13 @@ import json
 import shutil
 import tempfile
 from pathlib import Path
-from typing import List
-from unittest.mock import Mock
 
 import pytest
 
 from preprimer.core.converter import PrimerConverter
-from preprimer.core.enhanced_config import ConfigManager, EnhancedConfig
+from preprimer.core.enhanced_config import EnhancedConfig
 from preprimer.core.interfaces import AmpliconData, PrimerData
-from preprimer.core.registry import ParserRegistry, WriterRegistry
+from preprimer.core.registry import ParserRegistry
 from preprimer.core.security import InputValidator, PathValidator
 from preprimer.parsers.artic_parser import ARTICParser
 from preprimer.parsers.varvamp_parser import VarVAMPParser
@@ -298,18 +296,6 @@ class TestConfigurationBenchmarks:
 
         finally:
             temp_path.unlink(missing_ok=True)
-
-    def test_config_manager_updates_benchmark(self, benchmark):
-        """Benchmark configuration manager updates."""
-        manager = ConfigManager()
-
-        def update_config():
-            for i in range(10):
-                manager.update_partial(debug_mode=(i % 2 == 0))
-            return manager.config.debug_mode
-
-        result = benchmark(update_config)
-        assert isinstance(result, bool)
 
 
 class TestRegistryBenchmarks:

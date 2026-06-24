@@ -49,31 +49,26 @@ class BaseParserTest(ABC):
     @abstractmethod
     def parser_class(self) -> Type[StandardizedParser]:
         """The parser class to test."""
-        pass
 
     @property
     @abstractmethod
     def valid_test_file(self) -> Path:
         """Path to a valid test file for this parser."""
-        pass
 
     @property
     @abstractmethod
     def expected_amplicon_count(self) -> int:
         """Expected number of amplicons in valid_test_file."""
-        pass
 
     @property
     @abstractmethod
     def expected_format_name(self) -> str:
         """Expected format name (e.g., 'varvamp', 'artic')."""
-        pass
 
     @property
     @abstractmethod
     def expected_extensions(self) -> List[str]:
         """Expected file extensions (e.g., ['.tsv', '.bed'])."""
-        pass
 
     # =========================================================================
     # Optional: Override these for parser-specific behavior
@@ -180,9 +175,7 @@ class BaseParserTest(ABC):
                 continue
 
             result = parser.validate_file(invalid_file)
-            assert (
-                result is False
-            ), f"Parser accepted invalid file: {invalid_file.name}"
+            assert result is False, f"Parser accepted invalid file: {invalid_file.name}"
 
     @pytest.mark.unit
     @pytest.mark.parser

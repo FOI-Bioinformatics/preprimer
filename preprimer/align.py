@@ -79,65 +79,36 @@ def align_primers(
             output_paths["primers"] = output_path
             logger.info(f"Primer alignment results: {output_path}")
 
-        elif output_format == "me-pcr":
-            # Run in silico PCR using me-PCR
-            mepcr_output_dir = output_dir / "alignment" / "mepcr"
-            mepcr_output_dir.mkdir(parents=True, exist_ok=True)
-
-            # Get me-PCR provider
-            mepcr_provider = alignment_registry.get_provider("me-pcr")
-
-            if not mepcr_provider.is_available():
-                raise RuntimeError(
-                    "me-PCR is not available on this system. "
-                    "Please install me-PCR and ensure it's in your PATH."
-                )
-
-            logger.info("Running me-PCR in silico PCR...")
-            output_file = mepcr_output_dir / f"{prefix}.mepcr.aln"
-
-            output_path = mepcr_provider.run_mepcr(
-                primer_file=sts_file,
-                reference=reference_file,
-                output_file=output_file,
-                max_product_size=1000,
-            )
-
-            output_paths["me-pcr"] = output_path
-            logger.info(f"me-PCR results: {output_path}")
-
-        elif output_format == "merpcr":
-            # Run in silico PCR using merPCR
-            merpcr_output_dir = output_dir / "alignment" / "merpcr"
-            merpcr_output_dir.mkdir(parents=True, exist_ok=True)
-
-            # Get merPCR provider
-            merpcr_provider = alignment_registry.get_provider("merpcr")
-
-            if not merpcr_provider.is_available():
-                raise RuntimeError(
-                    "merPCR is not available on this system. "
-                    "Please install merPCR and ensure it's in your PATH."
-                )
-
-            logger.info("Running merPCR in silico PCR...")
-            output_file = merpcr_output_dir / f"{prefix}.merpcr.aln"
-
-            output_path = merpcr_provider.run_merpcr(
-                primer_file=sts_file,
-                reference=reference_file,
-                output_file=output_file,
-                max_product_size=1000,
-            )
-
-            output_paths["merpcr"] = output_path
-            logger.info(f"merPCR results: {output_path}")
-
         else:
-            raise ValueError(
-                f"Invalid output format '{output_format}'. "
-                f"Must be 'primers', 'me-pcr', or 'merpcr'"
+            # Any registered in-silico-PCR provider (me-pcr, merpcr, seqkit,
+            # primersearch, mfeprimer, ...) runs uniformly via align_primers.
+            if not alignment_registry.is_registered(output_format):
+                raise ValueError(
+                    f"Invalid output format '{output_format}'. Must be 'primers' "
+                    f"or a registered in-silico-PCR tool: "
+                    f"{', '.join(alignment_registry.list_providers())}"
+                )
+
+            tool_output_dir = output_dir / "alignment" / output_format
+            tool_output_dir.mkdir(parents=True, exist_ok=True)
+
+            provider = alignment_registry.get_provider(output_format)
+            if not provider.is_available():
+                raise RuntimeError(
+                    f"{output_format} is not available on this system. "
+                    f"Please install {output_format} and ensure it's in your PATH."
+                )
+
+            logger.info(f"Running {output_format} in silico PCR...")
+            output_path = provider.align_primers(
+                primer_file=sts_file,
+                reference_file=reference_file,
+                output_dir=tool_output_dir,
+                prefix=prefix,
             )
+
+            output_paths[output_format] = output_path
+            logger.info(f"{output_format} results: {output_path}")
 
     return output_paths
 

@@ -11,7 +11,6 @@ Supports both header and header-less formats for compatibility with
 me-pcr and merPCR output files.
 """
 
-import csv
 import logging
 import re
 from pathlib import Path
@@ -71,7 +70,15 @@ class STSParser(StandardizedParser):
         second_field_upper = fields[1].strip().upper()
         third_field_upper = fields[2].strip().upper()
 
-        primer_keywords = ["FORWARD", "REVERSE", "FWD", "REV", "LEFT", "RIGHT", "PRIMER"]
+        primer_keywords = [
+            "FORWARD",
+            "REVERSE",
+            "FWD",
+            "REV",
+            "LEFT",
+            "RIGHT",
+            "PRIMER",
+        ]
         if any(keyword in second_field_upper for keyword in primer_keywords):
             return True
         if any(keyword in third_field_upper for keyword in primer_keywords):
@@ -79,7 +86,7 @@ class STSParser(StandardizedParser):
 
         # Check if fields look like DNA sequences (mostly ATCG)
         # If second field is mostly DNA bases, it's likely data not header
-        dna_pattern = re.compile(r'^[ATCGNRYSWKMBDHVatcgn]+$')
+        dna_pattern = re.compile(r"^[ATCGNRYSWKMBDHVatcgn]+$")
         if dna_pattern.match(fields[1].strip()):
             return False  # Looks like sequence data
 
@@ -122,12 +129,25 @@ class STSParser(StandardizedParser):
 
                     # First field should be a name/ID field
                     valid_name_fields = ["NAME", "AMPLICON", "ID", "MARKER", "STS"]
-                    if not any(keyword in header_fields_upper[0] for keyword in valid_name_fields):
-                        logger.debug(f"Invalid header: first field '{fields[0]}' doesn't match expected name fields")
+                    if not any(
+                        keyword in header_fields_upper[0]
+                        for keyword in valid_name_fields
+                    ):
+                        logger.debug(
+                            f"Invalid header: first field '{fields[0]}' doesn't match expected name fields"
+                        )
                         return False
 
                     # Second and third fields should be primer-related
-                    primer_keywords = ["FORWARD", "REVERSE", "FWD", "REV", "LEFT", "RIGHT", "PRIMER"]
+                    primer_keywords = [
+                        "FORWARD",
+                        "REVERSE",
+                        "FWD",
+                        "REV",
+                        "LEFT",
+                        "RIGHT",
+                        "PRIMER",
+                    ]
                     has_primer_keyword = False
                     for field in header_fields_upper[1:3]:  # Check 2nd and 3rd fields
                         if any(keyword in field for keyword in primer_keywords):
@@ -135,7 +155,9 @@ class STSParser(StandardizedParser):
                             break
 
                     if not has_primer_keyword:
-                        logger.debug(f"Invalid header: no primer-related keywords in fields {fields[1:3]}")
+                        logger.debug(
+                            f"Invalid header: no primer-related keywords in fields {fields[1:3]}"
+                        )
                         return False
 
                 # Get a data line (skip header if present)
@@ -152,12 +174,16 @@ class STSParser(StandardizedParser):
                     return False
 
                 # Validate that second/third fields look like DNA sequences
-                dna_pattern = re.compile(r'^[ATCGNRYSWKMBDHVatcgn]+$')
+                dna_pattern = re.compile(r"^[ATCGNRYSWKMBDHVatcgn]+$")
                 if not dna_pattern.match(data_fields[1].strip()):
-                    logger.debug(f"Second field doesn't look like DNA sequence: {data_fields[1]}")
+                    logger.debug(
+                        f"Second field doesn't look like DNA sequence: {data_fields[1]}"
+                    )
                     return False
                 if not dna_pattern.match(data_fields[2].strip()):
-                    logger.debug(f"Third field doesn't look like DNA sequence: {data_fields[2]}")
+                    logger.debug(
+                        f"Third field doesn't look like DNA sequence: {data_fields[2]}"
+                    )
                     return False
 
                 # If 4 columns, validate fourth is numeric (product size)
@@ -165,7 +191,9 @@ class STSParser(StandardizedParser):
                     try:
                         size = int(data_fields[3].strip())
                         if size <= 0:
-                            logger.debug(f"Invalid product size (must be positive): {size}")
+                            logger.debug(
+                                f"Invalid product size (must be positive): {size}"
+                            )
                             return False
                     except ValueError:
                         logger.debug(f"Fourth field is not numeric: {data_fields[3]}")
@@ -243,7 +271,9 @@ class STSParser(StandardizedParser):
                 start_row = 1 if has_header else 0
 
                 for row_num_offset, line in enumerate(lines[start_row:]):
-                    row_num = row_num_offset + start_row + 1  # Human-readable row number
+                    row_num = (
+                        row_num_offset + start_row + 1
+                    )  # Human-readable row number
 
                     try:
                         fields = line.split("\t")
@@ -267,9 +297,7 @@ class STSParser(StandardizedParser):
 
                         # Validate required fields
                         required_fields = ["NAME", "FORWARD", "REVERSE"]
-                        self._validate_required_fields(
-                            row, required_fields, row_num
-                        )
+                        self._validate_required_fields(row, required_fields, row_num)
 
                         # Sanitize input data
                         amplicon_name = self._sanitize_string_field(
@@ -317,7 +345,9 @@ class STSParser(StandardizedParser):
 
                         forward_start = 0
                         forward_stop = len(forward_seq)
-                        reverse_start = forward_stop + estimated_amplicon_length - len(reverse_seq)
+                        reverse_start = (
+                            forward_stop + estimated_amplicon_length - len(reverse_seq)
+                        )
                         reverse_stop = reverse_start + len(reverse_seq)
 
                         # Create PrimerData objects
@@ -334,6 +364,9 @@ class STSParser(StandardizedParser):
                             metadata={
                                 "source_row": row_num,
                                 "product_size": product_size,
+                                # STS format carries no coordinates; positions
+                                # here are estimated, not biologically accurate.
+                                "synthetic_coordinates": True,
                             },
                         )
 
@@ -350,6 +383,9 @@ class STSParser(StandardizedParser):
                             metadata={
                                 "source_row": row_num,
                                 "product_size": product_size,
+                                # STS format carries no coordinates; positions
+                                # here are estimated, not biologically accurate.
+                                "synthetic_coordinates": True,
                             },
                         )
 

@@ -66,12 +66,13 @@ class MePCRProvider(AlignmentProvider):
             f"M={max_product_size}",
         ]
 
-        # Run me-PCR
+        # Run me-PCR (timeout guards against a hung external process)
         subprocess.run(
             mepcr_command,
             check=True,
             capture_output=True,
             text=True,
+            timeout=300,
         )
 
         return output_file
@@ -106,6 +107,13 @@ class MePCRProvider(AlignmentProvider):
             f"M={max_product_size}",
         ]
 
-        subprocess.run(mepcr_command, shell=False, check=True)
+        subprocess.run(
+            mepcr_command,
+            shell=False,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
 
         return output_file

@@ -14,6 +14,9 @@ from .blast_provider import BlastProvider
 from .exonerate_provider import ExonerateProvider
 from .mepcr_provider import MePCRProvider
 from .merpcr_provider import MerPCRProvider
+from .mfeprimer_provider import MFEprimerProvider
+from .primersearch_provider import PrimersearchProvider
+from .seqkit_provider import SeqkitProvider
 
 
 def register_all_providers():
@@ -22,6 +25,9 @@ def register_all_providers():
     alignment_registry.register(ExonerateProvider)
     alignment_registry.register(MePCRProvider)
     alignment_registry.register(MerPCRProvider)
+    alignment_registry.register(SeqkitProvider)
+    alignment_registry.register(PrimersearchProvider)
+    alignment_registry.register(MFEprimerProvider)
 
 
 # Auto-register on import
@@ -32,5 +38,8 @@ __all__ = [
     "ExonerateProvider",
     "MePCRProvider",
     "MerPCRProvider",
+    "SeqkitProvider",
+    "PrimersearchProvider",
+    "MFEprimerProvider",
     "register_all_providers",
 ]

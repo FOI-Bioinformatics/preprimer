@@ -55,10 +55,7 @@ class STSWriter(OutputWriter):
         include_size = kwargs.get("include_size")
         if include_size is None:
             # Auto-detect: check if any amplicons have meaningful length info
-            include_size = any(
-                amp.length and amp.length > 0
-                for amp in amplicons
-            )
+            include_size = any(amp.length and amp.length > 0 for amp in amplicons)
             logger.info(
                 f"Auto-detected STS format: "
                 f"{'4-column (with SIZE)' if include_size else '3-column'}"
@@ -118,11 +115,13 @@ class STSWriter(OutputWriter):
 
                     amplicon_count += 1
 
-                    # If there are multiple primers per direction, log warning
+                    # If there are multiple primers per direction, warn that
+                    # alternate primers are being dropped.
                     if len(forward_primers) > 1 or len(reverse_primers) > 1:
-                        logger.info(
+                        logger.warning(
                             f"Amplicon {amplicon.amplicon_id} has multiple primers "
-                            "per direction, using first of each"
+                            "per direction; keeping only the first of each "
+                            "(alternates dropped)"
                         )
 
             format_desc = f"{'4-column' if include_size else '3-column'} STS format"

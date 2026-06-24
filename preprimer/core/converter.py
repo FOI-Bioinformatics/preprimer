@@ -4,7 +4,7 @@ Core conversion logic for preprimer.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from .enhanced_config import EnhancedConfig
 from .exceptions import (
@@ -14,7 +14,6 @@ from .exceptions import (
     OutputError,
     ParserError,
     ValidationError,
-    handle_common_exceptions,
 )
 from .interfaces import AmpliconData
 from .registry import parser_registry, writer_registry
@@ -25,8 +24,14 @@ logger = logging.getLogger(__name__)
 class PrimerConverter:
     """Main converter class for primer format conversion."""
 
+    # Output formats that represent at most one forward + one reverse primer
+    # per amplicon, so alternate primers are dropped on write.
+    LOSSY_FORMATS = {"olivar", "sts"}
+
     def __init__(self, config: Optional[EnhancedConfig] = None):
         self.config = config or EnhancedConfig()
+        # Populated by convert(); machine-readable summary of the last run.
+        self.last_summary: Dict[str, Any] = {}
 
     def convert(
         self,
@@ -36,6 +41,8 @@ class PrimerConverter:
         output_formats: Optional[List[str]] = None,
         prefix: str = "primers",
         reference_file: Optional[Union[str, Path]] = None,
+        lenient: bool = False,
+        strict: bool = False,
         **kwargs,
     ) -> Dict[str, Path]:
         """
@@ -96,9 +103,16 @@ class PrimerConverter:
 
             logger.info(f"Parsed {len(amplicons)} amplicons")
 
-            # Validate amplicons
+            # Collect warnings for the run summary (non-fatal data-quality notices).
+            warnings: List[str] = []
+
+            # Validate amplicons. In lenient mode, validation issues become
+            # warnings instead of aborting the conversion.
             try:
-                self._validate_amplicons(amplicons)
+                validation_warnings = self._validate_amplicons(
+                    amplicons, lenient=lenient
+                )
+                warnings.extend(validation_warnings)
             except ValidationError:
                 # Re-raise validation errors as-is
                 raise
@@ -110,6 +124,33 @@ class PrimerConverter:
                     "Check that the input data is complete and valid"
                 ) from e
 
+            # Detect fabricated (synthetic) coordinates flagged by parsers.
+            synthetic_primers = sum(
+                1
+                for amp in amplicons
+                for p in amp.primers
+                if p.metadata.get("synthetic_coordinates")
+            )
+            if synthetic_primers:
+                msg = (
+                    f"{synthetic_primers} primer(s) have synthetic coordinates "
+                    f"(the source format lacked positions; coordinates were "
+                    f"estimated and are not biologically accurate)"
+                )
+                if strict:
+                    raise ValidationError(
+                        msg,
+                        user_message=(
+                            "Conversion aborted in --strict mode: the input "
+                            "lacks real primer coordinates."
+                        ),
+                    ).add_suggestion(
+                        "Provide a coordinate-bearing input format, or drop "
+                        "--strict to allow estimated coordinates"
+                    )
+                warnings.append(msg)
+                logger.warning(msg)
+
         # Get reference file if not provided
         if reference_file is None:
             reference_file = parser.get_reference_file(input_file)
@@ -120,10 +161,38 @@ class PrimerConverter:
         if output_formats is None:
             output_formats = self.config.output.formats
 
+        # Warn when the source carries no primer sequences (e.g. a 6-column
+        # primer.bed) but the requested output relies on sequences.
+        seqless_primers = sum(
+            1 for amp in amplicons for p in amp.primers if not p.sequence
+        )
+        SEQUENCE_BEARING = {"fasta", "varvamp", "olivar", "sts"}
+        if seqless_primers and SEQUENCE_BEARING.intersection(
+            f.lower() for f in output_formats
+        ):
+            msg = (
+                f"{seqless_primers} primer(s) have no sequence (the input is a "
+                f"6-column primer.bed); sequence-bearing output formats will have "
+                f"empty primer sequences"
+            )
+            warnings.append(msg)
+            logger.warning(msg)
+
         # Convert to output formats
         output_files = {}
 
         for output_format in output_formats:
+            # Warn when a lossy format will drop alternate primers.
+            if output_format.lower() in self.LOSSY_FORMATS:
+                dropped = self._count_dropped_primers(amplicons)
+                if dropped:
+                    msg = (
+                        f"{output_format} format keeps one forward/reverse primer "
+                        f"per amplicon; {dropped} alternate primer(s) will be dropped"
+                    )
+                    warnings.append(msg)
+                    logger.warning(msg)
+
             try:
                 output_file = self._write_format(
                     amplicons,
@@ -144,7 +213,28 @@ class PrimerConverter:
                 if not kwargs.get("continue_on_error", False):
                     raise
 
+        # Build a machine-readable summary of the run.
+        self.last_summary = {
+            "input_file": str(input_file),
+            "input_format": input_format,
+            "amplicons": len(amplicons),
+            "primers": sum(len(a.primers) for a in amplicons),
+            "synthetic_coordinate_primers": synthetic_primers,
+            "output_files": {fmt: str(path) for fmt, path in output_files.items()},
+            "warnings": warnings,
+        }
+
         return output_files
+
+    @staticmethod
+    def _count_dropped_primers(amplicons: List[AmpliconData]) -> int:
+        """Count alternate primers that a single-pair format would discard."""
+        dropped = 0
+        for amplicon in amplicons:
+            fwd = len(amplicon.forward_primers)
+            rev = len(amplicon.reverse_primers)
+            dropped += max(0, fwd - 1) + max(0, rev - 1)
+        return dropped
 
     def _write_format(
         self,
@@ -185,12 +275,24 @@ class PrimerConverter:
 
         return result_path or output_path
 
-    def _validate_amplicons(self, amplicons: List[AmpliconData]) -> None:
-        """Validate parsed amplicon data."""
+    def _validate_amplicons(
+        self, amplicons: List[AmpliconData], lenient: bool = False
+    ) -> List[str]:
+        """Validate parsed amplicon data.
+
+        Args:
+            amplicons: Parsed amplicons to validate.
+            lenient: When True, data-quality issues are returned as warnings
+                instead of raising ``ValidationError``. An empty input is always
+                a hard error regardless of this flag.
+
+        Returns:
+            List of warning strings (empty unless lenient mode downgraded issues).
+        """
         if not amplicons:
             raise ValidationError("No amplicons found in input file")
 
-        issues = []
+        issues: List[str] = []
 
         for amplicon in amplicons:
             if not amplicon.primers:
@@ -210,7 +312,11 @@ class PrimerConverter:
             if self.config.validation.enabled:
                 for primer in amplicon.primers:
                     if not primer.sequence:
-                        issues.append(f"Primer {primer.name} has empty sequence")
+                        # An empty sequence is valid for a 6-column primer.bed,
+                        # where sequences live in reference.fasta. Other parsers
+                        # reject empty sequences at parse time, so this only
+                        # occurs for sequence-less BED input. Skip content checks
+                        # (the converter emits a "no sequence" warning separately).
                         continue
 
                     # Check sequence length
@@ -243,6 +349,14 @@ class PrimerConverter:
             else:
                 issue_summary = "\n".join(issues)
 
+            if lenient:
+                # Downgrade to warnings so the conversion can proceed.
+                logger.warning(
+                    f"Validation issues (continuing in lenient mode):\n{issue_summary}"
+                )
+                return issues
+
             raise ValidationError(f"Validation failed:\n{issue_summary}")
 
         logger.info(f"Validation passed for {len(amplicons)} amplicons")
+        return []

@@ -17,17 +17,14 @@ Requires:
 import shutil
 import time
 from pathlib import Path
-from typing import Dict, List
 
 import pytest
 
 from preprimer.align import align_primers
 from preprimer.core.converter import PrimerConverter
 from preprimer.core.enhanced_config import EnhancedConfig
-from preprimer.core.registry import alignment_registry, parser_registry
 
 # Import validation framework
-from .report_generator import ReportGenerator
 from .validator import ValidationResult, validate_conversion
 
 # Test data paths
@@ -236,9 +233,7 @@ class TestFormatConversions:
             )[input_format]
 
             # Validate both conversions
-            result1 = validate_conversion(
-                input_format, "sts", input_file, output_sts
-            )
+            result1 = validate_conversion(input_format, "sts", input_file, output_sts)
             result2 = validate_conversion(
                 "sts", input_format, output_sts, output_original
             )
@@ -434,9 +429,7 @@ class TestEdgeCases:
     """Test edge cases and special scenarios."""
 
     @standard
-    def test_circular_genome_handling(
-        self, converter, output_dir, validation_results
-    ):
+    def test_circular_genome_handling(self, converter, output_dir, validation_results):
         """Test circular genome (mitochondrial) handling."""
         input_file = MITOCHONDRIAL_DATASET / "olivar.csv"
 
@@ -468,7 +461,9 @@ class TestEdgeCases:
         """Test handling of edge case with minimal data."""
         # Create minimal STS file with 1 amplicon (with proper header and valid primer lengths)
         minimal_sts = tmp_path / "minimal.sts"
-        minimal_sts.write_text("NAME\tFORWARD\tREVERSE\nTEST_AMP\tATCGATCGATCGATCG\tGCTAGCTAGCTAGCTA\n")
+        minimal_sts.write_text(
+            "NAME\tFORWARD\tREVERSE\nTEST_AMP\tATCGATCGATCGATCG\tGCTAGCTAGCTAGCTA\n"
+        )
 
         # Should handle gracefully
         output_files = converter.convert(
@@ -584,6 +579,7 @@ class TestIntegrationWorkflows:
 @pytest.fixture(scope="session", autouse=True)
 def generate_reports(request, tmp_path_factory):
     """Generate validation reports after all tests complete."""
+
     # This will run after all tests
     def finalize():
         # Collect all validation results from test sessions

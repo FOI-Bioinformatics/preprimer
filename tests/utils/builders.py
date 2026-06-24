@@ -4,7 +4,6 @@ Test data builders for PrePrimer tests.
 Provides fluent builder APIs for creating test data objects.
 """
 
-from pathlib import Path
 from typing import Dict, List, Optional
 
 from preprimer.core.enhanced_config import (
@@ -155,7 +154,7 @@ class AmpliconDataBuilder:
         self,
         forward_seq: str = "ATCGATCGATCGATCGATCG",
         reverse_seq: str = "CGATCGATCGATCGATCGAT",
-        pool: int = 1
+        pool: int = 1,
     ) -> "AmpliconDataBuilder":
         """Add a forward/reverse primer pair."""
         forward = (
@@ -223,10 +222,7 @@ class ConfigBuilder:
         self._environment = "test"  # Default to test environment
 
     def with_validation(
-        self,
-        enabled: bool = True,
-        min_length: int = 15,
-        max_length: int = 35
+        self, enabled: bool = True, min_length: int = 15, max_length: int = 35
     ) -> "ConfigBuilder":
         """Set validation settings."""
         self._validation = ValidationSettings(
@@ -237,9 +233,7 @@ class ConfigBuilder:
         return self
 
     def with_output(
-        self,
-        formats: Optional[List[str]] = None,
-        force_overwrite: bool = True
+        self, formats: Optional[List[str]] = None, force_overwrite: bool = True
     ) -> "ConfigBuilder":
         """Set output settings."""
         self._output = OutputSettings(
@@ -304,10 +298,7 @@ class TestDatasetBuilder:
         self._prefix = "test"
 
     def add_amplicon(
-        self,
-        amplicon_id: str,
-        pool: int = 1,
-        length: int = 200
+        self, amplicon_id: str, pool: int = 1, length: int = 200
     ) -> "TestDatasetBuilder":
         """Add an amplicon with default primer pair."""
         amplicon = (
@@ -340,11 +331,12 @@ class TestDatasetBuilder:
 
 # Convenience functions for common test scenarios
 
+
 def build_primer(
     name: str = "test_primer",
     sequence: str = "ATCGATCGATCGATCGATCG",
     direction: str = "forward",
-    **kwargs
+    **kwargs,
 ) -> PrimerData:
     """Quick primer builder."""
     builder = PrimerDataBuilder().with_name(name).with_sequence(sequence)
@@ -361,9 +353,7 @@ def build_primer(
 
 
 def build_amplicon(
-    amplicon_id: str = "test_amplicon",
-    with_primers: bool = True,
-    **kwargs
+    amplicon_id: str = "test_amplicon", with_primers: bool = True, **kwargs
 ) -> AmpliconData:
     """Quick amplicon builder."""
     builder = AmpliconDataBuilder().with_id(amplicon_id)

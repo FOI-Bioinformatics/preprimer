@@ -261,8 +261,12 @@ class TestVarVAMPParserEdgeCases:
             f.write("\t".join(header) + "\n")
 
             # Same amplicon, different pools
-            f.write("amp1\t200\tamp1_LEFT\t1\t100\t120\tATCGATCGATCGATCGATCG\t20\t50.0\t60.0\t50.0\t60.0\t1.0\n")
-            f.write("amp1\t200\tamp1_RIGHT\t2\t280\t300\tGCTAGCTAGCTAGCTAGCTA\t20\t50.0\t60.0\t50.0\t60.0\t1.0\n")
+            f.write(
+                "amp1\t200\tamp1_LEFT\t1\t100\t120\tATCGATCGATCGATCGATCG\t20\t50.0\t60.0\t50.0\t60.0\t1.0\n"
+            )
+            f.write(
+                "amp1\t200\tamp1_RIGHT\t2\t280\t300\tGCTAGCTAGCTAGCTAGCTA\t20\t50.0\t60.0\t50.0\t60.0\t1.0\n"
+            )
 
             inconsistent_file = Path(f.name)
 

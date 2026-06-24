@@ -68,23 +68,31 @@ preprimer convert --input ambiguous_file.txt --format varvamp --output-formats a
 - Compatible with [amplicon-nf](https://github.com/nf-core/amplicon-nf) analysis pipelines
 - Supports both single and multiple reference architectures
 
-#### **File Structure** (7-column extended BED format)
+#### **File Structure** (6- or 7-column BED)
+Both the canonical **6-column** `primer.bed` (the form community scheme repos
+and `primaschema` distribute, where sequences live in `reference.fasta`) and the
+**7-column** PrimalScheme-like variant (sequence appended) are read:
 ```bed
-# artic-bed-version v3.0
+# 7-column (PrimalScheme-like, sequence appended)
 MN908947.3	47	78	SARS-CoV-2_1_LEFT	1	+	CTCTTGTAGATCTGTTCTCTAAACGAACTTT
 MN908947.3	419	447	SARS-CoV-2_1_RIGHT	1	-	AAAACGCCTTTTTCAACTTCTACTAAGC
-NC_009942.1	8	30	WNVUS1_1_LEFT_1	1	+	GCCTGTGTGAGCTGACAAACTT
-reference	14	34	reference_1_LEFT_1	1	+	CGGTTCAGGCTTCACCACAG
+# 6-column (canonical primal-page / legacy; no sequence column)
+NC_009942.1	8	30	WNVUS1_1_LEFT	1	+
 ```
 
-#### **Column Specification** (Extended BED format)
+#### **Column Specification**
 1. `chrom` - Reference sequence name (NCBI accession or generic "reference")
 2. `start` - Primer start coordinate (0-based, inclusive)
-3. `stop` - Primer end coordinate (0-based, exclusive)  
+3. `stop` - Primer end coordinate (0-based, exclusive)
 4. `name` - Primer name following articbedversion naming conventions
 5. `pool` - Pool assignment (1, 2, etc.) or BED score
 6. `strand` - Strand orientation (+ for forward, - for reverse)
-7. `sequence` - Primer sequence (5' to 3') with IUPAC support
+7. `sequence` - *(7-column only)* Primer sequence (5' to 3') with IUPAC support
+
+When writing ARTIC output, choose the column count with
+`convert --bed-columns {6,7}` (default 7). A sibling `info.json` (primal-page
+schema) is imported on read and its metadata (species, version, authors) is
+preserved through conversion.
 
 #### **Version Differences**
 - **v2.0 (Legacy)**: Simple naming (`SARS-CoV-2_1_LEFT`), generic reference names
@@ -219,9 +227,23 @@ preprimer convert --input validation_primers.sts --output-formats artic fasta va
 preprimer info primers.sts.tsv
 ```
 
+### **Primer3 Format (Boulder-IO)**
+
+**Description:** Output of the Primer3 primer-design engine that many tiled
+tools wrap. Boulder-IO is `KEY=value` lines with records terminated by a lone
+`=`. PrePrimer reads the designed primer pairs
+(`PRIMER_LEFT_i_SEQUENCE`, `PRIMER_RIGHT_i_SEQUENCE`, and the
+`PRIMER_LEFT_i=start,len` / `PRIMER_RIGHT_i=pos,len` coordinates).
+
+```bash
+# Convert raw Primer3 output (extensions .p3 / .primer3)
+preprimer convert --input primer3_output.p3 --output-formats artic
+```
+
 ## 📤 **Output Formats**
 
-PrePrimer converts to five different output formats for maximum compatibility and bidirectional conversion.
+PrePrimer converts to multiple output formats for maximum compatibility and
+bidirectional conversion.
 
 ### **ARTIC Primerscheme Format**
 
@@ -452,16 +474,30 @@ COVID_amplicon_2,EPI_ISL_402124,2,250,530,GCTAGCTAGCTAGCTAGCTA,TAGCTAGCTAGCTAGCT
 - `fP` - Forward primer sequence (5' to 3')
 - `rP` - Reverse primer sequence (5' to 3')
 
+### **GFF3 Format**
+
+**Description:** Primer binding sites as GFF3 features
+(`primer_binding_site`) for genome-browser visualization. GFF3 is 1-based and
+inclusive, so a primer stored 0-based at `[start, stop)` is written as
+`start+1 .. stop`. Attributes carry the primer name, amplicon id, pool, and
+(when available) the sequence.
+
+```bash
+preprimer convert --input primers.scheme.bed --output-formats gff3
+```
+
 ## 🔄 **Format Conversion Matrix**
 
-**Complete bidirectional conversion support:**
+**Complete bidirectional conversion support** (plus the `primer3` input and
+`gff3` output formats):
 
-| Input → Output | ARTIC | FASTA | STS | VarVAMP | Olivar |
-|----------------|-------|-------|-----|---------|--------|
-| **VarVAMP** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **ARTIC** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Olivar** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **STS** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Input → Output | ARTIC | FASTA | STS | VarVAMP | Olivar | GFF3 |
+|----------------|-------|-------|-----|---------|--------|------|
+| **VarVAMP** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **ARTIC** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Olivar** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **STS** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Primer3** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **🎉 All 20 conversion pathways supported with full bidirectional compatibility!**
 

@@ -125,8 +125,9 @@ class TestARTICWriter(BaseWriterTest):
 
         # Count primers
         expected_primers = sum(len(amp.primers) for amp in amplicons)
-        assert len(lines) == expected_primers, \
-            f"Expected {expected_primers} primers, got {len(lines)}"
+        assert (
+            len(lines) == expected_primers
+        ), f"Expected {expected_primers} primers, got {len(lines)}"
 
         # Verify info.json is valid JSON
         with open(info_json, "r", encoding="utf-8") as f:
@@ -295,7 +296,9 @@ class TestARTICWriter(BaseWriterTest):
         amplicons = self.get_test_amplicons()
 
         # Create temporary reference file
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".fasta", delete=False) as ref:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".fasta", delete=False
+        ) as ref:
             ref.write(">MN908947.3\n")
             ref.write("ATCGATCGATCGATCG\n")
             ref_path = Path(ref.name)
@@ -455,7 +458,9 @@ class TestARTICWriterIntegration:
             amplicons.append(amplicon)
 
         # Create reference file
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".fasta", delete=False) as ref:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".fasta", delete=False
+        ) as ref:
             ref.write(">MN908947.3 SARS-CoV-2\n")
             ref.write("A" * 1000 + "\n")
             ref_path = Path(ref.name)

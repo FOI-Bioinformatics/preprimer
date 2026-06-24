@@ -7,7 +7,6 @@ Focuses on the missed coverage areas to improve overall module coverage.
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import mock_open, patch
 
 import pytest
 

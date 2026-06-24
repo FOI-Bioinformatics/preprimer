@@ -5,16 +5,13 @@ pydantic validation, plugin settings, and runtime reconfiguration.
 
 import json
 import os
-import threading
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    ValidationError,
     field_validator,
     model_validator,
 )
@@ -37,9 +34,16 @@ class AlignmentSettings(BaseModel):
     @field_validator("aligner")
     @classmethod
     def validate_aligner(cls, v):
-        valid_aligners = {"blast", "exonerate", "minimap2", "bwa"}
+        # Derive valid aligners from the registry (single source of truth)
+        # rather than a hardcoded list that can drift from reality.
+        from preprimer.core.registry import alignment_registry
+
+        valid_aligners = set(alignment_registry.list_providers())
+        if not valid_aligners:
+            # Providers not registered yet; defer validation to runtime use.
+            return v
         if v not in valid_aligners:
-            raise ValueError(f"Aligner must be one of: {valid_aligners}")
+            raise ValueError(f"Aligner must be one of: {sorted(valid_aligners)}")
         return v
 
 
@@ -396,165 +400,3 @@ class EnhancedConfig(BaseModel):
         if plugin_name not in self.plugins.config:
             self.plugins.config[plugin_name] = {}
         self.plugins.config[plugin_name].update(config)
-
-
-@dataclass
-class ConfigWatcher:
-    """Watches configuration files for changes and triggers reloads."""
-
-    config_path: Path
-    callback: Callable[[EnhancedConfig], None]
-    _stop_event: threading.Event = field(default_factory=threading.Event)
-    _thread: Optional[threading.Thread] = None
-
-    def start(self) -> None:
-        """Start watching for configuration changes."""
-        if self._thread and self._thread.is_alive():
-            return
-
-        self._stop_event.clear()
-        self._thread = threading.Thread(target=self._watch_loop, daemon=True)
-        self._thread.start()
-
-    def stop(self) -> None:
-        """Stop watching for configuration changes."""
-        self._stop_event.set()
-        if self._thread:
-            self._thread.join(timeout=1.0)
-
-    def _watch_loop(self) -> None:
-        """Main watch loop."""
-        import time
-
-        last_mtime = (
-            self.config_path.stat().st_mtime if self.config_path.exists() else 0
-        )
-
-        while not self._stop_event.wait(1.0):  # Check every second
-            try:
-                if self.config_path.exists():
-                    current_mtime = self.config_path.stat().st_mtime
-                    if current_mtime > last_mtime:
-                        last_mtime = current_mtime
-                        # Reload configuration
-                        new_config = EnhancedConfig.from_file(self.config_path)
-                        self.callback(new_config)
-            except Exception:
-                # Ignore errors during watching
-                pass
-
-
-class ConfigManager:
-    """
-    Manages configuration with runtime reconfiguration support.
-    """
-
-    def __init__(self, initial_config: Optional[EnhancedConfig] = None):
-        self._config = initial_config or EnhancedConfig()
-        self._watchers: List[ConfigWatcher] = []
-        self._change_callbacks: List[Callable[[EnhancedConfig], None]] = []
-        self._lock = threading.RLock()
-
-    @property
-    def config(self) -> EnhancedConfig:
-        """Get current configuration (thread-safe)."""
-        with self._lock:
-            return self._config.model_copy(deep=True)
-
-    def update_config(self, new_config: EnhancedConfig) -> None:
-        """
-        Update configuration and notify callbacks.
-
-        Args:
-            new_config: New configuration
-        """
-        with self._lock:
-            old_config = self._config
-            self._config = new_config
-
-            # Notify change callbacks
-            for callback in self._change_callbacks:
-                try:
-                    callback(new_config)
-                except Exception:
-                    # Don't let callback errors break config updates
-                    pass
-
-    def update_partial(self, **updates) -> None:
-        """
-        Partially update configuration.
-
-        Args:
-            **updates: Configuration updates
-        """
-        with self._lock:
-            current_data = self._config.model_dump()
-
-            # Apply updates
-            for key, value in updates.items():
-                if "." in key:
-                    # Handle nested updates
-                    EnhancedConfig._set_nested_value(current_data, key, value)
-                else:
-                    current_data[key] = value
-
-            # Create new config and update
-            new_config = EnhancedConfig(**current_data)
-            self.update_config(new_config)
-
-    def add_change_callback(self, callback: Callable[[EnhancedConfig], None]) -> None:
-        """Add a callback for configuration changes."""
-        with self._lock:
-            self._change_callbacks.append(callback)
-
-    def remove_change_callback(
-        self, callback: Callable[[EnhancedConfig], None]
-    ) -> None:
-        """Remove a configuration change callback."""
-        with self._lock:
-            if callback in self._change_callbacks:
-                self._change_callbacks.remove(callback)
-
-    def watch_file(self, config_path: Union[str, Path]) -> None:
-        """
-        Start watching a configuration file for changes.
-
-        Args:
-            config_path: Path to configuration file
-        """
-        config_path = Path(config_path)
-
-        def reload_callback(new_config: EnhancedConfig) -> None:
-            self.update_config(new_config)
-
-        watcher = ConfigWatcher(config_path, reload_callback)
-        watcher.start()
-
-        with self._lock:
-            self._watchers.append(watcher)
-
-    def stop_watching(self) -> None:
-        """Stop all file watchers."""
-        with self._lock:
-            for watcher in self._watchers:
-                watcher.stop()
-            self._watchers.clear()
-
-
-# Global configuration manager instance
-config_manager = ConfigManager()
-
-
-def get_config() -> EnhancedConfig:
-    """Get the current global configuration."""
-    return config_manager.config
-
-
-def update_config(new_config: EnhancedConfig) -> None:
-    """Update the global configuration."""
-    config_manager.update_config(new_config)
-
-
-def update_config_partial(**updates) -> None:
-    """Partially update the global configuration."""
-    config_manager.update_partial(**updates)

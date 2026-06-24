@@ -34,8 +34,7 @@ from typing import List
 
 import pytest
 
-from preprimer.core.exceptions import SecurityError
-from preprimer.core.interfaces import AmpliconData, OutputWriter, PrimerData
+from preprimer.core.interfaces import AmpliconData, PrimerData
 
 
 class BaseWriterTest(ABC):
@@ -65,19 +64,16 @@ class BaseWriterTest(ABC):
     @abstractmethod
     def writer_class(self) -> type:
         """Return the writer class to test (e.g., VarVAMPWriter)."""
-        pass
 
     @property
     @abstractmethod
     def expected_format_name(self) -> str:
         """Return expected format name (e.g., 'varvamp')."""
-        pass
 
     @property
     @abstractmethod
     def expected_file_extension(self) -> str:
         """Return expected file extension (e.g., '.tsv')."""
-        pass
 
     @abstractmethod
     def get_test_amplicons(self) -> List[AmpliconData]:
@@ -86,7 +82,6 @@ class BaseWriterTest(ABC):
 
         Should return a list with at least 1-2 amplicons with valid primers.
         """
-        pass
 
     @abstractmethod
     def verify_output_content(self, output_path: Path, amplicons: List[AmpliconData]):
@@ -100,7 +95,6 @@ class BaseWriterTest(ABC):
         Raises:
             AssertionError: If output content is invalid
         """
-        pass
 
     # =========================================================================
     # Helper Methods
@@ -285,7 +279,12 @@ class BaseWriterTest(ABC):
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create nested directory path that doesn't exist
-            output_path = Path(tmpdir) / "subdir1" / "subdir2" / f"output{self.expected_file_extension}"
+            output_path = (
+                Path(tmpdir)
+                / "subdir1"
+                / "subdir2"
+                / f"output{self.expected_file_extension}"
+            )
 
             # Directory should not exist yet
             assert not output_path.parent.exists()
@@ -307,7 +306,9 @@ class BaseWriterTest(ABC):
         writer = self.writer_class()
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_path = Path(tmpdir) / "subdir" / f"output{self.expected_file_extension}"
+            output_path = (
+                Path(tmpdir) / "subdir" / f"output{self.expected_file_extension}"
+            )
 
             # Directory should not exist yet
             assert not output_path.parent.exists()

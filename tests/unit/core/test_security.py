@@ -16,7 +16,6 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from preprimer.core.exceptions import ParserError
-from preprimer.core.exceptions import SecurityError as CoreSecurityError
 from preprimer.core.security import (
     InputValidator,
     PathValidator,

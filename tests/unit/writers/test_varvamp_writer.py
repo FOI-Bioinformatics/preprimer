@@ -114,7 +114,9 @@ class TestVarVAMPWriter(BaseWriterTest):
 
         # Count expected primers
         expected_primers = sum(len(amp.primers) for amp in amplicons)
-        assert len(rows) == expected_primers, f"Expected {expected_primers} primers, got {len(rows)}"
+        assert (
+            len(rows) == expected_primers
+        ), f"Expected {expected_primers} primers, got {len(rows)}"
 
         # Check required columns exist
         required_columns = [
@@ -183,8 +185,12 @@ class TestVarVAMPWriter(BaseWriterTest):
                 rows = list(reader)
 
                 assert len(rows) == 2
-                assert rows[0]["amplicon_length"] == "400", "Should use default length 400"
-                assert rows[1]["amplicon_length"] == "400", "Should use default length 400"
+                assert (
+                    rows[0]["amplicon_length"] == "400"
+                ), "Should use default length 400"
+                assert (
+                    rows[1]["amplicon_length"] == "400"
+                ), "Should use default length 400"
 
         finally:
             if output_path.exists():
@@ -428,7 +434,9 @@ class TestVarVAMPWriter(BaseWriterTest):
                 "score",
             ]
             with open(output_path, "w", newline="", encoding="utf-8") as tsvfile:
-                csv_writer = csv.DictWriter(tsvfile, fieldnames=fieldnames, delimiter="\t")
+                csv_writer = csv.DictWriter(
+                    tsvfile, fieldnames=fieldnames, delimiter="\t"
+                )
                 csv_writer.writeheader()
                 # No data rows
 

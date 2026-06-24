@@ -65,7 +65,9 @@ class TestOlivarParser(BaseParserTest):
 
         assert isinstance(extensions, list), "file_extensions must return list"
         assert len(extensions) > 0, "file_extensions must not be empty"
-        assert all(isinstance(ext, str) for ext in extensions), "All extensions must be strings"
+        assert all(
+            isinstance(ext, str) for ext in extensions
+        ), "All extensions must be strings"
         # Olivar has 'olivar-design.csv' which doesn't start with '.'
         # This is a special case for pattern matching
         assert set(extensions) == set(self.expected_extensions)

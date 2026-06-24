@@ -2,14 +2,17 @@
 
 Technical reference for AI assistants working with the PrePrimer codebase.
 
-## Current State (v0.3.0)
+## Current State (v0.4.0)
 
-**Status:** Production-ready
+**Status:** Beta (active hardening; see CHANGELOG). Matches the
+`Development Status :: 4 - Beta` classifier in `pyproject.toml`.
 
-**Codebase Metrics:**
-- **Source Code**: ~6,900 lines of Python across 59 modules
-- **Test Suite**: ~22,300 lines implementing 998 tests
-- **Test Coverage**: 96.90% with 100% pass rate
+**Codebase Metrics** (measured; keep in sync when they change):
+- **Source Code**: ~7,300 lines of Python across 30 modules
+- **Test Suite**: 708 tests (700 passing, 8 skipped; 100% of non-skipped pass)
+- **Test Coverage**: ~94% line / ~92% branch (`pytest --cov`, `branch=true`).
+  The remaining gap is defensive error branches (e.g. permission/timeout
+  handlers) and the external-tool alignment success paths not run in CI.
 - **Architecture**: Plugin-based with security-focused validation
 - **Documentation**: Organized in docs/ directory
 
@@ -256,7 +259,7 @@ python -m pytest
 
 ### Test Coverage Requirements
 
-- **Overall**: ≥95% (currently 96.90%)
+- **Overall**: ~94% line / ~92% branch coverage (target: do not regress)
 - **Security module**: 100% (achieved)
 - **New features**: Must include tests
 - **Bug fixes**: Must include regression test
@@ -378,19 +381,19 @@ docs/
 
 ### `ci.yml` - Runs on every push/PR
 - Tests on Ubuntu + macOS
-- Python 3.11, 3.12, 3.13
-- Code quality checks (black, isort, flake8, mypy)
+- Python 3.12, 3.13 (minimum supported: 3.12)
+- Code quality checks: black + isort (enforced), flake8 (errors block,
+  style warnings are reported but non-blocking), mypy
 - Security scan (bandit)
 - ~3-5 minutes
 
-### `release.yml` - Runs on version tags
-- Run tests
-- Build package (wheel + sdist)
-- Create GitHub release
-- Attach build artifacts
-- ~2-3 minutes
+### `release.yml` - Planned (not yet present)
+A tag-triggered release workflow (run tests, build wheel + sdist, create the
+GitHub release, attach artifacts) is documented here as the intended process but
+is **not yet committed** under `.github/workflows/`. Only `ci.yml` exists today.
+Add `release.yml` before relying on the tag-push flow below.
 
-**Trigger release**:
+**Intended release trigger** (once `release.yml` exists):
 ```bash
 git tag -a v1.0.0 -m "Release v1.0.0"
 git push origin v1.0.0
@@ -530,7 +533,7 @@ See `docs/development/patterns/` for detailed documentation.
 
 ---
 
-**Version**: 0.3.0
-**Last Updated**: 2025-10-22
-**Test Coverage**: 96.90% (998 tests, 100% pass rate)
-**Codebase**: ~6,900 lines source + ~22,300 lines tests
+**Version**: 0.4.0
+**Last Updated**: 2026-06-23
+**Test Coverage**: ~94% line / ~92% branch (708 tests: 700 passing, 8 skipped)
+**Codebase**: ~7,300 lines source across 30 modules

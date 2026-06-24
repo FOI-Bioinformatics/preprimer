@@ -8,17 +8,15 @@ to achieve complete coverage of the CLI module.
 import argparse
 import logging
 import sys
-import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
-
-import pytest
+from unittest.mock import Mock, patch
 
 from preprimer.cli import (
     cmd_convert,
     cmd_info,
     cmd_list,
     create_parser,
+    get_version,
     main,
     setup_logging,
 )
@@ -38,6 +36,7 @@ class TestSetupLogging:
             level=logging.INFO,
             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
+            stream=sys.stderr,
         )
 
     @patch("preprimer.cli.logging.basicConfig")
@@ -49,6 +48,7 @@ class TestSetupLogging:
             level=logging.DEBUG,
             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
+            stream=sys.stderr,
         )
 
     @patch("preprimer.cli.logging.basicConfig")
@@ -60,6 +60,7 @@ class TestSetupLogging:
             level=logging.WARNING,
             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
+            stream=sys.stderr,
         )
 
     @patch("preprimer.cli.logging.basicConfig")
@@ -71,6 +72,7 @@ class TestSetupLogging:
             level=logging.ERROR,
             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
+            stream=sys.stderr,
         )
 
     @patch("preprimer.cli.logging.basicConfig")
@@ -82,6 +84,7 @@ class TestSetupLogging:
             level=logging.INFO,  # Should default to INFO
             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
+            stream=sys.stderr,
         )
 
 
@@ -94,7 +97,10 @@ class TestCreateParser:
 
         assert isinstance(parser, argparse.ArgumentParser)
         assert "PrePrimer" in parser.description
-        assert parser._option_string_actions["--version"].version == "PrePrimer 0.2.0"
+        assert (
+            parser._option_string_actions["--version"].version
+            == f"PrePrimer {get_version()}"
+        )
 
     def test_parser_version_argument(self):
         """Test version argument."""
@@ -103,7 +109,7 @@ class TestCreateParser:
         # Test that version argument exists and has correct value
         version_action = parser._option_string_actions.get("--version")
         assert version_action is not None
-        assert version_action.version == "PrePrimer 0.2.0"
+        assert version_action.version == f"PrePrimer {get_version()}"
 
     def test_parser_log_level_argument(self):
         """Test log-level argument."""
@@ -211,19 +217,23 @@ class TestCmdConvert:
         self.mock_args.output_formats = ["artic"]
         self.mock_args.prefix = "test"
         self.mock_args.reference = None
+        self.mock_args.lenient = False
+        self.mock_args.strict = False
+        self.mock_args.json = False
 
     @patch("preprimer.cli.PrimerConverter")
     def test_cmd_convert_success(self, mock_converter_class):
         """Test successful conversion."""
         mock_converter = mock_converter_class.return_value
         mock_converter.convert.return_value = {"artic": Path("output/artic.bed")}
+        mock_converter.last_summary = {"warnings": []}
 
-        with patch("preprimer.cli.logger") as mock_logger:
+        with patch("preprimer.cli.emit") as mock_emit:
             result = cmd_convert(self.mock_args, self.config)
 
         assert result == 0
         mock_converter.convert.assert_called_once()
-        mock_logger.info.assert_called()
+        mock_emit.assert_any_call("Conversion completed successfully.")
 
     @patch("preprimer.cli.PrimerConverter")
     def test_cmd_convert_with_force(self, mock_converter_class):
@@ -231,6 +241,7 @@ class TestCmdConvert:
         self.mock_args.force = True
         mock_converter = mock_converter_class.return_value
         mock_converter.convert.return_value = {"artic": Path("output/artic.bed")}
+        mock_converter.last_summary = {"warnings": []}
 
         result = cmd_convert(self.mock_args, self.config)
 
@@ -280,8 +291,9 @@ class TestCmdConvert:
         mock_parser.parse.assert_called_once_with(
             self.mock_args.input, self.mock_args.prefix
         )
-        mock_converter._validate_amplicons.assert_called_once_with(mock_amplicons)
-        mock_logger.info.assert_called()
+        mock_converter._validate_amplicons.assert_called_once_with(
+            mock_amplicons, lenient=False
+        )
 
     @patch("preprimer.cli.parser_registry")
     @patch("preprimer.cli.PrimerConverter")
@@ -338,11 +350,11 @@ class TestCmdConvert:
 
         mock_registry.detect_format.return_value = None
 
-        with patch("preprimer.cli.logger") as mock_logger:
+        with patch("preprimer.cli.report_error") as mock_report:
             result = cmd_convert(self.mock_args, self.config)
 
         assert result == 1
-        mock_logger.error.assert_called_with("Could not detect input format")
+        mock_report.assert_called_once()
 
     @patch("preprimer.cli.PrimerConverter")
     def test_cmd_convert_preprimer_error(self, mock_converter_class):
@@ -350,11 +362,11 @@ class TestCmdConvert:
         mock_converter = mock_converter_class.return_value
         mock_converter.convert.side_effect = PrePrimerError("Test error")
 
-        with patch("preprimer.cli.logger") as mock_logger:
+        with patch("preprimer.cli.report_error") as mock_report:
             result = cmd_convert(self.mock_args, self.config)
 
         assert result == 1
-        mock_logger.error.assert_called_with("❌ Test error")
+        mock_report.assert_called_once()
 
     @patch("preprimer.cli.PrimerConverter")
     def test_cmd_convert_unexpected_error(self, mock_converter_class):
@@ -362,11 +374,14 @@ class TestCmdConvert:
         mock_converter = mock_converter_class.return_value
         mock_converter.convert.side_effect = ValueError("Unexpected error")
 
-        with patch("preprimer.cli.logger") as mock_logger:
+        with (
+            patch("preprimer.cli.report_error") as mock_report,
+            patch("preprimer.cli.logger") as mock_logger,
+        ):
             result = cmd_convert(self.mock_args, self.config)
 
         assert result == 1
-        mock_logger.error.assert_any_call("❌ Unexpected error: Unexpected error")
+        mock_report.assert_called_once()
         mock_logger.debug.assert_called_with("Full traceback:", exc_info=True)
 
 
@@ -389,13 +404,13 @@ class TestCmdList:
         mock_parser_reg.list_formats.return_value = ["artic", "varvamp"]
         mock_parser_reg.list_extensions.side_effect = [[".bed"], [".tsv"]]
 
-        with patch("builtins.print") as mock_print:
+        with patch("preprimer.cli.emit") as mock_emit:
             result = cmd_list(self.mock_args)
 
         assert result == 0
-        mock_print.assert_any_call("📥 Available input formats:")
-        mock_print.assert_any_call("  artic: .bed")
-        mock_print.assert_any_call("  varvamp: .tsv")
+        mock_emit.assert_any_call("Available input formats:")
+        mock_emit.assert_any_call("  artic: .bed")
+        mock_emit.assert_any_call("  varvamp: .tsv")
 
     @patch("preprimer.cli.parser_registry")
     @patch("preprimer.cli.writer_registry")
@@ -405,18 +420,18 @@ class TestCmdList:
 
         mock_writer_reg.list_formats.return_value = ["artic", "fasta"]
         mock_writer1 = Mock()
-        mock_writer1.file_extension = ".bed"
+        mock_writer1.file_extension.return_value = ".bed"
         mock_writer2 = Mock()
-        mock_writer2.file_extension = ".fasta"
+        mock_writer2.file_extension.return_value = ".fasta"
         mock_writer_reg.get_writer.side_effect = [mock_writer1, mock_writer2]
 
-        with patch("builtins.print") as mock_print:
+        with patch("preprimer.cli.emit") as mock_emit:
             result = cmd_list(self.mock_args)
 
         assert result == 0
-        mock_print.assert_any_call("📤 Available output formats:")
-        mock_print.assert_any_call("  artic: .bed")
-        mock_print.assert_any_call("  fasta: .fasta")
+        mock_emit.assert_any_call("Available output formats:")
+        mock_emit.assert_any_call("  artic: .bed")
+        mock_emit.assert_any_call("  fasta: .fasta")
 
     @patch("preprimer.cli.parser_registry")
     @patch("preprimer.cli.writer_registry")
@@ -429,16 +444,16 @@ class TestCmdList:
         mock_parser_reg.list_extensions.return_value = [".bed"]
         mock_writer_reg.list_formats.return_value = ["fasta"]
         mock_writer = Mock()
-        mock_writer.file_extension = ".fasta"
+        mock_writer.file_extension.return_value = ".fasta"
         mock_writer_reg.get_writer.return_value = mock_writer
 
-        with patch("builtins.print") as mock_print:
+        with patch("preprimer.cli.emit") as mock_emit:
             result = cmd_list(self.mock_args)
 
         assert result == 0
         # Should show both parsers and writers
-        mock_print.assert_any_call("📥 Available input formats:")
-        mock_print.assert_any_call("📤 Available output formats:")
+        mock_emit.assert_any_call("Available input formats:")
+        mock_emit.assert_any_call("Available output formats:")
 
     @patch("preprimer.cli.cmd_list")
     def test_cmd_list_default_shows_all(self, mock_cmd_list_recursive):
@@ -468,11 +483,11 @@ class TestCmdInfo:
         mock_file.exists.return_value = False
         self.mock_args.file = mock_file
 
-        with patch("preprimer.cli.logger") as mock_logger:
+        with patch("preprimer.cli.report_error") as mock_report:
             result = cmd_info(self.mock_args)
 
         assert result == 1
-        mock_logger.error.assert_called_with(f"File not found: {mock_file}")
+        mock_report.assert_called_once()
 
     @patch("preprimer.cli.parser_registry")
     def test_cmd_info_unknown_format(self, mock_registry):
@@ -485,14 +500,14 @@ class TestCmdInfo:
         mock_registry.detect_format.return_value = None
         mock_registry.list_formats.return_value = ["artic", "varvamp"]
 
-        with patch("builtins.print") as mock_print:
+        with patch("preprimer.cli.emit") as mock_emit:
             result = cmd_info(self.mock_args)
 
         assert result == 0
-        mock_print.assert_any_call(f"📁 File: {mock_file}")
-        mock_print.assert_any_call("📏 Size: 1,024 bytes")
-        mock_print.assert_any_call("❓ Format: Unknown/unsupported")
-        mock_print.assert_any_call("   Supported formats: artic, varvamp")
+        mock_emit.assert_any_call(f"File: {mock_file}")
+        mock_emit.assert_any_call("Size: 1,024 bytes")
+        mock_emit.assert_any_call("Format: Unknown/unsupported")
+        mock_emit.assert_any_call("   Supported formats: artic, varvamp")
 
     @patch("preprimer.cli.parser_registry")
     def test_cmd_info_successful_parsing(self, mock_registry):
@@ -523,18 +538,18 @@ class TestCmdInfo:
         mock_registry.detect_format.return_value = "artic"
         mock_registry.get_parser.return_value = mock_parser
 
-        with patch("builtins.print") as mock_print:
+        with patch("preprimer.cli.emit") as mock_emit:
             result = cmd_info(self.mock_args)
 
         assert result == 0
-        mock_print.assert_any_call(f"📁 File: {mock_file}")
-        mock_print.assert_any_call("📏 Size: 2,048 bytes")
-        mock_print.assert_any_call("🔍 Detected format: artic")
-        mock_print.assert_any_call("🧬 Amplicons: 2")
-        mock_print.assert_any_call("🔬 Primers: 5")  # Total: 3 + 2 = 5
-        mock_print.assert_any_call("\n📊 Amplicon details:")
-        mock_print.assert_any_call("  amplicon_1: 2F + 1R")
-        mock_print.assert_any_call("  amplicon_2: 1F + 1R")
+        mock_emit.assert_any_call(f"File: {mock_file}")
+        mock_emit.assert_any_call("Size: 2,048 bytes")
+        mock_emit.assert_any_call("Detected format: artic")
+        mock_emit.assert_any_call("Amplicons: 2")
+        mock_emit.assert_any_call("Primers: 5")  # Total: 3 + 2 = 5
+        mock_emit.assert_any_call("\nAmplicon details:")
+        mock_emit.assert_any_call("  amplicon_1: 2F + 1R")
+        mock_emit.assert_any_call("  amplicon_2: 1F + 1R")
 
     @patch("preprimer.cli.parser_registry")
     def test_cmd_info_parsing_error(self, mock_registry):
@@ -550,13 +565,16 @@ class TestCmdInfo:
         mock_registry.detect_format.return_value = "artic"
         mock_registry.get_parser.return_value = mock_parser
 
-        with patch("builtins.print") as mock_print:
+        with (
+            patch("preprimer.cli.emit") as mock_emit,
+            patch("preprimer.cli.report_error") as mock_report,
+        ):
             result = cmd_info(self.mock_args)
 
-        assert result == 0
-        mock_print.assert_any_call(f"📁 File: {mock_file}")
-        mock_print.assert_any_call("🔍 Detected format: artic")
-        mock_print.assert_any_call("⚠️  Could not parse file: Parsing failed")
+        # Parsing failures are now surfaced as errors (non-zero exit).
+        assert result == 1
+        mock_emit.assert_any_call("Detected format: artic")
+        mock_report.assert_called_once()
 
     @patch("preprimer.cli.parser_registry")
     def test_cmd_info_many_amplicons(self, mock_registry):
@@ -582,14 +600,14 @@ class TestCmdInfo:
         mock_registry.detect_format.return_value = "varvamp"
         mock_registry.get_parser.return_value = mock_parser
 
-        with patch("builtins.print") as mock_print:
+        with patch("preprimer.cli.emit") as mock_emit:
             result = cmd_info(self.mock_args)
 
         assert result == 0
-        mock_print.assert_any_call("🧬 Amplicons: 8")
-        mock_print.assert_any_call("🔬 Primers: 16")  # 8 amplicons * 2 primers each
+        mock_emit.assert_any_call("Amplicons: 8")
+        mock_emit.assert_any_call("Primers: 16")  # 8 amplicons * 2 primers each
         # Should show "... and 3 more amplicons" (8 - 5 = 3)
-        mock_print.assert_any_call("  ... and 3 more amplicons")
+        mock_emit.assert_any_call("  ... and 3 more amplicons")
 
 
 class TestMain:
@@ -704,11 +722,11 @@ class TestMain:
         mock_config_class.from_file.side_effect = ValueError("Bad config")
 
         with patch.object(sys, "argv", test_argv):
-            with patch("preprimer.cli.logger") as mock_logger:
+            with patch("preprimer.cli.report_error") as mock_report:
                 result = main()
 
         assert result == 1
-        mock_logger.error.assert_called_with("Configuration error: Bad config")
+        mock_report.assert_called_once()
 
     @patch("preprimer.cli.setup_logging")
     @patch("preprimer.cli.EnhancedConfig")

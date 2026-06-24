@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -32,9 +32,12 @@ jobs:
       - name: Run tests
         run: python -m pytest tests/ -v
 
-      - name: Code quality (Python 3.11 only)
-        if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+      - name: Code quality (one matrix entry only)
+        if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
         run: |
           black --check preprimer/ tests/
           isort --check-only preprimer/ tests/
-          flake8 preprimer/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+          # Errors (real bugs) must pass; style warnings are reported but
+          # non-blocking, per the documented "warnings OK, errors not OK" policy.
+          flake8 preprimer/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 preprimer/ tests/ --count --exit-zero --max-line-length=88 --extend-ignore=E203,W503 --statistics

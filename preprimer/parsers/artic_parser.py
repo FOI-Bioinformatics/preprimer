@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Union
 
 from ..core.exceptions import ParserError
 from ..core.interfaces import AmpliconData, PrimerData
+from ..core.primerscheme_info import PrimerschemeInfo
 from ..core.standardized_parser import StandardizedParser
 
 logger = logging.getLogger(__name__)
@@ -89,7 +90,10 @@ class ARTICParser(StandardizedParser):
                         continue
 
                     parts = line.split("\t")
-                    if len(parts) < 7:
+                    # Accept both the canonical 6-column primer.bed
+                    # (chrom start end name pool strand) and the PrimalScheme-like
+                    # 7-column variant that appends the primer sequence.
+                    if len(parts) < 6:
                         logger.warning(f"Skipping malformed line: {line}")
                         continue
 
@@ -100,7 +104,8 @@ class ARTICParser(StandardizedParser):
                     primer_name = parts[3]
                     pool = int(parts[4])
                     strand = parts[5]
-                    sequence = parts[6]
+                    # 6-column BED carries no sequence (it lives in reference.fasta).
+                    sequence = parts[6] if len(parts) >= 7 else ""
 
                     # Parse primer name to get amplicon info
                     # Format: PREFIX_AMPLICON_SIDE_ALT (e.g., SARS-CoV-2_400_1_LEFT_1)
@@ -168,7 +173,26 @@ class ARTICParser(StandardizedParser):
                 stops = [p.stop for p in amplicon.primers]
                 amplicon.length = max(stops) - min(starts)
 
+        # Import scheme metadata from a sibling info.json (primal-page) so it
+        # survives conversion instead of being regenerated as placeholders.
+        scheme_info = self._load_scheme_info(file_path)
+        if scheme_info is not None:
+            for amplicon in amplicons.values():
+                amplicon.metadata["scheme_info"] = scheme_info
+
         return amplicons
+
+    @staticmethod
+    def _load_scheme_info(file_path: Path) -> Optional[Dict]:
+        """Load a sibling info.json (primal-page schema) if present."""
+        info_path = file_path.parent / "info.json"
+        if not info_path.exists():
+            return None
+        try:
+            return PrimerschemeInfo.from_file(info_path).to_dict()
+        except Exception as e:  # malformed info.json must not break parsing
+            logger.warning(f"Could not read scheme info.json at {info_path}: {e}")
+            return None
 
     def get_reference_file(self, file_path: Union[str, Path]) -> Optional[Path]:
         """Get associated reference file."""

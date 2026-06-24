@@ -86,12 +86,13 @@ class MerPCRProvider(AlignmentProvider):
         if max_product_size:
             merpcr_command.extend(["-Z", str(max_product_size)])
 
-        # Run merPCR
+        # Run merPCR (timeout guards against a hung external process)
         subprocess.run(
             merpcr_command,
             check=True,
             capture_output=True,
             text=True,
+            timeout=300,
         )
 
         return output_file
@@ -141,6 +142,13 @@ class MerPCRProvider(AlignmentProvider):
         if max_product_size:
             merpcr_command.extend(["-Z", str(max_product_size)])
 
-        subprocess.run(merpcr_command, shell=False, check=True)
+        subprocess.run(
+            merpcr_command,
+            shell=False,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
 
         return output_file

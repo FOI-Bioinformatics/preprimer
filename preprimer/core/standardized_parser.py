@@ -21,10 +21,16 @@ class StandardizedParser(PrimerParser):
     standardized error messages, and consistent logging format.
     """
 
-    def __init__(self):
-        """Initialize standardized parser with security validators."""
+    def __init__(self, max_file_size: Optional[int] = None):
+        """Initialize standardized parser with security validators.
+
+        Args:
+            max_file_size: Maximum input file size in bytes. Defaults to
+                ``PathValidator.DEFAULT_MAX_FILE_SIZE`` when None.
+        """
         self.path_validator = PathValidator()
         self.input_validator = InputValidator()
+        self.max_file_size = max_file_size
 
     def parse(
         self, file_path: Union[str, Path], prefix: str = ""
@@ -95,6 +101,9 @@ class StandardizedParser(PrimerParser):
         # Validate and sanitize file path
         validated_path = self.path_validator.sanitize_path(file_path)
 
+        # Enforce a maximum file size to prevent unbounded-input resource use.
+        self.path_validator.validate_file_size(validated_path, self.max_file_size)
+
         # Validate prefix if provided
         if prefix:
             self.input_validator.validate_amplicon_name(prefix)
@@ -105,9 +114,15 @@ class StandardizedParser(PrimerParser):
         """
         Detect genome topology from available information.
 
+        Reliable automatic detection requires either a ``metadata.yaml`` beside
+        the input file or a ``prefix`` that is a recognized accession in
+        ``TopologyDetector.KNOWN_REFERENCES`` (e.g. ``NC_012920.1``). When the
+        prefix is just a naming label (the common CLI case), topology defaults
+        to linear. Supply ``metadata.yaml`` for circular genomes.
+
         Args:
             file_path: Validated file path
-            prefix: Validated prefix (reference ID)
+            prefix: Validated prefix, used as the reference ID for lookup
 
         Returns:
             GenomeInfo with detected topology
@@ -246,9 +261,19 @@ class StandardizedParser(PrimerParser):
             if start >= stop:
                 raise ValueError("Start position must be less than stop position")
 
-            # Validate sequence length matches coordinates
+            # Validate sequence length matches coordinates. A one-base
+            # discrepancy is expected for half-open coordinate conventions and
+            # is benign, so log at debug level to avoid flooding the console;
+            # larger mismatches are surfaced as warnings.
             expected_length = stop - start
-            if len(sequence) != expected_length:
+            delta = abs(len(sequence) - expected_length)
+            if delta == 1:
+                logger.debug(
+                    f"Sequence length ({len(sequence)}) differs by one from "
+                    f"coordinates ({expected_length}) for primer {primer_name} "
+                    f"in row {row_num} (half-open coordinate convention)"
+                )
+            elif delta > 1:
                 logger.warning(
                     f"Sequence length ({len(sequence)}) does not match "
                     f"coordinates ({expected_length}) for primer {primer_name} "
@@ -424,4 +449,3 @@ class StandardizedParser(PrimerParser):
         Raises:
             ParserError: If parsing fails
         """
-        pass

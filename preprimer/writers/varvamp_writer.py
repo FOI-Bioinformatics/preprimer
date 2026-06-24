@@ -5,10 +5,13 @@ Writes primer data to VarVAMP-compatible tab-separated format.
 """
 
 import csv
+import logging
 from pathlib import Path
 from typing import Dict, List, Union
 
 from preprimer.core.interfaces import AmpliconData, OutputWriter
+
+logger = logging.getLogger(__name__)
 
 
 class VarVAMPWriter(OutputWriter):
@@ -50,12 +53,17 @@ class VarVAMPWriter(OutputWriter):
 
         # Prepare primer data for VarVAMP format
         primer_rows = []
+        substituted_metrics = 0  # primers missing Tm/score (placeholders used)
 
         for amplicon in amplicons:
             amplicon_name = amplicon.amplicon_id
 
             # Add all primers from this amplicon
             for primer in amplicon.primers:
+                if getattr(primer, "tm", None) is None or (
+                    getattr(primer, "score", None) is None
+                ):
+                    substituted_metrics += 1
                 row = {
                     "amplicon_name": amplicon_name,
                     "amplicon_length": amplicon.length or 400,
@@ -96,6 +104,12 @@ class VarVAMPWriter(OutputWriter):
                 writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
                 writer.writeheader()
                 writer.writerows(primer_rows)
+
+        if substituted_metrics:
+            logger.warning(
+                f"{substituted_metrics} primer(s) lacked Tm/score; placeholder "
+                f"values were written to the VarVAMP output"
+            )
 
         return output_path
 

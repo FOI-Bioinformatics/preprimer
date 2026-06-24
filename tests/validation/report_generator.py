@@ -7,7 +7,7 @@ Generates HTML and Markdown reports from validation results.
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 from .validator import ValidationResult
 
@@ -46,7 +46,9 @@ class ReportGenerator:
         lines.append("")
         lines.append(f"- **Total Tests**: {total_tests}")
         lines.append(f"- **Passed**: {passed_tests} ✅")
-        lines.append(f"- **Failed**: {failed_tests} {'✅' if failed_tests == 0 else '❌'}")
+        lines.append(
+            f"- **Failed**: {failed_tests} {'✅' if failed_tests == 0 else '❌'}"
+        )
         lines.append(f"- **Pass Rate**: {(passed_tests/total_tests*100):.1f}%")
         lines.append("")
 

@@ -7,6 +7,88 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-24
+
+### Added
+- **Canonical 6-column `primer.bed`** (gap analysis G1): the ARTIC parser now
+  reads both the 6-column primal-page / legacy `primer.bed` (the form community
+  scheme repos and `primaschema` distribute) and the 7-column PrimalScheme-like
+  variant; the writer can emit either via `convert --bed-columns {6,7}` (default 7).
+- **info.json metadata import** (G2): an existing scheme's `info.json`
+  (species, version, authors, …) is read on import and preserved through
+  conversion instead of being regenerated as placeholders.
+- **More in-silico-PCR engines** (G3): `seqkit amplicon`, EMBOSS `primersearch`,
+  and `mfeprimer` providers, joining BLAST/Exonerate/me-PCR/merPCR. The `align`
+  command's tool choices are now derived from the provider registry.
+- **Generic interchange formats** (G4): a **GFF3** writer (primer features for
+  genome browsers) and a **Primer3** (Boulder-IO) output parser. (GenBank
+  deferred to avoid a heavy dependency.)
+- **Machine-readable CLI output**: `--json` flag on `convert` and `align` emits a
+  structured summary (input format, amplicon/primer counts, output paths,
+  warnings, synthetic-coordinate count) to stdout for pipeline integration.
+- **Stable exit codes**: `0` success, `1` user/validation error, `2` missing
+  external tool.
+- **`--strict` / `--lenient` modes** for `convert`: `--strict` aborts when primer
+  coordinates are synthetic (estimated because the input format lacks positions);
+  `--lenient` downgrades validation failures to warnings and continues.
+- **Synthetic-coordinate provenance**: parsers flag estimated coordinates
+  (STS always, Olivar when positions are absent); conversions warn and report a
+  count in the summary.
+- **`python -m preprimer`** entry point (`preprimer/__main__.py`).
+- **File-size guard**: `PathValidator.validate_file_size` /
+  `validate_output_directory` (previously documented but unimplemented) are now
+  present and enforced on every parse.
+- Regression test suite `tests/integration/test_production_hardening.py`.
+
+### Fixed
+- **ARTIC coordinate off-by-one**: the ARTIC writer subtracted 1 from the start
+  coordinate, but `PrimerData` stores 0-based coordinates (matching BED and the
+  VarVAMP/Olivar parsers). This corrupted every ARTIC-sourced conversion by one
+  base (`artic -> artic` drifted -1 per round-trip) and produced position
+  annotations one base too low in all formats. The writer now emits the stored
+  coordinate verbatim, making round-trips faithful and cross-format coordinates
+  consistent; it also removes the need for the negative-coordinate clamp.
+- **CLI error reporting**: user-facing messages and actionable suggestions
+  (`PrePrimerError.get_user_message()`) are now shown instead of the raw
+  technical message.
+- **`list --writers`** printed a bound-method object instead of the file
+  extension.
+- **`--version`** reported a hardcoded `0.2.0`; now derived from the installed
+  package metadata.
+- **ARTIC writer** could emit a negative BED start (`-1`) for coordinate-less
+  inputs; BED start is now clamped at `0`.
+- **Duplicate ARTIC primer names**: alternate primers within an amplicon now get
+  unique names (`_LEFT_0`, `_LEFT_1`, …).
+- **Path validation** rejected legitimate filenames containing `..`
+  (e.g. `sars..cov2.tsv`); traversal is now detected per path segment while such
+  filenames are allowed.
+- **Aligner whitelist** in config diverged from the registry (accepted
+  unimplemented `minimap2`/`bwa`, rejected real `me-pcr`/`merpcr`); it is now
+  derived from the registry.
+- **Subprocess hangs**: all alignment providers now run with a timeout; BLAST
+  defaults to tabular output (`outfmt 6`), matching its own parser.
+- Benign per-primer "sequence length does not match coordinates" log (a half-open
+  coordinate-convention artifact) downgraded from warning to debug to stop
+  console flooding.
+
+### Changed
+- **Minimum Python is now 3.12** (was 3.11).
+- **CLI output discipline**: results go to stdout (visible regardless of log
+  level), diagnostics to stderr; emoji replaced with ASCII status tokens for
+  portability.
+- **`convert_primers()`** now applies recognized config-shorthand kwargs
+  (`force_overwrite`, `validate_sequences`, `aligner`, `min_length`,
+  `max_length`) instead of silently dropping them; other kwargs are forwarded.
+- Documentation (`CLAUDE.md`) synced to reality: status set to Beta, accurate
+  test/coverage metrics, topology-detection limitations noted, `release.yml`
+  marked as planned.
+
+### Removed
+- **Unused runtime-reconfiguration machinery**: `ConfigWatcher`, `ConfigManager`,
+  the `config_manager` singleton, and `get_config` / `update_config` /
+  `update_config_partial`. These had no production usage, were not part of the
+  public API, and carried silent-failure modes and a polling daemon thread.
+
 ## [0.3.0] - 2025-10-22
 
 ### Added
