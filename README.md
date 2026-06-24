@@ -4,18 +4,21 @@ Primer scheme converter for tiled amplicon sequencing supporting linear and circ
 
 [![CI Status](https://github.com/FOI-Bioinformatics/preprimer/workflows/CI/badge.svg)](https://github.com/FOI-Bioinformatics/preprimer/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Platform: Linux | macOS](https://img.shields.io/badge/platform-Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/FOI-Bioinformatics/preprimer)
 
-PrePrimer provides bidirectional conversion between primer design formats used in tiled amplicon sequencing workflows. The tool handles VarVAMP, ARTIC, Olivar, STS, and FASTA formats with automatic topology detection for circular genomes.
+PrePrimer provides bidirectional conversion between primer design formats used in tiled amplicon sequencing workflows. The tool handles VarVAMP, ARTIC, Olivar, STS, Primer3, FASTA, and GFF3 formats with automatic topology detection for circular genomes.
 
-## Current Version: v0.3.0
+## Current Version: v0.4.0
 
 ### Recent Changes
 
-- **Comprehensive Writer Testing**: All 5 output writers now have complete test coverage (110/113 tests, 97.3%)
-- **BaseWriterTest Pattern**: Reusable test infrastructure with automatic contract enforcement
-- **Performance Baselines**: Established benchmarks for all writers (51-591µs write times)
+- **Canonical 6-column `primer.bed`**: read and write the legacy/primal-page form distributed by community scheme repos (`--bed-columns {6,7}`)
+- **info.json import**: scheme metadata (species, version, authors) is read on input and preserved through conversion
+- **New formats**: GFF3 output and Primer3 (Boulder-IO) input
+- **More in-silico-PCR engines**: seqkit, EMBOSS primersearch, and mfeprimer join BLAST, Exonerate, me-PCR, and merPCR
+- **Fixed** an ARTIC writer coordinate off-by-one that affected ARTIC-sourced conversions
+- **Minimum Python is now 3.12**
 
 See [CHANGELOG.md](CHANGELOG.md) for complete release history.
 
@@ -23,25 +26,25 @@ See [CHANGELOG.md](CHANGELOG.md) for complete release history.
 
 PrePrimer provides format conversion with the following capabilities:
 
-- **Format Support**: 4 input parsers (VarVAMP, ARTIC, Olivar, STS) and 5 output writers (VarVAMP, ARTIC, Olivar, STS, FASTA) supporting 20 conversion pathways
+- **Format Support**: 5 input parsers (VarVAMP, ARTIC, Olivar, STS, Primer3) and 6 output writers (VarVAMP, ARTIC, Olivar, STS, FASTA, GFF3) supporting 30 conversion pathways
 - **Topology Detection**: Automatic identification of circular genome architectures (mitochondrial DNA, plasmids, viral episomes)
-- **Standards Compliance**: Implementation of primal-page info.json schema and articbedversion specifications (v2.0/v3.0)
+- **Standards Compliance**: 6- and 7-column `primer.bed`, primal-page `info.json` (read and write), and articbedversion specifications
 - **IUPAC Support**: Handling of degenerate nucleotide codes for variant-aware primer designs
-- **Alignment Integration**: BLAST, Exonerate, merPCR, and me-PCR providers for primer-to-reference alignment
+- **In-silico PCR / alignment**: BLAST, Exonerate, me-PCR, merPCR, seqkit, EMBOSS primersearch, and mfeprimer providers
 - **Input Validation**: Path sanitization, size limits, and format verification for security
 
 ## Codebase Statistics
 
-- **Source Code**: ~6,900 lines of Python across 59 modules
-- **Test Suite**: ~22,300 lines implementing 998 tests
-- **Test Coverage**: 96.90% with 100% pass rate
+- **Source Code**: ~7,600 lines of Python across 35 modules
+- **Test Suite**: ~17,500 lines; 726 passing tests (8 skipped)
+- **Test Coverage**: ~94% line / ~92% branch coverage
 - **Performance**: Sub-second processing for datasets containing 500 amplicons
 
 ## Installation
 
 ### Requirements
 
-- Python 3.11 or higher
+- Python 3.12 or higher
 - Linux or macOS operating system
 
 ### Setup
@@ -87,7 +90,7 @@ from preprimer.core.enhanced_config import EnhancedConfig
 config = EnhancedConfig()
 converter = PrimerConverter(config)
 
-# Perform conversion
+# Perform conversion; returns a dict mapping each output format to its path
 result = converter.convert(
     input_file="primers.tsv",
     output_dir="output/",
@@ -95,7 +98,8 @@ result = converter.convert(
     prefix="SARS-CoV-2"
 )
 
-print(f"Converted {len(result)} amplicons")
+for output_format, output_path in result.items():
+    print(f"{output_format}: {output_path}")
 ```
 
 ## Supported Formats
@@ -103,10 +107,12 @@ print(f"Converted {len(result)} amplicons")
 | Format | Input | Output | Specification |
 |--------|-------|--------|---------------|
 | **VarVAMP** | ✅ `.tsv` | ✅ | 13-column TSV with IUPAC degenerate nucleotide support |
-| **ARTIC** | ✅ `.bed` | ✅ | BED6 format following articbedversion v2.0/v3.0 |
+| **ARTIC** | ✅ `.bed` | ✅ | 6- or 7-column `primer.bed` + `reference.fasta` + `info.json` (primal-page) |
 | **Olivar** | ✅ `.csv` | ✅ | CSV format with amplicon metadata and circular genome support |
 | **STS** | ✅ `.sts.tsv` | ✅ | 3/4-column TSV with automatic header detection |
+| **Primer3** | ✅ `.p3` | ❌ | Primer3 Boulder-IO output (`KEY=value`) |
 | **FASTA** | ❌ | ✅ | Multi-FASTA with metadata in sequence headers |
+| **GFF3** | ❌ | ✅ | Primer binding-site features for genome browsers |
 
 Full format specifications available in [docs/user-guide/supported-formats.md](docs/user-guide/supported-formats.md).
 
@@ -122,7 +128,7 @@ Full format specifications available in [docs/user-guide/supported-formats.md](d
 
 ### Developer Documentation
 - [Architecture Overview](docs/developer/architecture.md)
-- [Adding Parsers](docs/developer/adding-parsers.md)
+- [Extending PrePrimer (adding parsers/writers)](docs/developer/extending.md)
 - [Contributing Guidelines](docs/developer/contributing.md)
 - [Release Checklist](docs/developer/release-checklist.md)
 
@@ -138,18 +144,20 @@ Full format specifications available in [docs/user-guide/supported-formats.md](d
 
 ## Alignment Integration
 
-PrePrimer integrates multiple alignment providers for primer-to-reference validation:
+PrePrimer integrates multiple in-silico-PCR and alignment providers for primer-to-reference validation. The `align` command reads primers in STS format:
 
 ```bash
-# Align primers using merPCR (recommended)
-preprimer align --primers primers.bed --reference genome.fasta --aligner merpcr
+# In-silico PCR with merPCR (recommended)
+preprimer align --sts-file primers.sts.tsv --reference genome.fasta \
+                --output-dir results/ --output-formats merpcr
 
-# Use BLAST for alignment
-preprimer align --primers primers.tsv --reference genome.fasta \
-                --aligner blast --output alignment.tsv
+# Per-primer alignment with BLAST
+preprimer align --sts-file primers.sts.tsv --reference genome.fasta \
+                --output-dir results/ --output-formats primers --aligner blast
 ```
 
-Available providers: `blast`, `exonerate`, `merpcr`, `mepcr`
+- In-silico-PCR engines (`--output-formats`): `me-pcr`, `merpcr`, `seqkit`, `primersearch`, `mfeprimer`
+- Per-primer alignment (`--output-formats primers`) uses `--aligner {blast,exonerate}`
 
 ## Testing
 
@@ -188,12 +196,12 @@ bandit -r preprimer/ -ll
 If you use PrePrimer in your research, please cite:
 
 ```bibtex
-@software{preprimer2025,
+@software{preprimer2026,
   title = {PrePrimer: Primer Scheme Converter for Tiled Amplicon Sequencing},
   author = {PrePrimer Contributors},
-  year = {2025},
+  year = {2026},
   url = {https://github.com/FOI-Bioinformatics/preprimer},
-  version = {0.3.0}
+  version = {0.4.0}
 }
 ```
 
@@ -217,5 +225,5 @@ For security concerns, please review [SECURITY.md](SECURITY.md) for reporting pr
 
 PrePrimer implements specifications from:
 - [ARTIC Network](https://artic.network/) - articbedversion standards
-- [Primal Scheme](https://github.com/aresti/primal-scheme) - primal-page schema
+- [PrimalScheme](https://github.com/aresti/primalscheme) - primal-page schema
 - [PrimerSchemes Labs](https://github.com/quick-lab/primerschemes) - validation datasets
