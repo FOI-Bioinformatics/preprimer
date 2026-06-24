@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-24
+
 ### Added
 - **Canonical 6-column `primer.bed`** (gap analysis G1): the ARTIC parser now
   reads both the 6-column primal-page / legacy `primer.bed` (the form community
@@ -70,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   console flooding.
 
 ### Changed
+- **Minimum Python is now 3.12** (was 3.11).
 - **CLI output discipline**: results go to stdout (visible regardless of log
   level), diagnostics to stderr; emoji replaced with ASCII status tokens for
   portability.

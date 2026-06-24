@@ -5,7 +5,7 @@ A modern, extensible tool for converting between different primer scheme formats
 used in tiled amplicon sequencing.
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 # Import parsers, writers, and alignment providers to trigger auto-registration
 import preprimer.alignment  # noqa: F401

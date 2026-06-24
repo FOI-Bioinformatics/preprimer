@@ -2,7 +2,7 @@
 
 Technical reference for AI assistants working with the PrePrimer codebase.
 
-## Current State (v0.3.0)
+## Current State (v0.4.0)
 
 **Status:** Beta (active hardening; see CHANGELOG). Matches the
 `Development Status :: 4 - Beta` classifier in `pyproject.toml`.
@@ -533,7 +533,7 @@ See `docs/development/patterns/` for detailed documentation.
 
 ---
 
-**Version**: 0.3.0
+**Version**: 0.4.0
 **Last Updated**: 2026-06-23
 **Test Coverage**: ~94% line / ~92% branch (708 tests: 700 passing, 8 skipped)
 **Codebase**: ~7,300 lines source across 30 modules
