@@ -6,6 +6,7 @@ Parser implementations for different primer formats.
 from ..core.registry import parser_registry
 from .artic_parser import ARTICParser
 from .olivar_parser import OlivarParser
+from .primer3_parser import Primer3Parser
 from .sts_parser import STSParser
 from .varvamp_parser import VarVAMPParser
 
@@ -16,6 +17,7 @@ def register_all_parsers():
     parser_registry.register(ARTICParser)
     parser_registry.register(OlivarParser)
     parser_registry.register(STSParser)
+    parser_registry.register(Primer3Parser)
 
 
 # Auto-register on import
@@ -26,5 +28,6 @@ __all__ = [
     "ARTICParser",
     "OlivarParser",
     "STSParser",
+    "Primer3Parser",
     "register_all_parsers",
 ]

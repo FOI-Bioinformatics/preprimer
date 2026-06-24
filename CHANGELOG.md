@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Canonical 6-column `primer.bed`** (gap analysis G1): the ARTIC parser now
+  reads both the 6-column primal-page / legacy `primer.bed` (the form community
+  scheme repos and `primaschema` distribute) and the 7-column PrimalScheme-like
+  variant; the writer can emit either via `convert --bed-columns {6,7}` (default 7).
+- **info.json metadata import** (G2): an existing scheme's `info.json`
+  (species, version, authors, …) is read on import and preserved through
+  conversion instead of being regenerated as placeholders.
+- **More in-silico-PCR engines** (G3): `seqkit amplicon`, EMBOSS `primersearch`,
+  and `mfeprimer` providers, joining BLAST/Exonerate/me-PCR/merPCR. The `align`
+  command's tool choices are now derived from the provider registry.
+- **Generic interchange formats** (G4): a **GFF3** writer (primer features for
+  genome browsers) and a **Primer3** (Boulder-IO) output parser. (GenBank
+  deferred to avoid a heavy dependency.)
 - **Machine-readable CLI output**: `--json` flag on `convert` and `align` emits a
   structured summary (input format, amplicon/primer counts, output paths,
   warnings, synthetic-coordinate count) to stdout for pipeline integration.
