@@ -381,8 +381,9 @@ docs/
 
 ### `ci.yml` - Runs on every push/PR
 - Tests on Ubuntu + macOS
-- Python 3.11, 3.12, 3.13
-- Code quality checks (black, isort, flake8, mypy)
+- Python 3.12, 3.13 (minimum supported: 3.12)
+- Code quality checks: black + isort (enforced), flake8 (errors block,
+  style warnings are reported but non-blocking), mypy
 - Security scan (bandit)
 - ~3-5 minutes
 
