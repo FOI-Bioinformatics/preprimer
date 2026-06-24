@@ -134,16 +134,10 @@ class ARTICWriter(OutputWriter):
                     # chrom start(0-based) end(0-based-exclusive) name pool strand sequence
                     # Note: Standard BED is 6 columns, but ARTIC workflows expect sequence as 7th column
 
-                    # Convert 1-based primer coordinates to 0-based BED.
-                    # Clamp at 0: some source formats lack coordinates and yield
-                    # start==0, which would otherwise produce an invalid BED
-                    # start of -1.
-                    bed_start = max(0, primer.start - 1)
-                    if primer.start - 1 < 0:
-                        logger.warning(
-                            f"Primer {primer.name} has start={primer.start}; "
-                            f"clamping BED start to 0 (coordinates may be synthetic)"
-                        )
+                    # PrimerData coordinates are stored 0-based (matching BED), so
+                    # they are written verbatim. Guard against negative values
+                    # defensively (parsers validate start >= 0).
+                    bed_start = max(0, primer.start)
                     bed_end = primer.stop  # BED end is exclusive, so this is correct
 
                     # Use official ARTIC naming convention for compatibility,

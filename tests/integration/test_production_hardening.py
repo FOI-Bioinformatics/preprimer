@@ -36,6 +36,49 @@ def _bed_starts(bed_file: Path):
     return starts
 
 
+def _bed_coords(bed_file: Path):
+    """Return list of (start, end) from a BED file, in order."""
+    return [
+        (int(p[1]), int(p[2]))
+        for ln in bed_file.read_text().splitlines()
+        if ln.strip() and not ln.startswith("#")
+        for p in [ln.split("\t")]
+    ]
+
+
+def test_artic_roundtrip_preserves_bed_coordinates(tmp_path):
+    """artic -> artic must reproduce the original BED start/end coordinates.
+
+    The internal PrimerData convention is 0-based (matching BED), so the writer
+    must not shift coordinates. Regression test for the ARTIC writer off-by-one.
+    """
+    src = DATA / "artic.scheme.bed"
+    PrimerConverter().convert(
+        input_file=src,
+        output_dir=tmp_path,
+        output_formats=["artic"],
+        prefix="rt",
+        lenient=True,
+    )
+    out = tmp_path / "artic" / "rt" / "V1" / "primer.bed"
+    assert out.exists()
+    assert _bed_coords(out) == _bed_coords(src)
+
+
+def test_varvamp_to_artic_matches_canonical_bed(tmp_path):
+    """varvamp -> artic must yield the same coordinates as the canonical
+    artic.scheme.bed for the same scheme (cross-format consistency)."""
+    PrimerConverter().convert(
+        input_file=DATA / "varvamp.tsv",
+        output_dir=tmp_path,
+        output_formats=["artic"],
+        prefix="x",
+        lenient=True,
+    )
+    out = tmp_path / "artic" / "x" / "V1" / "primer.bed"
+    assert _bed_coords(out) == _bed_coords(DATA / "artic.scheme.bed")
+
+
 def test_sts_to_artic_has_no_negative_bed_coordinates(tmp_path):
     converter = PrimerConverter()
     converter.convert(

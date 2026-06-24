@@ -26,6 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Regression test suite `tests/integration/test_production_hardening.py`.
 
 ### Fixed
+- **ARTIC coordinate off-by-one**: the ARTIC writer subtracted 1 from the start
+  coordinate, but `PrimerData` stores 0-based coordinates (matching BED and the
+  VarVAMP/Olivar parsers). This corrupted every ARTIC-sourced conversion by one
+  base (`artic -> artic` drifted -1 per round-trip) and produced position
+  annotations one base too low in all formats. The writer now emits the stored
+  coordinate verbatim, making round-trips faithful and cross-format coordinates
+  consistent; it also removes the need for the negative-coordinate clamp.
 - **CLI error reporting**: user-facing messages and actionable suggestions
   (`PrePrimerError.get_user_message()`) are now shown instead of the raw
   technical message.
