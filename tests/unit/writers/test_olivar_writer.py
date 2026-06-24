@@ -107,7 +107,9 @@ class TestOlivarWriter(BaseWriterTest):
             rows = list(reader)
 
         # Olivar writes one row per amplicon
-        assert len(rows) == len(amplicons), f"Expected {len(amplicons)} rows, got {len(rows)}"
+        assert len(rows) == len(
+            amplicons
+        ), f"Expected {len(amplicons)} rows, got {len(rows)}"
 
         # Check required columns exist
         required_columns = [
@@ -462,7 +464,9 @@ class TestOlivarWriter(BaseWriterTest):
         assert "description" in info
 
         # Check specific content
-        assert "Olivar" in info.get("use_case", "") or "olivar" in info.get("format", "")
+        assert "Olivar" in info.get("use_case", "") or "olivar" in info.get(
+            "format", ""
+        )
 
 
 # =============================================================================

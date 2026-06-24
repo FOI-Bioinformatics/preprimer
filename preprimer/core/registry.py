@@ -4,7 +4,7 @@ Parser and writer registry system for preprimer.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from typing import Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from .exceptions import OutputError, ParserError
 from .interfaces import OutputWriter, PrimerParser

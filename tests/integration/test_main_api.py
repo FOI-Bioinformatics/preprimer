@@ -4,14 +4,13 @@ Comprehensive tests for the main PrePrimer API entry point (preprimer/__init__.p
 This tests the primary user-facing API function convert_primers() which was severely undertested.
 """
 
-import os
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from preprimer import EnhancedConfig, PrimerConverter, convert_primers
+from preprimer import EnhancedConfig, convert_primers
 from preprimer.core.exceptions import PrePrimerError
 
 

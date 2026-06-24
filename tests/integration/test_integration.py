@@ -2,21 +2,17 @@
 Comprehensive integration tests for preprimer end-to-end functionality.
 """
 
-import json
 import shutil
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List
 
 import pytest
-import yaml
 
 from preprimer.core.converter import PrimerConverter
 from preprimer.core.enhanced_config import EnhancedConfig
 from preprimer.core.exceptions import ParserError, PrePrimerError, ValidationError
-from preprimer.core.registry import ParserRegistry, WriterRegistry
+from preprimer.core.registry import ParserRegistry
 from preprimer.parsers.artic_parser import ARTICParser
-from preprimer.parsers.olivar_parser import OlivarParser
 from preprimer.parsers.varvamp_parser import VarVAMPParser
 
 
@@ -232,7 +228,6 @@ test_amp	300	RW_test	1	380	400	CGATCGATCGATCGATCGAT	20	0.5	60.0	0.52	58.5	85.2""
     def test_concurrent_operations(self, temp_workspace, varvamp_test_file):
         """Test concurrent conversion operations."""
         import threading
-        import time
 
         output_dirs = [temp_workspace / f"output_{i}" for i in range(3)]
         results = []

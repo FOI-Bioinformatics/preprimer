@@ -14,7 +14,6 @@ from .exceptions import (
     OutputError,
     ParserError,
     ValidationError,
-    handle_common_exceptions,
 )
 from .interfaces import AmpliconData
 from .registry import parser_registry, writer_registry

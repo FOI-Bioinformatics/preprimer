@@ -15,7 +15,7 @@ from typing import List, Optional, Union
 
 from ..core.exceptions import OutputError
 from ..core.interfaces import AmpliconData, OutputWriter
-from ..core.primerscheme_info import PrimerschemeInfo, generate_info_json
+from ..core.primerscheme_info import generate_info_json
 
 logger = logging.getLogger(__name__)
 

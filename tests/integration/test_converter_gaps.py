@@ -5,7 +5,6 @@ This targets the 7 missed statements in preprimer/core/converter.py which are
 critical for core conversion functionality.
 """
 
-import os
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch

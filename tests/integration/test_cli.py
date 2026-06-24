@@ -8,11 +8,8 @@ to achieve complete coverage of the CLI module.
 import argparse
 import logging
 import sys
-import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
-
-import pytest
+from unittest.mock import Mock, patch
 
 from preprimer.cli import (
     cmd_convert,

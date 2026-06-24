@@ -107,18 +107,22 @@ class TestSTSWriter(BaseWriterTest):
         # STS has header + one row per amplicon
         assert len(lines) >= 1, "File should have at least header"
         # STS writer outputs 4 columns: NAME, FORWARD, REVERSE, SIZE
-        assert lines[0] == "NAME\tFORWARD\tREVERSE\tSIZE", "Header should be NAME, FORWARD, REVERSE, SIZE"
+        assert (
+            lines[0] == "NAME\tFORWARD\tREVERSE\tSIZE"
+        ), "Header should be NAME, FORWARD, REVERSE, SIZE"
 
         # Count amplicons with both forward and reverse primers
         complete_amplicons = [
-            amp for amp in amplicons
+            amp
+            for amp in amplicons
             if any(p.direction == "forward" for p in amp.primers)
             and any(p.direction == "reverse" for p in amp.primers)
         ]
 
         if complete_amplicons:
-            assert len(lines) == len(complete_amplicons) + 1, \
-                f"Expected {len(complete_amplicons)} data rows, got {len(lines) - 1}"
+            assert (
+                len(lines) == len(complete_amplicons) + 1
+            ), f"Expected {len(complete_amplicons)} data rows, got {len(lines) - 1}"
 
     # =========================================================================
     # Override base class tests where needed
@@ -149,7 +153,9 @@ class TestSTSWriter(BaseWriterTest):
             AmpliconData(
                 amplicon_id="amp1",
                 primers=[
-                    PrimerData("amp1_F", "ATCGATCG", 100, 108, "+", "forward", 1, "amp1")
+                    PrimerData(
+                        "amp1_F", "ATCGATCG", 100, 108, "+", "forward", 1, "amp1"
+                    )
                 ],
                 reference_id="chr1",
             ),
@@ -157,7 +163,9 @@ class TestSTSWriter(BaseWriterTest):
             AmpliconData(
                 amplicon_id="amp2",
                 primers=[
-                    PrimerData("amp2_R", "CGATCGAT", 200, 208, "-", "reverse", 1, "amp2")
+                    PrimerData(
+                        "amp2_R", "CGATCGAT", 200, 208, "-", "reverse", 1, "amp2"
+                    )
                 ],
                 reference_id="chr1",
             ),
@@ -165,14 +173,20 @@ class TestSTSWriter(BaseWriterTest):
             AmpliconData(
                 amplicon_id="amp3",
                 primers=[
-                    PrimerData("amp3_F", "GCTAGCTA", 300, 308, "+", "forward", 1, "amp3"),
-                    PrimerData("amp3_R", "TAGCTAG", 400, 407, "-", "reverse", 1, "amp3"),
+                    PrimerData(
+                        "amp3_F", "GCTAGCTA", 300, 308, "+", "forward", 1, "amp3"
+                    ),
+                    PrimerData(
+                        "amp3_R", "TAGCTAG", 400, 407, "-", "reverse", 1, "amp3"
+                    ),
                 ],
                 reference_id="chr1",
             ),
         ]
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".sts.tsv", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".sts.tsv", delete=False
+        ) as f:
             output_path = Path(f.name)
 
         try:
@@ -202,14 +216,34 @@ class TestSTSWriter(BaseWriterTest):
             AmpliconData(
                 amplicon_id="test_amplicon",
                 primers=[
-                    PrimerData("test_F", "ATCGATCG", 100, 108, "+", "forward", 1, "test_amplicon"),
-                    PrimerData("test_R", "CGATCGAT", 200, 208, "-", "reverse", 1, "test_amplicon"),
+                    PrimerData(
+                        "test_F",
+                        "ATCGATCG",
+                        100,
+                        108,
+                        "+",
+                        "forward",
+                        1,
+                        "test_amplicon",
+                    ),
+                    PrimerData(
+                        "test_R",
+                        "CGATCGAT",
+                        200,
+                        208,
+                        "-",
+                        "reverse",
+                        1,
+                        "test_amplicon",
+                    ),
                 ],
                 reference_id="chr1",
             )
         ]
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".sts.tsv", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".sts.tsv", delete=False
+        ) as f:
             output_path = Path(f.name)
 
         try:
@@ -240,14 +274,34 @@ class TestSTSWriter(BaseWriterTest):
             AmpliconData(
                 amplicon_id="chr1_amplicon_1",  # Already contains reference_id
                 primers=[
-                    PrimerData("amp_F", "ATCGATCG", 100, 108, "+", "forward", 1, "chr1_amplicon_1"),
-                    PrimerData("amp_R", "CGATCGAT", 200, 208, "-", "reverse", 1, "chr1_amplicon_1"),
+                    PrimerData(
+                        "amp_F",
+                        "ATCGATCG",
+                        100,
+                        108,
+                        "+",
+                        "forward",
+                        1,
+                        "chr1_amplicon_1",
+                    ),
+                    PrimerData(
+                        "amp_R",
+                        "CGATCGAT",
+                        200,
+                        208,
+                        "-",
+                        "reverse",
+                        1,
+                        "chr1_amplicon_1",
+                    ),
                 ],
                 reference_id="chr1",
             )
         ]
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".sts.tsv", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".sts.tsv", delete=False
+        ) as f:
             output_path = Path(f.name)
 
         try:
@@ -275,16 +329,26 @@ class TestSTSWriter(BaseWriterTest):
             AmpliconData(
                 amplicon_id="amp1",
                 primers=[
-                    PrimerData("amp1_F1", "ATCGATCG", 100, 108, "+", "forward", 1, "amp1"),
-                    PrimerData("amp1_F2", "GCTAGCTA", 110, 118, "+", "forward", 1, "amp1"),
-                    PrimerData("amp1_R1", "CGATCGAT", 200, 208, "-", "reverse", 1, "amp1"),
-                    PrimerData("amp1_R2", "TAGCTAG", 210, 217, "-", "reverse", 1, "amp1"),
+                    PrimerData(
+                        "amp1_F1", "ATCGATCG", 100, 108, "+", "forward", 1, "amp1"
+                    ),
+                    PrimerData(
+                        "amp1_F2", "GCTAGCTA", 110, 118, "+", "forward", 1, "amp1"
+                    ),
+                    PrimerData(
+                        "amp1_R1", "CGATCGAT", 200, 208, "-", "reverse", 1, "amp1"
+                    ),
+                    PrimerData(
+                        "amp1_R2", "TAGCTAG", 210, 217, "-", "reverse", 1, "amp1"
+                    ),
                 ],
                 reference_id="chr1",
             )
         ]
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".sts.tsv", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".sts.tsv", delete=False
+        ) as f:
             output_path = Path(f.name)
 
         try:
@@ -313,14 +377,34 @@ class TestSTSWriter(BaseWriterTest):
             AmpliconData(
                 amplicon_id="test_amplicon",
                 primers=[
-                    PrimerData("test_F", "ATCGATCG", 100, 108, "+", "forward", 1, "test_amplicon"),
-                    PrimerData("test_R", "CGATCGAT", 200, 208, "-", "reverse", 1, "test_amplicon"),
+                    PrimerData(
+                        "test_F",
+                        "ATCGATCG",
+                        100,
+                        108,
+                        "+",
+                        "forward",
+                        1,
+                        "test_amplicon",
+                    ),
+                    PrimerData(
+                        "test_R",
+                        "CGATCGAT",
+                        200,
+                        208,
+                        "-",
+                        "reverse",
+                        1,
+                        "test_amplicon",
+                    ),
                 ],
                 reference_id=None,  # No reference_id
             )
         ]
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".sts.tsv", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".sts.tsv", delete=False
+        ) as f:
             output_path = Path(f.name)
 
         try:
@@ -348,14 +432,34 @@ class TestSTSWriter(BaseWriterTest):
             AmpliconData(
                 amplicon_id="complex_name_123",
                 primers=[
-                    PrimerData("p_F", "ATCGATCG", 100, 108, "+", "forward", 1, "complex_name_123"),
-                    PrimerData("p_R", "CGATCGAT", 200, 208, "-", "reverse", 1, "complex_name_123"),
+                    PrimerData(
+                        "p_F",
+                        "ATCGATCG",
+                        100,
+                        108,
+                        "+",
+                        "forward",
+                        1,
+                        "complex_name_123",
+                    ),
+                    PrimerData(
+                        "p_R",
+                        "CGATCGAT",
+                        200,
+                        208,
+                        "-",
+                        "reverse",
+                        1,
+                        "complex_name_123",
+                    ),
                 ],
                 reference_id="NC_045512.2",
             )
         ]
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".sts.tsv", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".sts.tsv", delete=False
+        ) as f:
             output_path = Path(f.name)
 
         try:
@@ -412,7 +516,9 @@ class TestSTSWriter(BaseWriterTest):
             )
             amplicons.append(amplicon)
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".sts.tsv", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".sts.tsv", delete=False
+        ) as f:
             output_path = Path(f.name)
 
         try:
@@ -427,9 +533,9 @@ class TestSTSWriter(BaseWriterTest):
 
             # Verify all amplicons written
             for i in range(5):
-                assert f"amplicon_{i+1}" in lines[i+1]
-                assert "ATCGATCGATCGATCG" in lines[i+1]
-                assert "CGTACGTACGTACGTA" in lines[i+1]
+                assert f"amplicon_{i+1}" in lines[i + 1]
+                assert "ATCGATCGATCGATCG" in lines[i + 1]
+                assert "CGTACGTACGTACGTA" in lines[i + 1]
 
             # STSWriter doesn't have validate_output method - just verify file exists
             assert output_path.exists()
@@ -491,7 +597,9 @@ class TestSTSWriterIntegration:
             ),
         ]
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".sts.tsv", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".sts.tsv", delete=False
+        ) as f:
             output_path = Path(f.name)
 
         try:

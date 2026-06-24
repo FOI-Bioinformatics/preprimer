@@ -5,8 +5,6 @@ Tests the fundamental data structures (PrimerData, AmpliconData) and
 abstract base classes that form the foundation of PrePrimer.
 """
 
-import pytest
-
 from preprimer.core.interfaces import AmpliconData, PrimerData
 
 

@@ -449,4 +449,3 @@ class StandardizedParser(PrimerParser):
         Raises:
             ParserError: If parsing fails
         """
-        pass

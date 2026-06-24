@@ -10,10 +10,10 @@ import os
 import re
 import shutil
 import subprocess
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import List, Optional, Set, Union
 
-from .exceptions import PrePrimerError, SecurityError
+from .exceptions import SecurityError
 
 
 class PathValidator:

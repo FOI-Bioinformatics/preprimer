@@ -294,7 +294,6 @@ class TestErrorHandlingIntegration:
     def test_parser_error_chain(self):
         """Test error chaining from parser to converter."""
         from preprimer.core.converter import PrimerConverter
-        from preprimer.core.enhanced_config import EnhancedConfig
 
         converter = PrimerConverter()
 

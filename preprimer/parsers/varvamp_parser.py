@@ -16,7 +16,7 @@ from ..core.exceptions import (
     SecurityError,
     handle_common_exceptions,
 )
-from ..core.interfaces import AmpliconData, PrimerData
+from ..core.interfaces import AmpliconData
 from ..core.standardized_parser import StandardizedParser
 
 logger = logging.getLogger(__name__)

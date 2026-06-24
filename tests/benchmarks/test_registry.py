@@ -4,8 +4,8 @@ Performance tests for the optimized registry system.
 
 import time
 from pathlib import Path
-from typing import Dict, List
-from unittest.mock import Mock, patch
+from typing import List
+from unittest.mock import patch
 
 import pytest
 

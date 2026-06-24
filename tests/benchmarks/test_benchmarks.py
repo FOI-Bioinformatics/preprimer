@@ -6,15 +6,13 @@ import json
 import shutil
 import tempfile
 from pathlib import Path
-from typing import List
-from unittest.mock import Mock
 
 import pytest
 
 from preprimer.core.converter import PrimerConverter
 from preprimer.core.enhanced_config import EnhancedConfig
 from preprimer.core.interfaces import AmpliconData, PrimerData
-from preprimer.core.registry import ParserRegistry, WriterRegistry
+from preprimer.core.registry import ParserRegistry
 from preprimer.core.security import InputValidator, PathValidator
 from preprimer.parsers.artic_parser import ARTICParser
 from preprimer.parsers.varvamp_parser import VarVAMPParser

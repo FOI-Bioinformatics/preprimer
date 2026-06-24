@@ -6,10 +6,14 @@ Provides factory functions for creating common test data scenarios.
 
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from preprimer.core.interfaces import AmpliconData, PrimerData
-from tests.utils.builders import AmpliconDataBuilder, PrimerDataBuilder, TestDatasetBuilder
+from tests.utils.builders import (
+    AmpliconDataBuilder,
+    PrimerDataBuilder,
+    TestDatasetBuilder,
+)
 
 
 def create_minimal_dataset() -> Dict[str, AmpliconData]:
@@ -36,7 +40,9 @@ def create_small_dataset(amplicons: int = 5, pools: int = 2) -> Dict[str, Amplic
     return TestDatasetBuilder().with_n_amplicons(amplicons, pools=pools).build()
 
 
-def create_medium_dataset(amplicons: int = 80, pools: int = 2) -> Dict[str, AmpliconData]:
+def create_medium_dataset(
+    amplicons: int = 80, pools: int = 2
+) -> Dict[str, AmpliconData]:
     """
     Create a medium-sized dataset for performance tests.
 
@@ -59,10 +65,7 @@ def create_circular_genome_dataset() -> Dict[str, AmpliconData]:
     """
     # Amplicon that wraps around the origin (start > end)
     amplicon1 = (
-        AmpliconDataBuilder()
-        .with_id("amplicon_circular_1")
-        .with_length(400)
-        .build()
+        AmpliconDataBuilder().with_id("amplicon_circular_1").with_length(400).build()
     )
 
     # Add primers with wrapped coordinates
@@ -174,18 +177,14 @@ def create_alternates_dataset() -> Dict[str, AmpliconData]:
         )
 
     amplicon = (
-        AmpliconDataBuilder()
-        .with_id("alt_amplicon")
-        .with_primers(primers)
-        .build()
+        AmpliconDataBuilder().with_id("alt_amplicon").with_primers(primers).build()
     )
 
     return {"alt_amplicon": amplicon}
 
 
 def create_temp_fasta_file(
-    sequence: str = "ATCGATCGATCG",
-    name: str = "test_ref"
+    sequence: str = "ATCGATCGATCG", name: str = "test_ref"
 ) -> Path:
     """
     Create a temporary FASTA file.
@@ -204,8 +203,7 @@ def create_temp_fasta_file(
 
 
 def create_temp_bed_file(
-    primers: List[Tuple[str, int, int, str]],
-    reference: str = "test_ref"
+    primers: List[Tuple[str, int, int, str]], reference: str = "test_ref"
 ) -> Path:
     """
     Create a temporary BED file.
@@ -224,9 +222,7 @@ def create_temp_bed_file(
     return Path(tmp.name)
 
 
-def create_temp_varvamp_file(
-    amplicons: Dict[str, AmpliconData]
-) -> Path:
+def create_temp_varvamp_file(amplicons: Dict[str, AmpliconData]) -> Path:
     """
     Create a temporary VarVAMP TSV file.
 
@@ -259,8 +255,7 @@ def create_temp_varvamp_file(
 
 
 def create_malformed_file(
-    file_type: str = "varvamp",
-    issue: str = "missing_columns"
+    file_type: str = "varvamp", issue: str = "missing_columns"
 ) -> Path:
     """
     Create a malformed test file for error testing.
@@ -326,6 +321,8 @@ def create_dataset_from_scenario(scenario: str) -> Dict[str, AmpliconData]:
     }
 
     if scenario not in scenarios:
-        raise ValueError(f"Unknown scenario: {scenario}. Available: {list(scenarios.keys())}")
+        raise ValueError(
+            f"Unknown scenario: {scenario}. Available: {list(scenarios.keys())}"
+        )
 
     return scenarios[scenario]()

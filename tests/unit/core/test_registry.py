@@ -5,7 +5,7 @@ Comprehensive tests for registry module targeting missed coverage lines.
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import pytest
 

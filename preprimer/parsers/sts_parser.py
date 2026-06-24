@@ -11,7 +11,6 @@ Supports both header and header-less formats for compatibility with
 me-pcr and merPCR output files.
 """
 
-import csv
 import logging
 import re
 from pathlib import Path

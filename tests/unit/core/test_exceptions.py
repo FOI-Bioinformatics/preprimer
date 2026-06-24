@@ -5,11 +5,6 @@ This targets the 15 missed statements in preprimer/core/exceptions.py which are
 critical for user experience and error handling.
 """
 
-import logging
-from unittest.mock import MagicMock, patch
-
-import pytest
-
 from preprimer.core.exceptions import (  # AlignmentError,  # Removed in v0.2.0 (no alignment providers implemented)
     ConfigError,
     CorruptedDataError,

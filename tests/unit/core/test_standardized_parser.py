@@ -5,7 +5,7 @@ Tests for the StandardizedParser base class and interface.
 import tempfile
 from pathlib import Path
 from typing import Dict, List
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 

@@ -115,18 +115,21 @@ class TestFASTAWriter(BaseWriterTest):
         headers = [line for line in lines if line.startswith(">")]
         expected_primers = sum(len(amp.primers) for amp in amplicons)
 
-        assert len(headers) == expected_primers, \
-            f"Expected {expected_primers} FASTA headers, got {len(headers)}"
+        assert (
+            len(headers) == expected_primers
+        ), f"Expected {expected_primers} FASTA headers, got {len(headers)}"
 
         # Each header should be followed by a sequence
         for i, line in enumerate(lines):
             if line.startswith(">"):
                 # Next line should be a sequence (not empty, not another header)
                 if i + 1 < len(lines):
-                    assert not lines[i + 1].startswith(">"), \
-                        f"Header at line {i} not followed by sequence"
-                    assert len(lines[i + 1]) > 0, \
-                        f"Empty sequence after header at line {i}"
+                    assert not lines[i + 1].startswith(
+                        ">"
+                    ), f"Header at line {i} not followed by sequence"
+                    assert (
+                        len(lines[i + 1]) > 0
+                    ), f"Empty sequence after header at line {i}"
 
     # =========================================================================
     # Override base class tests where needed
@@ -201,8 +204,9 @@ class TestFASTAWriter(BaseWriterTest):
                 assert len(seq) > 0, "Sequences should not be empty"
                 # Allow IUPAC nucleotide codes
                 valid_chars = set("ATCGNRYSWKMBDHVatcgn")
-                assert all(c in valid_chars for c in seq), \
-                    f"Invalid characters in sequence: {seq}"
+                assert all(
+                    c in valid_chars for c in seq
+                ), f"Invalid characters in sequence: {seq}"
 
         finally:
             if output_path.exists():
@@ -341,8 +345,9 @@ class TestFASTAWriter(BaseWriterTest):
             for header in headers:
                 # ARTIC names should be in format: amplicon_num_direction_alt
                 # The artic_name property generates this
-                assert "_LEFT" in header or "_RIGHT" in header, \
-                    "Should use ARTIC naming convention"
+                assert (
+                    "_LEFT" in header or "_RIGHT" in header
+                ), "Should use ARTIC naming convention"
 
         finally:
             if output_path.exists():

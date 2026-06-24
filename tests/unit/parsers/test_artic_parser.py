@@ -66,9 +66,9 @@ class TestARTICParser(BaseParserTest):
         for amp in amplicons:
             for primer in amp.primers:
                 # ARTIC primers contain _LEFT or _RIGHT (may have _1, _2 suffix for alternates)
-                assert "_LEFT" in primer.name or "_RIGHT" in primer.name, (
-                    f"ARTIC primer name must contain _LEFT or _RIGHT: {primer.name}"
-                )
+                assert (
+                    "_LEFT" in primer.name or "_RIGHT" in primer.name
+                ), f"ARTIC primer name must contain _LEFT or _RIGHT: {primer.name}"
 
     @pytest.mark.unit
     @pytest.mark.parser
@@ -79,13 +79,19 @@ class TestARTICParser(BaseParserTest):
 
         for amp in amplicons:
             left_primers = [
-                p for p in amp.primers if p.name.endswith("_LEFT") or p.direction == "forward"
+                p
+                for p in amp.primers
+                if p.name.endswith("_LEFT") or p.direction == "forward"
             ]
             right_primers = [
-                p for p in amp.primers if p.name.endswith("_RIGHT") or p.direction == "reverse"
+                p
+                for p in amp.primers
+                if p.name.endswith("_RIGHT") or p.direction == "reverse"
             ]
 
-            assert len(left_primers) > 0, f"Amplicon {amp.amplicon_id} must have LEFT primer"
+            assert (
+                len(left_primers) > 0
+            ), f"Amplicon {amp.amplicon_id} must have LEFT primer"
             assert (
                 len(right_primers) > 0
             ), f"Amplicon {amp.amplicon_id} must have RIGHT primer"
@@ -192,7 +198,9 @@ class TestARTICParser(BaseParserTest):
     def test_artic_reference_id_from_bed(self):
         """ARTIC parser uses reference_id from BED file (column 1)."""
         parser = ARTICParser()
-        prefix = "SARS-CoV-2"  # Prefix is used for generating IDs, not replacing reference
+        prefix = (
+            "SARS-CoV-2"  # Prefix is used for generating IDs, not replacing reference
+        )
 
         amplicons = parser.parse(self.valid_test_file, prefix=prefix)
 

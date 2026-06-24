@@ -5,7 +5,6 @@ Validates format conversions, alignment outputs, and data integrity.
 """
 
 import hashlib
-import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Set
@@ -83,7 +82,9 @@ class OutputValidator:
 
         result.add_stat("total_amplicons", total_amplicons)
         result.add_stat("total_primers", total_primers)
-        result.add_stat("avg_primers_per_amplicon", total_primers / max(total_amplicons, 1))
+        result.add_stat(
+            "avg_primers_per_amplicon", total_primers / max(total_amplicons, 1)
+        )
 
         return result
 
@@ -101,9 +102,7 @@ class OutputValidator:
                 sequences_checked += 1
 
                 if not primer.sequence:
-                    result.add_error(
-                        f"Empty sequence for primer: {primer.name}"
-                    )
+                    result.add_error(f"Empty sequence for primer: {primer.name}")
                     continue
 
                 # Check for invalid characters
@@ -147,9 +146,13 @@ def validate_artic_output(output_dir: Path) -> ValidationResult:
             return result
 
         # Look for .scheme.bed or primer.bed file
-        bed_files = list(output_dir.rglob("*.scheme.bed")) + list(output_dir.rglob("primer.bed"))
+        bed_files = list(output_dir.rglob("*.scheme.bed")) + list(
+            output_dir.rglob("primer.bed")
+        )
         if not bed_files:
-            result.add_error("No BED file found in output (looking for *.scheme.bed or primer.bed)")
+            result.add_error(
+                "No BED file found in output (looking for *.scheme.bed or primer.bed)"
+            )
             return result
 
     # Add stats for found files
@@ -166,9 +169,7 @@ def validate_artic_output(output_dir: Path) -> ValidationResult:
     for i, line in enumerate(lines[:5], 1):  # Check first 5 lines
         parts = line.split("\t")
         if len(parts) < 6:
-            result.add_error(
-                f"Line {i} has insufficient columns: {len(parts)} < 6"
-            )
+            result.add_error(f"Line {i} has insufficient columns: {len(parts)} < 6")
 
     # Look for reference FASTA (only if output_dir is a directory)
     if output_dir.is_dir():
@@ -203,9 +204,7 @@ def validate_varvamp_output(output_file: Path) -> ValidationResult:
     for i, line in enumerate(lines[:5], 1):
         parts = line.split("\t")
         if len(parts) != 13:
-            result.add_error(
-                f"Line {i} has incorrect column count: {len(parts)} != 13"
-            )
+            result.add_error(f"Line {i} has incorrect column count: {len(parts)} != 13")
 
     return result
 
@@ -268,9 +267,7 @@ def validate_fasta_output(output_file: Path) -> ValidationResult:
             valid_bases = set("ATCGRYSWKMBDHVN")
             invalid = set(line.upper()) - valid_bases
             if invalid:
-                result.add_warning(
-                    f"Invalid bases at line {i+1}: {invalid}"
-                )
+                result.add_warning(f"Invalid bases at line {i+1}: {invalid}")
 
     return result
 
@@ -319,7 +316,10 @@ def validate_sts_output(output_file: Path) -> ValidationResult:
 
     result.add_stat("column_count", expected_cols)
     result.add_stat("has_header", is_header)
-    result.add_stat("format_type", f"{'4-column (extended)' if expected_cols == 4 else '3-column (standard)'}")
+    result.add_stat(
+        "format_type",
+        f"{'4-column (extended)' if expected_cols == 4 else '3-column (standard)'}",
+    )
 
     # Validate all lines have consistent column count
     for i, line in enumerate(lines, 1):
