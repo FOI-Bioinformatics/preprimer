@@ -229,13 +229,24 @@ Examples:
         help="Output directory for alignment results",
     )
 
+    # In-silico-PCR engines come from the registry; "primers" is the special
+    # per-primer BLAST/Exonerate alignment mode (those two are the --aligner
+    # choices, not standalone in-silico-PCR engines).
+    insilico_engines = [
+        p
+        for p in alignment_registry.list_providers()
+        if p not in ("blast", "exonerate")
+    ]
     align_parser.add_argument(
         "--output-formats",
         "--output-format",
-        choices=["primers", "me-pcr", "merpcr"],
+        choices=["primers"] + insilico_engines,
         nargs="+",
         required=True,
-        help="Alignment output format(s): 'primers' (BLAST/Exonerate), 'me-pcr', or 'merpcr'",
+        help=(
+            "Alignment output format(s): 'primers' (per-primer BLAST/Exonerate) "
+            "or an in-silico-PCR engine (" + ", ".join(insilico_engines) + ")"
+        ),
     )
 
     align_parser.add_argument(
@@ -449,31 +460,16 @@ def cmd_align(args: argparse.Namespace) -> int:
             )
             return EXIT_USER_ERROR
 
-        # Check if required tools are available
-        if "primers" in args.output_formats:
-            aligner = args.aligner
-            provider = alignment_registry.get_provider(aligner)
+        # Check that the required tool(s) are available. "primers" uses the
+        # selected --aligner (BLAST/Exonerate); every other format is a
+        # registered in-silico-PCR engine of the same name.
+        for fmt in args.output_formats:
+            tool = args.aligner if fmt == "primers" else fmt
+            provider = alignment_registry.get_provider(tool)
             if not provider.is_available():
                 return missing_tool(
-                    f"{aligner} is not available on this system. "
-                    f"Please install {aligner} and ensure it's in your PATH."
-                )
-
-        if "me-pcr" in args.output_formats:
-            mepcr_provider = alignment_registry.get_provider("me-pcr")
-            if not mepcr_provider.is_available():
-                return missing_tool(
-                    "me-PCR is not available on this system. "
-                    "Please install me-PCR and ensure it's in your PATH."
-                )
-
-        if "merpcr" in args.output_formats:
-            merpcr_provider = alignment_registry.get_provider("merpcr")
-            if not merpcr_provider.is_available():
-                return missing_tool(
-                    "merPCR is not available on this system. "
-                    "Please install merPCR (pip install merpcr) and ensure it's in "
-                    "your PATH."
+                    f"{tool} is not available on this system. "
+                    f"Please install {tool} and ensure it's in your PATH."
                 )
 
         # Run alignment

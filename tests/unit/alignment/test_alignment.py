@@ -418,7 +418,7 @@ class TestAlignPrimersFunction:
         assert "me-pcr" in output_paths
         assert (
             output_paths["me-pcr"]
-            == output_dir / "alignment" / "mepcr" / "primers.mepcr.aln"
+            == output_dir / "alignment" / "me-pcr" / "primers.mepcr.aln"
         )
 
     @patch("subprocess.run")
