@@ -162,6 +162,23 @@ class PrimerConverter:
         if output_formats is None:
             output_formats = self.config.output.formats
 
+        # Warn when the source carries no primer sequences (e.g. a 6-column
+        # primer.bed) but the requested output relies on sequences.
+        seqless_primers = sum(
+            1 for amp in amplicons for p in amp.primers if not p.sequence
+        )
+        SEQUENCE_BEARING = {"fasta", "varvamp", "olivar", "sts"}
+        if seqless_primers and SEQUENCE_BEARING.intersection(
+            f.lower() for f in output_formats
+        ):
+            msg = (
+                f"{seqless_primers} primer(s) have no sequence (the input is a "
+                f"6-column primer.bed); sequence-bearing output formats will have "
+                f"empty primer sequences"
+            )
+            warnings.append(msg)
+            logger.warning(msg)
+
         # Convert to output formats
         output_files = {}
 
@@ -296,7 +313,11 @@ class PrimerConverter:
             if self.config.validation.enabled:
                 for primer in amplicon.primers:
                     if not primer.sequence:
-                        issues.append(f"Primer {primer.name} has empty sequence")
+                        # An empty sequence is valid for a 6-column primer.bed,
+                        # where sequences live in reference.fasta. Other parsers
+                        # reject empty sequences at parse time, so this only
+                        # occurs for sequence-less BED input. Skip content checks
+                        # (the converter emits a "no sequence" warning separately).
                         continue
 
                     # Check sequence length

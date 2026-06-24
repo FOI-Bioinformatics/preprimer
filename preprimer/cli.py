@@ -173,6 +173,17 @@ Examples:
         help="Emit a machine-readable JSON summary to stdout",
     )
 
+    convert_parser.add_argument(
+        "--bed-columns",
+        type=int,
+        choices=[6, 7],
+        default=7,
+        help=(
+            "ARTIC primer.bed column count: 7 = PrimalScheme-like with sequence "
+            "(default); 6 = canonical primal-page / legacy primer.bed"
+        ),
+    )
+
     # List formats command
     list_parser = subparsers.add_parser("list", help="List available formats")
     list_parser.add_argument(
@@ -313,6 +324,7 @@ def cmd_convert(args: argparse.Namespace, config: EnhancedConfig) -> int:
             lenient=args.lenient,
             strict=args.strict,
             force=args.force,
+            bed_columns=args.bed_columns,
         )
 
         summary = converter.last_summary

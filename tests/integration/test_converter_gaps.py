@@ -235,18 +235,25 @@ class TestConverterPrimerValidationEdgeCases:
     """Test specific primer validation edge cases (lines 204-205, 214, 223, 231)."""
 
     def test_validation_empty_primer_sequence(self):
-        """Test validation with empty primer sequence (lines 204-205)."""
+        """An empty primer sequence is valid (6-column primer.bed input, where
+        sequences live in reference.fasta) and must not fail validation."""
 
-        # Create amplicon with empty primer sequence
         amplicons = [
             AmpliconData(
                 amplicon_id="test_amp",
                 primers=[
                     PrimerData(
                         "empty_seq", "", 100, 120, "+", "forward", 1, "test_amp"
-                    ),  # Empty sequence
+                    ),  # Empty sequence (6-column BED)
                     PrimerData(
-                        "test_R", "CGAT", 300, 320, "-", "reverse", 1, "test_amp"
+                        "test_R",
+                        "CGATCGATCGATCGATCG",
+                        300,
+                        320,
+                        "-",
+                        "reverse",
+                        1,
+                        "test_amp",
                     ),
                 ],
             )
@@ -255,8 +262,8 @@ class TestConverterPrimerValidationEdgeCases:
         config = EnhancedConfig(validation=ValidationSettings(enabled=True))
         converter = PrimerConverter(config)
 
-        with pytest.raises(ValidationError, match="has empty sequence"):
-            converter._validate_amplicons(amplicons)
+        # No raise; empty sequence is not a validation failure.
+        assert converter._validate_amplicons(amplicons) == []
 
     def test_validation_primer_too_long(self):
         """Test validation with primer too long (line 214)."""
@@ -439,8 +446,8 @@ class TestConverterComplexScenarios:
 
         error_message = str(exc_info.value)
 
-        # Should have all types of validation errors
-        assert "empty sequence" in error_message
+        # Should report the genuine validation errors. (Empty sequence is now
+        # valid for 6-column primer.bed input, so it is no longer an error.)
         assert "too long" in error_message
         assert "invalid characters" in error_message
 

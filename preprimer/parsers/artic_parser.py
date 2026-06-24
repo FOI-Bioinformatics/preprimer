@@ -89,7 +89,10 @@ class ARTICParser(StandardizedParser):
                         continue
 
                     parts = line.split("\t")
-                    if len(parts) < 7:
+                    # Accept both the canonical 6-column primer.bed
+                    # (chrom start end name pool strand) and the PrimalScheme-like
+                    # 7-column variant that appends the primer sequence.
+                    if len(parts) < 6:
                         logger.warning(f"Skipping malformed line: {line}")
                         continue
 
@@ -100,7 +103,8 @@ class ARTICParser(StandardizedParser):
                     primer_name = parts[3]
                     pool = int(parts[4])
                     strand = parts[5]
-                    sequence = parts[6]
+                    # 6-column BED carries no sequence (it lives in reference.fasta).
+                    sequence = parts[6] if len(parts) >= 7 else ""
 
                     # Parse primer name to get amplicon info
                     # Format: PREFIX_AMPLICON_SIDE_ALT (e.g., SARS-CoV-2_400_1_LEFT_1)

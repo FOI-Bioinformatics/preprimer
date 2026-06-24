@@ -53,6 +53,10 @@ class ARTICWriter(OutputWriter):
         prefix = prefix or kwargs.get("prefix", "primers")
         reference_path = kwargs.get("reference_path")
 
+        # BED column count: 7 = PrimalScheme-like (sequence appended), the
+        # default; 6 = canonical primal-page / legacy primer.bed (no sequence).
+        bed_columns = kwargs.get("bed_columns", 7)
+
         # Scheme metadata parameters
         schemeversion = kwargs.get("schemeversion", "v1.0.0")
         species = kwargs.get("species", "Unknown species")
@@ -83,7 +87,7 @@ class ARTICWriter(OutputWriter):
 
         try:
             # 1. Write primer.bed file (0-based BED format)
-            self._write_primer_bed(amplicons, primer_bed_file)
+            self._write_primer_bed(amplicons, primer_bed_file, bed_columns)
 
             # 2. Copy reference.fasta if provided
             if reference_path:
@@ -122,17 +126,24 @@ class ARTICWriter(OutputWriter):
         except Exception as e:
             raise OutputError(f"Failed to write primerscheme format: {e}")
 
-    def _write_primer_bed(self, amplicons: List[AmpliconData], bed_file: Path) -> None:
-        """Write primer.bed file in official 0-based BED format."""
+    def _write_primer_bed(
+        self, amplicons: List[AmpliconData], bed_file: Path, bed_columns: int = 7
+    ) -> None:
+        """Write primer.bed in 0-based BED format.
+
+        Args:
+            bed_columns: 7 (PrimalScheme-like, sequence appended) or 6 (canonical
+                primal-page / legacy primer.bed without the sequence column).
+        """
         with open(bed_file, "w") as f:
             for amplicon in amplicons:
                 # Track alt indices per direction so alternate primers within an
                 # amplicon get unique names (e.g. _LEFT_0, _LEFT_1).
                 alt_counts = {"forward": 0, "reverse": 0}
                 for primer in amplicon.primers:
-                    # Official primalscheme BED format with sequence (extended format):
-                    # chrom start(0-based) end(0-based-exclusive) name pool strand sequence
-                    # Note: Standard BED is 6 columns, but ARTIC workflows expect sequence as 7th column
+                    # The primer.bed columns are:
+                    # chrom start(0-based) end(0-based-exclusive) name pool strand [sequence]
+                    # The 7th sequence column is the PrimalScheme-like extension.
 
                     # PrimerData coordinates are stored 0-based (matching BED), so
                     # they are written verbatim. Guard against negative values
@@ -147,13 +158,17 @@ class ARTICWriter(OutputWriter):
                     if primer.direction in alt_counts:
                         alt_counts[primer.direction] += 1
 
-                    # Write 7-column extended BED format (ARTIC standard)
-                    bed_line = (
-                        f"{primer.reference_id}\t{bed_start}\t{bed_end}\t"
-                        f"{artic_name}\t{primer.pool or 1}\t{primer.strand}\t"
-                        f"{primer.sequence}\n"
-                    )
-                    f.write(bed_line)
+                    fields = [
+                        primer.reference_id,
+                        str(bed_start),
+                        str(bed_end),
+                        artic_name,
+                        str(primer.pool or 1),
+                        primer.strand,
+                    ]
+                    if bed_columns >= 7:
+                        fields.append(primer.sequence)
+                    f.write("\t".join(fields) + "\n")
 
     def _copy_reference_fasta(
         self, reference_path: Union[str, Path], target_path: Path
